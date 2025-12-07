@@ -1,7 +1,7 @@
 {
   "name": "cursor-cc-plugins",
-  "version": "2.0.0",
-  "description": "Cursor ↔ Claude Code 2エージェントワークフロー。VibeCoder が自然言語だけで高品質なプロジェクトを開発できる Plan→Work→Review サイクルを提供。",
+  "version": "2.1.0",
+  "description": "Cursor ↔ Claude Code 2エージェントワークフロー。VibeCoder が自然言語だけで高品質なプロジェクトを開発できる Plan→Work→Review サイクルを提供。エラー自動修復・並列処理・セッション記憶機能付き。",
   "author": {
     "name": "Cursor-CC Plugins"
   },
@@ -14,7 +14,10 @@
     "plan-work-review",
     "project-scaffolding",
     "ci-cd",
-    "code-review"
+    "code-review",
+    "error-recovery",
+    "parallel-processing",
+    "session-memory"
   ],
   "repository": "https://github.com/Chachamaru127/cursor-cc-plugins",
   "homepage": "https://github.com/Chachamaru127/cursor-cc-plugins",
@@ -32,7 +35,8 @@
     "./agents/project-scaffolder.md",
     "./agents/code-reviewer.md",
     "./agents/ci-cd-fixer.md",
-    "./agents/project-state-updater.md"
+    "./agents/project-state-updater.md",
+    "./agents/error-recovery.md"
   ],
   "hooks": "./hooks/hooks.json"
 }
