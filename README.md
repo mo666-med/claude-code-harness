@@ -9,27 +9,6 @@ A 2-agent workflow plugin for Cursor ↔ Claude Code collaboration, designed for
 
 ---
 
-## Features
-
-### v2.2 (Latest)
-- 🎯 **One-Command Setup**: `/setup-2agent` instantly configures the Cursor + Claude Code 2-agent system
-- 🔧 **Troubleshooting**: Say "it's broken" or "not working" for automatic diagnosis and repair
-- 📋 **Enhanced Cursor Integration**: PM commands auto-deployed to `.cursor/`
-
-### v2.1
-- 🔧 **Auto Error Recovery**: Detects build/test errors and auto-fixes up to 3 times
-- ⚡ **Parallel Processing**: Independent tasks run in parallel (up to 67% faster)
-- 🧠 **Session Memory**: Automatically records and recalls previous work and decisions
-
-### v2.0
-- 🚀 **Plan → Work → Review Cycle**: Fully automated planning, implementation, and review
-- 🏗️ **Real Project Generation**: Automatically runs `create-next-app`, etc.
-- 🔍 **Code Review**: Automated security, performance, and quality checks
-- 🪝 **Lifecycle Hooks**: Auto-checks project state on session start
-- 💡 **VibeCoder Guide**: Ask "what should I do?" to get next action suggestions
-
----
-
 ## Who Is This For?
 
 - **VibeCoders**: Build apps without technical expertise using natural language
@@ -48,9 +27,347 @@ A 2-agent workflow plugin for Cursor ↔ Claude Code collaboration, designed for
 /plugin install cursor-cc-plugins
 ```
 
-### Project-Level Configuration (Team Sharing)
+---
 
-Add to your project's `.claude/settings.json`:
+## How to Use: Step-by-Step Guide for VibeCoders
+
+This section explains how to build your project phase by phase. **You don't need to remember any commands** - just follow the conversation flow below.
+
+### Phase 1: Defining What You Want to Build
+
+**Goal**: Clarify your idea before writing any code.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  YOU                                                            │
+│  "I want to build a recipe sharing app"                         │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│  CLAUDE CODE                                                    │
+│  "Great! Let me ask a few questions to understand better:"     │
+│                                                                 │
+│  1. Who will use this? (home cooks, professional chefs, etc.)  │
+│  2. What similar apps do you like? (Cookpad, Tasty, etc.)      │
+│  3. What's the most important feature?                          │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│  YOU                                                            │
+│  "Home cooks, I like Cookpad's simplicity, and I want users    │
+│   to be able to save their favorite recipes"                    │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│  CLAUDE CODE                                                    │
+│  "I recommend this tech stack:"                                 │
+│  - Next.js (fast, modern web framework)                         │
+│  - Supabase (easy database + auth)                              │
+│  - Tailwind CSS (beautiful styling)                             │
+│                                                                 │
+│  "Shall I create the project?"                                  │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│  YOU                                                            │
+│  "Yes, let's go!"                                               │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**What happens**: Claude Code creates all the initial files and folders for you.
+
+---
+
+### Phase 2: Building Features One by One
+
+**Goal**: Add features in small, manageable chunks.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  YOU                                                            │
+│  "Add user login feature"                                       │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│  CLAUDE CODE                                                    │
+│  "I'll break this down into tasks:"                             │
+│                                                                 │
+│  Phase 1: User Authentication                                   │
+│  - [ ] Create login page                                        │
+│  - [ ] Create signup page                                       │
+│  - [ ] Connect to Supabase Auth                                 │
+│                                                                 │
+│  "Starting Phase 1..."                                          │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│  CLAUDE CODE (working...)                                       │
+│  ✅ Created src/app/login/page.tsx                              │
+│  ✅ Created src/app/signup/page.tsx                             │
+│  ✅ Added authentication logic                                  │
+│                                                                 │
+│  "Done! Want to see it in action?"                              │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│  YOU                                                            │
+│  "Run it"                                                       │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│  CLAUDE CODE                                                    │
+│  "Dev server running at http://localhost:3000"                  │
+│  "Open your browser to see the login page!"                     │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**What to say when you want more features**:
+- "Add recipe upload feature"
+- "I want users to comment on recipes"
+- "Add a search function"
+
+---
+
+### Phase 3: Checking If Things Work
+
+**Goal**: Make sure your app is working correctly.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  YOU                                                            │
+│  "Check if everything is working"                               │
+│  (or "review the code")                                         │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│  CLAUDE CODE                                                    │
+│  "Running quality checks..."                                    │
+│                                                                 │
+│  ✅ Security: No issues found                                   │
+│  ✅ Performance: Good                                           │
+│  ⚠️  Code Quality: 2 minor suggestions                         │
+│                                                                 │
+│  "Overall: Looking good! The 2 suggestions are optional."       │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**When something goes wrong**:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  YOU                                                            │
+│  "It's broken" or "not working"                                 │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│  CLAUDE CODE                                                    │
+│  "Let me diagnose the issue..."                                 │
+│                                                                 │
+│  🔍 Found: Missing database connection                          │
+│  🔧 Fixing automatically...                                     │
+│  ✅ Fixed! Try again.                                           │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### Phase 4: Repeat Until Done
+
+**Goal**: Keep adding features until your app is complete.
+
+```
+The Development Loop:
+
+    ┌──────────────────────┐
+    │                      │
+    │  "Add X feature"     │ ◄─── You describe what you want
+    │                      │
+    └──────────┬───────────┘
+               │
+               ▼
+    ┌──────────────────────┐
+    │                      │
+    │  Claude Code builds  │ ◄─── Automatic implementation
+    │                      │
+    └──────────┬───────────┘
+               │
+               ▼
+    ┌──────────────────────┐
+    │                      │
+    │  "Run it" to test    │ ◄─── You verify it works
+    │                      │
+    └──────────┬───────────┘
+               │
+               ▼
+    ┌──────────────────────┐
+    │                      │
+    │  "Check it" review   │ ◄─── Quality check (optional)
+    │                      │
+    └──────────┬───────────┘
+               │
+               ▼
+         Happy? ──No──┐
+           │          │
+          Yes         │
+           │          │
+           ▼          │
+    ┌──────────────────────┐
+    │  Next feature...     │
+    └──────────┬───────────┘
+               │
+               └──────────────► Back to top
+```
+
+---
+
+### Phase 5: When You Come Back Later
+
+**Goal**: Resume work after a break.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  YOU (next day)                                                 │
+│  "What did we do last time?"                                    │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│  CLAUDE CODE                                                    │
+│  "Last session (yesterday):"                                    │
+│                                                                 │
+│  ✅ Completed: User login, Recipe upload                        │
+│  🔄 In progress: Comment feature                                │
+│  📋 Next up: Search function                                    │
+│                                                                 │
+│  "Want to continue with the comment feature?"                   │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│  YOU                                                            │
+│  "Yes, continue"                                                │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Quick Reference: What to Say
+
+Instead of remembering commands, just say what you want naturally:
+
+| Situation | What to Say |
+|-----------|-------------|
+| **Starting a new project** | "I want to build a [describe your idea]" |
+| **Adding a feature** | "Add [feature name]" or "I want users to be able to [action]" |
+| **Seeing your app** | "Run it" or "Show me" |
+| **Something broke** | "It's broken" or "Fix this error" |
+| **Checking quality** | "Check if everything is okay" or "Review the code" |
+| **Lost or confused** | "What should I do next?" |
+| **Coming back later** | "What did we do last time?" or "Continue from where we left off" |
+| **Want it done faster** | "Do everything" or "Handle this for me" |
+| **Checking progress** | "What's the status?" or "How much is done?" |
+
+---
+
+## Example: Building a Complete App
+
+Here's a realistic example of building a todo app from start to finish:
+
+```
+Day 1: Getting Started
+─────────────────────
+You: "I want to build a simple todo app"
+     → Claude asks clarifying questions
+     → You answer: "Just for myself, simple, with due dates"
+     → Project created!
+
+You: "Run it"
+     → Dev server starts, you see a blank page
+
+You: "Add the ability to create todos"
+     → Todo creation feature built
+
+You: "Run it"
+     → You can now add todos!
+
+
+Day 2: Adding More Features
+───────────────────────────
+You: "What did we do last time?"
+     → Claude reminds you of progress
+
+You: "Add due dates to todos"
+     → Due date feature built
+
+You: "Add the ability to mark todos as complete"
+     → Completion feature built
+
+You: "Check if everything is working"
+     → Quality review: All good!
+
+
+Day 3: Final Touches
+────────────────────
+You: "Add a way to delete todos"
+     → Delete feature built
+
+You: "Make it look nicer"
+     → Styling improvements
+
+You: "Run it"
+     → Your complete todo app is working!
+```
+
+---
+
+## Features
+
+### v2.2 (Latest)
+- 🎯 **One-Command Setup**: Instantly configure the 2-agent system
+- 🔧 **Troubleshooting**: Say "it's broken" for automatic diagnosis
+- 📋 **Enhanced Integration**: PM commands auto-deployed
+
+### v2.1
+- 🔧 **Auto Error Recovery**: Auto-fixes up to 3 times
+- ⚡ **Parallel Processing**: Up to 67% faster
+- 🧠 **Session Memory**: Remembers previous work
+
+### v2.0
+- 🚀 **Plan → Work → Review**: Automated development cycle
+- 🏗️ **Project Generation**: Creates real projects automatically
+- 🔍 **Code Review**: Security and quality checks
+
+---
+
+## For Teams: 2-Agent Architecture
+
+If you're working with a team using Cursor and Claude Code together:
+
+```
+Cursor (PM)              Claude Code (Worker)
+    │                           │
+    │  "Build login feature"    │
+    │──────────────────────────>│
+    │                           │
+    │                           │ Builds, tests, commits
+    │                           │
+    │  "Done! Please review"    │
+    │<──────────────────────────│
+    │                           │
+    │ Reviews and approves      │
+    │                           │
+```
+
+### Roles
+
+| Agent | Role | What They Do |
+|-------|------|--------------|
+| **Cursor (PM)** | Manager | Plans features, reviews work, deploys to production |
+| **Claude Code (Worker)** | Developer | Writes code, runs tests, deploys to staging |
+
+---
+
+## Project-Level Configuration (Team Sharing)
+
+To share this plugin with your team, add to `.claude/settings.json`:
 
 ```json
 {
@@ -70,145 +387,18 @@ Add to your project's `.claude/settings.json`:
 
 ---
 
-## Quick Start
+## Command Reference (For Advanced Users)
 
-### For VibeCoders (No Technical Knowledge Required)
-
-```
-You: "I want to build a blog"
-
-Claude Code:
-1. Asks a few questions (Who will use it? Similar services?)
-2. Suggests tech stack (Next.js + Supabase recommended)
-3. Auto-generates the project
-4. Say "run it" to start the dev server
-```
-
-### Commands
-
-| Command | Purpose | Example Phrase |
-|---------|---------|----------------|
-| `/init` | Start a project | "I want to build a blog" |
-| `/setup-2agent` | Setup 2-agent system | "Setup Cursor integration" |
-| `/plan` | Convert feature to plan | "Add authentication" |
-| `/work` | Execute the plan | "Start phase 1" |
-| `/review` | Code review | "Review the code" |
-| `/start-task` | Start next task | "Next task" |
-| `/handoff-to-cursor` | Report completion | "Done" |
-| `/sync-status` | Check status | "What's the status?" |
-
----
-
-## Plan → Work → Review Cycle
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                      /plan                              │
-│  "I want to build X" → Structured task list             │
-│  - WebSearch for latest tech recommendations            │
-│  - Adds phased tasks to Plans.md                        │
-└─────────────────────┬───────────────────────────────────┘
-                      ▼
-┌─────────────────────────────────────────────────────────┐
-│                      /work                              │
-│  Execute plan → Generate actual code                    │
-│  - Track progress with TodoWrite                        │
-│  - Run create-next-app, etc.                            │
-│  - Generate files                                       │
-└─────────────────────┬───────────────────────────────────┘
-                      ▼
-┌─────────────────────────────────────────────────────────┐
-│                      /review                            │
-│  Check code quality                                     │
-│  - Security                                             │
-│  - Performance                                          │
-│  - Code quality                                         │
-└─────────────────────────────────────────────────────────┘
-```
-
----
-
-## Agents
-
-| Agent | Purpose |
-|-------|---------|
-| project-analyzer | Detects new vs existing projects |
-| project-scaffolder | Auto-generates project structure |
-| code-reviewer | Multi-aspect code quality review |
-| ci-cd-fixer | Auto-fixes CI failures (up to 3 attempts) |
-| project-state-updater | Syncs Plans.md state |
-| error-recovery | Detects and auto-repairs errors |
-
----
-
-## Skills
-
-| Skill | Trigger Phrases |
-|-------|-----------------|
-| session-init | "start session", "begin work" |
-| workflow-guide | "explain the workflow" |
-| plans-management | "add a task" |
-| vibecoder-guide | "what should I do?", "what's next?" |
-| session-memory | "what did we do last time?", "continue from before" |
-| parallel-workflows | "run in parallel", "do these together" |
-| troubleshoot | "it's broken", "not working", "diagnose" |
-
----
-
-## Natural Language Phrases
-
-| What You Want | What to Say |
-|---------------|-------------|
-| Start a project | "I want to build X" |
-| Continue work | "continue", "next" |
-| Run the app | "run it", "show me" |
-| Add a feature | "add X feature" |
-| Review code | "check it", "review" |
-| Get help | "what should I do?" |
-| Delegate everything | "do everything", "take over" |
-| Fix errors | "fix it", "repair the error" |
-| Resume previous work | "continue from last time" |
-| Speed up | "do these together", "run in parallel" |
-| Troubleshoot | "it's broken", "diagnose" |
-| Setup 2-agent | "setup Cursor integration" |
-
----
-
-## Plans.md Markers
-
-| Marker | Meaning |
-|--------|---------|
-| `cursor:requested` | Requested by Cursor |
-| `cc:TODO` | Not started |
-| `cc:WIP` | Work in progress |
-| `cc:done` | Completed (awaiting review) |
-| `cursor:verified` | Verified by Cursor |
-
----
-
-## 2-Agent Architecture
-
-```
-Cursor (PM)              Claude Code (Worker)
-    │                           │
-    │  Task Request             │
-    │──────────────────────────>│
-    │                           │
-    │                           │ Implement, Test, Commit
-    │                           │
-    │  Completion Report        │
-    │<──────────────────────────│
-    │                           │
-    │ Review & Deploy Decision  │
-    │                           │
-```
-
-### Roles
-
-| Agent | Role | Responsibilities |
-|-------|------|------------------|
-| **Cursor (PM)** | Project Manager | Planning, review, production deployment decisions |
-| **Claude Code (Worker)** | Developer | Coding, testing, staging deployment |
+| Command | Purpose |
+|---------|---------|
+| `/init` | Start a new project |
+| `/setup-2agent` | Setup Cursor + Claude Code system |
+| `/plan` | Convert feature request to tasks |
+| `/work` | Execute planned tasks |
+| `/review` | Run code quality checks |
+| `/start-task` | Begin next task |
+| `/handoff-to-cursor` | Report completion to PM |
+| `/sync-status` | Check current status |
 
 ---
 
