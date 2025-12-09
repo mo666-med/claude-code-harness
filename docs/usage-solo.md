@@ -34,13 +34,15 @@ That's it. Claude Code handles everything.
 
 ## Commands
 
-| Command | What It Does |
-|---------|--------------|
-| `/init` | Create new project from description |
-| `/plan` | Break feature into tasks |
-| `/work` | Execute tasks and write code |
-| `/review` | Check code quality |
-| `/sync-status` | Show current progress |
+| Command | What It Does | When to Use |
+|---------|--------------|-------------|
+| `/init` | Create new project from description | **新規プロジェクト作成時のみ（1回）** |
+| `/plan` | Break feature into tasks | 機能追加のたび（何度でも） |
+| `/work` | Execute tasks and write code | タスク実行のたび（何度でも） |
+| `/review` | Check code quality | 品質チェック時 |
+| `/sync-status` | Show current progress | 進捗確認時 |
+
+> **重要**: `/init` は**新しいプロジェクトを作るとき**にのみ使います。既存プロジェクトへの機能追加は `/plan` + `/work` を使います。
 
 ---
 

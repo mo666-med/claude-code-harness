@@ -61,7 +61,7 @@
 
 ## Step-by-Step Guide
 
-### Step 1: Setup (One-time)
+### Step 1: Plugin Setup (One-time)
 
 In Claude Code, run:
 ```
@@ -72,6 +72,9 @@ This creates:
 - `AGENTS.md` - Shared workflow rules
 - `Plans.md` - Task tracking (shared between agents)
 - `.cursor/commands/` - Cursor commands for PM
+- `.cursor-cc-version` - Version tracking file
+
+> **Note**: `/setup-2agent` はプラグインの初期設定です。新しいプロジェクトを1から作る場合は、この後に `/init` を実行します。既存プロジェクトに導入する場合は `/init` は不要です。
 
 ### Step 2: Start a New Feature (Cursor)
 
