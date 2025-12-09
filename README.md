@@ -6,7 +6,7 @@
 
 **Cursor が PM、Claude Code が Worker として協調する「2エージェント開発ワークフロー」プラグイン。**
 
-Plans.md と共通のスキルレイヤーを共有しながら、Cursor が要件整理・タスク分解を行い、Claude Code が実装・テスト・修正を担当します。Solo モード（Claude Code のみ）も利用可能ですが、**推奨は 2-Agent 構成**です。
+Plans.md を通じて Cursor が要件整理・タスク分解を行い、Claude Code が実装・テスト・修正を担当します。Solo モード（Claude Code のみ）も利用可能ですが、**推奨は 2-Agent 構成**です。
 
 English | [日本語](README.ja.md)
 
@@ -62,7 +62,7 @@ English | [日本語](README.ja.md)
          │   /handoff-to-cursor
 ```
 
-両者は **Plans.md** と **skills/ 以下の SKILL.md** を共有しながら協調します。
+両者は **Plans.md** を通じてタスク状態を共有しながら協調します。
 
 ---
 
@@ -229,14 +229,6 @@ v3 は 3層の **Skill / Workflow / Profile** アーキテクチャを採用:
 ```
 Profile (誰が使うか)  →  Workflow (どう流れるか)  →  Skill (何をするか)
 ```
-
-#### SkillPort Integration
-
-| Without SkillPort | With SkillPort |
-|-------------------|----------------|
-| Claude Code 内で完結 | Cursor からも同じ skills/ を利用可能 |
-| セットアップ不要 | MCP 設定が必要 |
-| 個人向け | チーム・マルチツール向け |
 
 > 📖 詳細は [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) を参照
 

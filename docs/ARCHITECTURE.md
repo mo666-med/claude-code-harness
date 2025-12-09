@@ -31,10 +31,9 @@ cursor-cc-plugins v3 uses a modular architecture with three main layers:
                                ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │                        Skill Layer                                   │
-│  (SKILL.md files with SkillPort-compatible frontmatter)             │
+│  (SKILL.md files)                                                    │
 │  - Self-contained knowledge units                                    │
 │  - Reusable across workflows                                         │
-│  - Shareable via SkillPort MCP server                               │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -85,7 +84,7 @@ plugins/cursor-cc-plugins/
 
 ### 1. Skill Layer
 
-Skills are self-contained knowledge units stored as `SKILL.md` files with SkillPort-compatible frontmatter.
+Skills are self-contained knowledge units stored as `SKILL.md` files.
 
 #### SKILL.md Format
 
@@ -110,7 +109,7 @@ Detailed content and instructions...
 | Field | Required | Description |
 |-------|----------|-------------|
 | `name` | Yes | Unique skill identifier (ccp-{category}-{name}) |
-| `description` | Yes | Brief description (shown in SkillPort) |
+| `description` | Yes | Brief description of skill purpose |
 | `metadata.skillport.category` | Yes | Skill category: core, pm, worker, ci |
 | `metadata.skillport.tags` | Yes | Searchable tags |
 | `metadata.skillport.alwaysApply` | No | If true, always applied (default: false) |
@@ -209,59 +208,6 @@ output_style:
 
 ---
 
-## SkillPort Integration
-
-cursor-cc-plugins v3 integrates with [SkillPort](https://github.com/Chachamaru127/skillport) for skill sharing between Cursor and Claude Code.
-
-### Pattern A: External Tool (Recommended)
-
-SkillPort acts as an MCP server that reads SKILL.md files from the `skills/` directory:
-
-```
-┌───────────────┐     MCP     ┌────────────────┐     reads     ┌──────────────┐
-│    Cursor     │ ◄─────────► │   SkillPort    │ ◄───────────► │  skills/     │
-│    (Client)   │             │   (MCP Server) │               │  SKILL.md    │
-└───────────────┘             └────────────────┘               └──────────────┘
-                                                                      ▲
-                                                               reads  │
-                                                               ┌──────┴───────┐
-                                                               │  Claude Code │
-                                                               │  (local)     │
-                                                               └──────────────┘
-```
-
-### Cursor MCP Configuration
-
-Add to `.cursor/mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "ccp-skills": {
-      "command": "uvx",
-      "args": ["skillport"],
-      "env": {
-        "SKILLPORT_SKILLS_DIR": "/absolute/path/to/cursor-cc-plugins/skills",
-        "SKILLPORT_ENABLED_CATEGORIES": "core,pm,worker,ci"
-      }
-    }
-  }
-}
-```
-
-### How It Works
-
-1. **SkillPort reads SKILL.md files** from the configured directory
-2. **Skills are exposed as MCP tools** to Cursor
-3. **Claude Code reads skills locally** from the same directory
-4. **Both agents share the same skill definitions**
-
-### Claude Code Configuration
-
-Claude Code reads skills directly from the filesystem. No additional configuration needed if the plugin is installed.
-
----
-
 ## Backward Compatibility
 
 v3 maintains full backward compatibility with existing commands:
@@ -313,7 +259,7 @@ Instructions for the skill...
 ### Best Practices
 
 1. **Use clear naming**: `ccp-{category}-{descriptive-name}`
-2. **Write good descriptions**: Used for SkillPort search
+2. **Write good descriptions**: Helps understand skill purpose
 3. **Choose appropriate tags**: Help with discovery
 4. **Use alwaysApply sparingly**: Only for essential rules
 
