@@ -1,4 +1,4 @@
-# cursor-cc-plugins v3.0
+# cursor-cc-plugins v0.3
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-blue)](https://docs.anthropic.com/en/docs/claude-code)
@@ -160,7 +160,7 @@ Cursor を使えない環境や、簡単なプロトタイプ用の**サブモ�
 
 ## 4. Safety & Configuration
 
-v3.0 では**セーフティファースト設計**を採用。意図しない破壊的操作から保護します。
+v0.3 では**セーフティファースト設計**を採用。意図しない破壊的操作から保護します。
 
 ### Safety Modes
 
@@ -222,9 +222,9 @@ Solo Mode は **2-Agent モードの簡易版**です。
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Skill/Workflow/Profile 構造 |
 | [LIMITATIONS.md](docs/LIMITATIONS.md) | 制限事項と回避策 |
 
-### Architecture (v3)
+### Architecture (v0.3)
 
-v3 は 3層の **Skill / Workflow / Profile** アーキテクチャを採用:
+v0.3 は 3層の **Skill / Workflow / Profile** アーキテクチャを採用:
 
 ```
 Profile (誰が使うか)  →  Workflow (どう流れるか)  →  Skill (何をするか)
@@ -242,11 +242,11 @@ Profile (誰が使うか)  →  Workflow (どう流れるか)  →  Skill (何�
 | What's new? | Safety config, Skill/Workflow/Profile architecture, Version tracking |
 | Do I need to change? | Only for Advanced features |
 
-### Version Tracking (New in v3)
+### Version Tracking (New in v0.3)
 
 When you run `/setup-2agent`, a `.cursor-cc-version` file is created. This enables:
 
-- **Update notifications**: When plugin updates, you'll see "⚠️ Update available (v2.x → v3.x)"
+- **Update notifications**: When plugin updates, you'll see "⚠️ Update available (v0.2.x → v0.3.x)"
 - **Skip redundant setup**: If already latest version, setup is skipped by default
 - **Automatic version management**: No manual tracking needed
 
