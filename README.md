@@ -1,282 +1,221 @@
-# cursor-cc-plugins v0.3
+# cursor-cc-plugins
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-blue)](https://docs.anthropic.com/en/docs/claude-code)
-[![Safety First](https://img.shields.io/badge/Safety-First-green)](docs/ADMIN_GUIDE.md)
 
-**Cursor が PM、Claude Code が Worker として協調する「2エージェント開発ワークフロー」プラグイン。**
+**Two AIs working as a team to support your development.**
 
-Plans.md を通じて Cursor が要件整理・タスク分解を行い、Claude Code が実装・テスト・修正を担当します。Solo モード（Claude Code のみ）も利用可能ですが、**推奨は 2-Agent 構成**です。
+Cursor thinks about "what to build" with you, while Claude Code "actually builds it."
+Like a PM and engineer working in pairs, two AIs divide roles to move your project forward.
 
-English | [日本語](README.ja.md)
+[English](README.md) | [日本語](README.ja.md)
 
-![Two AIs, One Seamless Workflow - Cursor plans, Claude Code builds](docs/images/workflow-en.png)
-
----
-
-## Table of Contents
-
-1. [2-Agent Overview](#1-2-agent-overview) - Cursor + Claude Code の役割分担
-2. [Quick Start](#2-quick-start) - セットアップと最初の一歩
-3. [Commands](#3-commands) - 使えるコマンド一覧
-4. [Safety & Configuration](#4-safety--configuration) - セーフティ設定の概要
-5. [Solo Mode](#5-solo-mode) - Claude Code のみで使う場合
-6. [Documentation](#6-documentation) - 詳細ドキュメントへのリンク
+![Cursor plans, Claude Code builds](docs/images/workflow-en.png)
 
 ---
 
-## 1. 2-Agent Overview
-
-このプラグインは、**2つのエージェントが役割分担して開発を進める**ことを前提に設計されています。
-
-### Cursor (PM Agent)
-
-- ユーザーの要望を受けて**要件整理**
-- Plans.md に**タスクを分解**して記述
-- **進捗管理**や優先度の調整
-- 完了報告を**レビュー**して本番デプロイ判断
-
-### Claude Code (Worker Agent)
-
-- Plans.md のタスクをもとに**実装・リファクタ**
-- **テスト**の追加・修正
-- **CIエラー**の解析と修正（最大3回自動リトライ）
-- **stagingデプロイ**まで担当
-
-### How They Collaborate
+## What Is This?
 
 ```
-┌─────────────────┐                      ┌─────────────────┐
-│  Cursor (PM)    │                      │  Claude Code    │
-│                 │                      │   (Worker)      │
-│  • Requirements │   Plans.md (shared)  │  • Implement    │
-│  • Task分解     │ ◄──────────────────► │  • Test         │
-│  • Review       │                      │  • Fix CI       │
-│  • Prod deploy  │                      │  • Staging      │
-└────────┬────────┘                      └────────┬────────┘
-         │                                        │
-         │   /assign-to-cc                        │
-         └───────────────────────────────────────►│
-                                                  │
-         │◄───────────────────────────────────────┘
-         │   /handoff-to-cursor
+You: "I want to build a blog app"
+
+    ↓ Cursor (PM role) creates a plan
+
+Cursor: "I've organized the tasks. Let me hand it off to Claude Code."
+
+    ↓ You pass it to Claude Code
+
+Claude Code (Implementation role): "Done! Please review."
+
+    ↓ You pass it back to Cursor
+
+Cursor: "Review OK. Let's deploy to production."
 ```
 
-両者は **Plans.md** を通じてタスク状態を共有しながら協調します。
+**The "Plan → Implement → Review" cycle that was difficult with just one AI is now possible with two AIs working together.**
 
 ---
 
-## 2. Quick Start
+## Get Started in 3 Steps
 
-### Recommended: 2-Agent Mode (Cursor + Claude Code)
+### Step 1: Install
 
-**これが本プラグインの標準の使い方です。**
-
-#### Step 1: Install (Claude Code)
+Run in Claude Code:
 
 ```bash
 /plugin marketplace add Chachamaru127/cursor-cc-plugins
 /plugin install cursor-cc-plugins
 ```
 
-#### Step 2: Setup 2-Agent Files (Claude Code)
+### Step 2: Setup ⭐ Do This First!
 
-```
+```bash
 /setup-2agent
 ```
 
-This creates: `AGENTS.md`, `Plans.md`, `.cursor/commands/`, `.cursor-cc-version`
+This command creates all necessary files.
 
-> **Note**: `/setup-2agent` is for **plugin initialization** (one-time). If you want to create a new project from scratch, run `/init` after this step.
+### Step 3: Start Consulting with Cursor
 
-#### Step 3: Start Development (Cursor)
+**Now open Cursor.**
 
 ```
-[Cursor] "I want to build a blog app"
-         → Cursor creates plan → /assign-to-cc
+You → Cursor: "I want to build an e-commerce site"
 
-[You]    Copy task → Paste to Claude Code
-
-[Claude Code] /start-task → implements → /handoff-to-cursor
-
-[You]    Copy result → Paste to Cursor
-
-[Cursor] Review → Deploy to production
+Cursor: "Great! Let's organize the required features..."
 ```
 
-> 📖 詳細なワークフローは [docs/usage-2agent.md](docs/usage-2agent.md) を参照
+Cursor creates the plan, and when implementation is needed, hands it off to Claude Code.
 
 ---
 
-### Fallback: Solo Mode (Claude Code only)
+## Development Flow
 
-Cursor を使えない環境や、簡単なプロトタイプ用の**サブモード**です。
+```
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│   1. Consult with Cursor                                    │
+│      "I want to build X" "I want to add X feature"          │
+│              │                                              │
+│              ▼                                              │
+│   2. Cursor organizes tasks                                 │
+│      → Outputs task via /assign-to-cc                       │
+│              │                                              │
+│              ▼                                              │
+│   3. Copy task to Claude Code                               │
+│      (You bridge with copy & paste)                         │
+│              │                                              │
+│              ▼                                              │
+│   4. Claude Code implements                                 │
+│      → Completion report via /handoff-to-cursor             │
+│              │                                              │
+│              ▼                                              │
+│   5. Copy completion report to Cursor                       │
+│      (You bridge with copy & paste)                         │
+│              │                                              │
+│              ▼                                              │
+│   6. Cursor reviews                                         │
+│      → Decides on production deployment if OK               │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Key Point**: Cursor and Claude Code don't communicate directly. **You bridge them with copy & paste.** This keeps you informed of what's happening and ensures safety.
+
+---
+
+## Why Use Two AIs?
+
+### Comparison with Examples
+
+**With just one AI:**
+```
+You: "Add a login feature"
+AI: "Done!"
+You: "...Is this really OK?" (You need to check yourself)
+```
+
+**With 2-Agent (this plugin):**
+```
+You → Cursor: "Add a login feature"
+Cursor: "I've organized tasks including security requirements"
+    ↓
+Claude Code: "Implemented"
+    ↓
+Cursor: "Reviewed. SQL injection protection is OK. Let's deploy."
+```
+
+### Comparison Table
+
+| Aspect | One AI Only | 2-Agent |
+|--------|-------------|---------|
+| Planning | Tends to be vague | Cursor organizes |
+| Implementation | Focus on coding only | Claude Code handles |
+| Review | Self-reviews itself | **Different AI checks objectively** |
+| Quality | Varies | Maintains consistent quality |
+
+---
+
+## Only 2 Commands to Remember
+
+Start with just these:
+
+| Command | Where | What It Does |
+|---------|-------|--------------|
+| `/setup-2agent` | Claude Code | **Run once at the start**. Creates necessary files |
+| `/start-task` | Claude Code | Receives task from Cursor and starts work |
+
+Cursor and Claude Code will naturally guide you from there.
+
+### Note: Creating a New Project
+
+For existing projects, just `/setup-2agent` is enough.
+
+**To create a new app from scratch**, run after `/setup-2agent`:
+```bash
+/init
+```
+to create a new project.
+
+---
+
+## Without Cursor (Solo Mode)
+
+If you can't use Cursor, Claude Code alone works too.
 
 ```bash
-# Install
-/plugin marketplace add Chachamaru127/cursor-cc-plugins
-/plugin install cursor-cc-plugins
-
-# Start (直接 Claude Code に話しかける)
-"I want to build a todo app"
+# After installing, just talk to it directly
+"I want to build a Todo app"
 ```
 
-> 📖 Solo モードの詳細は [docs/usage-solo.md](docs/usage-solo.md) を参照
+However, Solo mode is a simplified version:
+- You need to review yourself
+- Production deployment decisions are manual
+- Planning to implementation all in one AI
+
+**For serious projects, 2-Agent mode is recommended.**
+
+> Details: [docs/usage-solo.md](docs/usage-solo.md)
 
 ---
 
-## 3. Commands
+## Learn More
 
-### ⚠️ `/setup-2agent` vs `/init`
+| Document | Contents |
+|----------|----------|
+| [2-Agent Detailed Guide](docs/usage-2agent.md) | Workflow details, conversation examples |
+| [Solo Mode Guide](docs/usage-solo.md) | Using Claude Code only |
+| [Team Setup Guide](docs/ADMIN_GUIDE.md) | Safety settings, team operations |
+| [Architecture](docs/ARCHITECTURE.md) | Technical details |
+
+---
+
+## FAQ
+
+### Q: What's the difference between `/setup-2agent` and `/init`?
 
 | Command | Purpose | When to Use |
 |---------|---------|-------------|
-| `/setup-2agent` | Plugin initialization | **First time after install** (one-time) |
-| `/init` | Create new project | When starting a new app from scratch |
+| `/setup-2agent` | Plugin setup | **Once at the start** |
+| `/init` | Create new project | Only when making a new app |
 
-**Correct order**: `/setup-2agent` → `/init` (if new project) → `/plan` + `/work`
+### Q: Will updating from v0.2 break things?
 
-### All Commands
-
-| Command | Who Uses | What It Does |
-|---------|----------|--------------|
-| `/setup-2agent` | Claude Code | **プラグイン初期設定**（最初に1回） |
-| `/init` | Claude Code | 新規プロジェクト作成 |
-| `/plan` | Both | 機能をタスクに分解 |
-| `/work` | Claude Code | タスクを実行してコード生成 |
-| `/review` | Both | コード品質チェック |
-| `/sync-status` | Both | 進捗状況を確認 |
-| `/start-task` | Claude Code | PM からのタスクを開始 |
-| `/handoff-to-cursor` | Claude Code | 完了報告を生成 |
-
-### Cursor Commands (after /setup-2agent)
-
-| Command | What It Does |
-|---------|--------------|
-| `/assign-to-cc` | Claude Code にタスクを依頼 |
-| `/review-cc-work` | Claude Code の完了報告をレビュー |
-
----
-
-## 4. Safety & Configuration
-
-v0.3 では**セーフティファースト設計**を採用。意図しない破壊的操作から保護します。
-
-### Safety Modes
-
-| Mode | Behavior | Use Case |
-|------|----------|----------|
-| `dry-run` | 変更なし、何が起きるか表示 | デフォルト・安全に探索 |
-| `apply-local` | ローカル変更のみ、push なし | 通常の開発 |
-| `apply-and-push` | git push を含む完全自動化 | CI/CD（要注意） |
-
-### Quick Config
-
-`cursor-cc.config.json`:
-
-```json
-{
-  "safety": { "mode": "apply-local" },
-  "git": { "protected_branches": ["main", "master"] },
-  "paths": { "protected": [".env", "secrets/"] }
-}
-```
-
-> 📖 詳細な設定は [docs/ADMIN_GUIDE.md](docs/ADMIN_GUIDE.md) を参照
-
----
-
-## 5. Solo Mode
-
-Solo Mode は **2-Agent モードの簡易版**です。
-
-| Feature | Solo Mode | 2-Agent Mode |
-|---------|-----------|--------------|
-| Planning | セルフ管理 | Cursor が担当 |
-| Code Review | セルフレビュー | Cursor がレビュー |
-| Production Deploy | 手動 | Cursor が判断 |
-| Best For | プロトタイプ | 本番プロジェクト |
-
-### Natural Language (Solo Mode)
-
-| Say This | What Runs |
-|----------|-----------|
-| "Build a blog" | `/init` |
-| "Add login" | `/plan` + `/work` |
-| "Run it" | Dev server starts |
-| "Check it" | `/review` |
-
-> 📖 Solo モードの詳細は [docs/usage-solo.md](docs/usage-solo.md) を参照
-
----
-
-## 6. Documentation
-
-### Usage Guides
-
-| Document | Description |
-|----------|-------------|
-| [usage-2agent.md](docs/usage-2agent.md) | 2-Agent モードの詳細ガイド |
-| [usage-solo.md](docs/usage-solo.md) | Solo モードの詳細ガイド |
-| [ADMIN_GUIDE.md](docs/ADMIN_GUIDE.md) | チーム導入・セーフティ設定 |
-| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Skill/Workflow/Profile 構造 |
-| [LIMITATIONS.md](docs/LIMITATIONS.md) | 制限事項と回避策 |
-
-### Architecture (v0.3)
-
-v0.3 は 3層の **Skill / Workflow / Profile** アーキテクチャを採用:
-
-```
-Profile (誰が使うか)  →  Workflow (どう流れるか)  →  Skill (何をするか)
-```
-
-> 📖 詳細は [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) を参照
-
----
-
-## Upgrading from v2?
-
-| Question | Answer |
-|----------|--------|
-| Does my project break? | **No** - v2 commands work the same |
-| What's new? | Safety config, Skill/Workflow/Profile architecture, Version tracking |
-| Do I need to change? | Only for Advanced features |
-
-### Version Tracking (New in v0.3)
-
-When you run `/setup-2agent`, a `.cursor-cc-version` file is created. This enables:
-
-- **Update notifications**: When plugin updates, you'll see "⚠️ Update available (v0.2.x → v0.3.x)"
-- **Skip redundant setup**: If already latest version, setup is skipped by default
-- **Automatic version management**: No manual tracking needed
+No. v0.2 commands still work the same.
 
 ```bash
-# After plugin update
 /plugin update cursor-cc-plugins
-/setup-2agent   # Will detect update and prompt to apply
+/setup-2agent  # Detects updates and applies them
 ```
 
 ---
-
-## Installation
-
-```bash
-/plugin marketplace add Chachamaru127/cursor-cc-plugins
-/plugin install cursor-cc-plugins
-```
-
----
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-## License
-
-MIT License - see [LICENSE](LICENSE) for details.
 
 ## Links
 
-- [GitHub Repository](https://github.com/Chachamaru127/cursor-cc-plugins)
-- [Claude Code Documentation](https://docs.anthropic.com/en/docs/claude-code)
+- [GitHub](https://github.com/Chachamaru127/cursor-cc-plugins)
 - [Report Issues](https://github.com/Chachamaru127/cursor-cc-plugins/issues)
+- [Claude Code Documentation](https://docs.anthropic.com/en/docs/claude-code)
+
+---
+
+MIT License

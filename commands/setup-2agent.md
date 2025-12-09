@@ -76,7 +76,7 @@ Cursor (PM) と Claude Code (Worker) の2エージェント体制を一発でセ
 
 ```bash
 # プラグインの現在のバージョンを取得
-PLUGIN_VERSION=$(cat ~/.claude/plugins/marketplaces/claude-code-plugins/plugins/cursor-cc-plugins/VERSION 2>/dev/null || echo "3.0.0")
+PLUGIN_VERSION=$(cat ~/.claude/plugins/marketplaces/cursor-cc-marketplace/VERSION 2>/dev/null || echo "0.3.0")
 
 # プロジェクトのバージョンファイルをチェック
 if [ -f .cursor-cc-version ]; then
@@ -347,7 +347,7 @@ echo "# Patterns" > .claude/memory/patterns.md
 
 ```bash
 # プラグインのバージョンを取得
-PLUGIN_VERSION=$(cat ~/.claude/plugins/marketplaces/claude-code-plugins/plugins/cursor-cc-plugins/VERSION 2>/dev/null || echo "3.0.0")
+PLUGIN_VERSION=$(cat ~/.claude/plugins/marketplaces/cursor-cc-marketplace/VERSION 2>/dev/null || echo "0.3.0")
 TODAY=$(date +%Y-%m-%d)
 
 # .cursor-cc-version を作成

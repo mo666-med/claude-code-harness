@@ -1,9 +1,9 @@
-# cursor-cc-plugins v3 Architecture
+# cursor-cc-plugins Architecture
 
-> **Version**: 3.0
+> **Version**: 0.3
 > **Last Updated**: 2025-12-09
 
-This document describes the internal architecture of cursor-cc-plugins v3, which introduces a 3-layer Skill / Workflow / Profile separation.
+This document describes the internal architecture of cursor-cc-plugins, which uses a 3-layer Skill / Workflow / Profile separation.
 
 ---
 
