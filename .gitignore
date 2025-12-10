@@ -20,6 +20,7 @@ Thumbs.db
 
 # 2-Agent setup files (auto-generated)
 /AGENTS.md
+/CLAUDE.md
 /Plans.md
 /.cursor/commands/
 /.cursor-cc-version
