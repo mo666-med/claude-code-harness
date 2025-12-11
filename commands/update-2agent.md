@@ -17,13 +17,15 @@
 
 ### Step 2: 検証チェックリストを確認
 
-スクリプト実行後、以下のファイルが存在することを確認：
+スクリプトが更新するファイル（自動検証）：
 
+- [ ] `.cursor/commands`
 - [ ] `.cursor/commands/start-session.md`
 - [ ] `.cursor/commands/assign-to-cc.md`
 - [ ] `.cursor/commands/review-cc-work.md`
 - [ ] `.cursor/commands/plan-with-cc.md`
 - [ ] `.cursor/commands/project-overview.md`
+- [ ] `.claude/rules`
 - [ ] `.claude/rules/workflow.md`
 - [ ] `.claude/rules/coding-standards.md`
 - [ ] `.cursor-cc-version`

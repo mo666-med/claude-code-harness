@@ -24,17 +24,25 @@ Cursor (PM) と Claude Code (Worker) の2エージェント体制を一発でセ
 
 ### Step 3: 検証チェックリストを確認
 
-以下のファイルが存在することを確認：
+スクリプトが作成するファイル（自動検証）：
 
+- [ ] `.cursor/commands`
 - [ ] `.cursor/commands/start-session.md`
 - [ ] `.cursor/commands/assign-to-cc.md`
 - [ ] `.cursor/commands/review-cc-work.md`
 - [ ] `.cursor/commands/plan-with-cc.md`
 - [ ] `.cursor/commands/project-overview.md`
+- [ ] `.claude/rules`
 - [ ] `.claude/rules/workflow.md`
 - [ ] `.claude/rules/coding-standards.md`
+- [ ] `.claude/memory`
 - [ ] `.claude/memory/session-log.md`
+- [ ] `.claude/memory/decisions.md`
+- [ ] `.claude/memory/patterns.md`
 - [ ] `.cursor-cc-version`
+
+Step 2 で Claude が生成するファイル：
+
 - [ ] `AGENTS.md`
 - [ ] `CLAUDE.md`
 - [ ] `Plans.md`

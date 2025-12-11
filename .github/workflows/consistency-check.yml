@@ -126,3 +126,16 @@ jobs:
           fi
 
           echo "hooks.json is valid"
+
+  checklist-sync:
+    name: Check Checklist Sync
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify command checklists match scripts
+        run: |
+          chmod +x ./scripts/ci/check-checklist-sync.sh
+          ./scripts/ci/check-checklist-sync.sh
