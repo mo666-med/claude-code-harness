@@ -1,12 +1,15 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-hooks.json",
+  "description": "cursor-cc-plugins: 2エージェントワークフロー用フック",
   "hooks": {
     "SessionStart": [
       {
-        "matcher": ".*",
+        "matcher": "startup",
         "hooks": [
           {
             "type": "command",
-            "command": "echo '📋 セッション開始: Plans.md を確認中...' && cat Plans.md 2>/dev/null | head -30 || echo '⚠️ Plans.md が見つかりません。/cursor-cc-plugins:init でセットアップしてください。'"
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/session-init.sh",
+            "statusMessage": "セッション初期化中..."
           }
         ]
       }
@@ -17,18 +20,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo \"📝 ファイル変更を記録: $(date '+%Y-%m-%d %H:%M')\" >> .claude/session-log.md 2>/dev/null || true"
-          }
-        ]
-      }
-    ],
-    "Notification": [
-      {
-        "matcher": ".*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo '🔔 通知を受信しました'"
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/auto-cleanup-hook.sh",
+            "statusMessage": "ファイルサイズチェック中..."
           }
         ]
       }

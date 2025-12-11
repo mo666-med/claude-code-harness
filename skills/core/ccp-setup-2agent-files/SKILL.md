@@ -33,6 +33,13 @@ metadata:
 | `assign-to-cc.md` | タスク依頼 | 具体的な作業を依頼する時 |
 | `review-cc-work.md` | 完了レビュー | Claude Code の作業を確認する時 |
 
+### Claude Rules (.claude/rules/) - v0.4.0+
+
+| ファイル | 用途 |
+|---------|------|
+| `workflow.md` | 2-Agent ワークフロールール |
+| `coding-standards.md` | コーディング規約（paths: で条件適用） |
+
 ### その他のファイル
 
 | ファイル | 用途 |
@@ -114,7 +121,24 @@ cp "$PLUGIN_PATH/templates/cursor/commands/review-cc-work.md" .cursor/commands/
 - `templates/cursor/commands/assign-to-cc.md` - タスク依頼
 - `templates/cursor/commands/review-cc-work.md` - 完了レビュー
 
-### Step 4: メモリ構造の初期化
+### Step 4: Claude Rules の配置（v0.4.0+）
+
+```bash
+# ディレクトリ作成
+mkdir -p .claude/rules
+
+# ルールファイルをテンプレートからコピー
+PLUGIN_PATH="$HOME/.claude/plugins/marketplaces/cursor-cc-marketplace"
+
+for template in "$PLUGIN_PATH/templates/rules"/*.template; do
+  if [ -f "$template" ]; then
+    rule_name=$(basename "$template" .template)
+    cp "$template" ".claude/rules/$rule_name"
+  fi
+done
+```
+
+### Step 5: メモリ構造の初期化
 
 ```bash
 # ディレクトリ作成
@@ -171,7 +195,7 @@ mkdir -p .claude/memory
 （まだ記録なし）
 ```
 
-### Step 5: バージョンファイルの作成
+### Step 6: バージョンファイルの作成
 
 **テンプレートから変数を置換して作成**:
 
@@ -216,7 +240,7 @@ last_setup_command: setup-2agent
 - **テンプレートを直接コピー**: 簡略化せず、詳細版テンプレートを使用
 - **バージョン管理**: `.cursor-cc-version` で更新検出を可能にする
 
-### Step 6: Hooks 設定の配置（自動整理機能）
+### Step 7: Hooks 設定の配置（自動整理機能）
 
 ```bash
 # スクリプトディレクトリ作成

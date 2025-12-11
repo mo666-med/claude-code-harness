@@ -42,5 +42,6 @@
     "./agents/ci-cd-fixer.md",
     "./agents/project-state-updater.md",
     "./agents/error-recovery.md"
-  ]
+  ],
+  "hooks": "./hooks/hooks.json"
 }

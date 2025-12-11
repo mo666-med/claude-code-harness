@@ -1,0 +1,34 @@
+# 2-Agent Workflow Rules
+
+このプロジェクトは **Cursor ↔ Claude Code** の2エージェントワークフローを採用しています。
+
+## 役割分担
+
+| エージェント | 責務 |
+|-------------|------|
+| **Cursor** | 計画・レビュー・意思決定 |
+| **Claude Code** | 実装・テスト・コミット |
+
+## タスク管理
+
+- タスクは `Plans.md` で管理
+- マーカー: `cursor:依頼中` → `cc:WIP` → `cc:完了` → `cursor:確認済`
+- 完了したタスクは即座にマークすること
+
+## ハンドオフ
+
+### Cursor → Claude Code
+1. Plans.md にタスクを記載
+2. `cursor:依頼中` マーカーを付与
+3. Claude Code にハンドオフ
+
+### Claude Code → Cursor
+1. 作業完了後 `cc:完了` マーカーを付与
+2. 作業サマリーを Plans.md に記載
+3. Cursor に確認依頼
+
+## 禁止事項
+
+- 開発用ファイル（CLAUDE.md, AGENTS.md, Plans.md）の外部公開
+- 明示的な依頼なしの大規模リファクタリング
+- テストなしの機能追加

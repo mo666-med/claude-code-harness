@@ -69,7 +69,7 @@ normalize_filename "$PLANS_FILE" "Plans.md"
 
 ---
 
-## 期待されるファイル構成（v0.3.8）
+## 期待されるファイル構成（v0.4.0）
 
 更新時に以下のファイルが**存在すべき**かチェックする：
 
@@ -82,12 +82,15 @@ normalize_filename "$PLANS_FILE" "Plans.md"
 ├── .cursor-cc-config.yaml          # v0.3.7+
 ├── .cursor/
 │   └── commands/
-│       ├── start-session.md        # v0.3.5+
+│       ├── start-session.md        # v0.3.5+（Named Sessions: v0.4.0+）
 │       ├── project-overview.md     # v0.3.5+
 │       ├── plan-with-cc.md         # v0.3.5+
 │       ├── assign-to-cc.md
 │       └── review-cc-work.md
 └── .claude/
+    ├── rules/                      # v0.4.0+
+    │   ├── workflow.md
+    │   └── coding-standards.md
     ├── memory/
     │   ├── session-log.md
     │   ├── decisions.md
@@ -133,6 +136,8 @@ REQUIRED_FILES=(
   ".cursor/commands/plan-with-cc.md"
   ".cursor/commands/assign-to-cc.md"
   ".cursor/commands/review-cc-work.md"
+  ".claude/rules/workflow.md"              # v0.4.0+
+  ".claude/rules/coding-standards.md"      # v0.4.0+
   ".claude/scripts/auto-cleanup-hook.sh"
   ".cursor-cc-config.yaml"
 )
@@ -234,7 +239,26 @@ cp "$PLUGIN_PATH/templates/cursor/commands/assign-to-cc.md" .cursor/commands/
 cp "$PLUGIN_PATH/templates/cursor/commands/review-cc-work.md" .cursor/commands/
 ```
 
-### Step 8: Hooks 設定の更新（v0.3.7+）
+### Step 8: Claude Rules の更新（v0.4.0+）
+
+```bash
+# ディレクトリ作成（存在しない場合）
+mkdir -p .claude/rules
+
+# プラグイン提供のルールを更新（テンプレートから）
+for template in "$PLUGIN_PATH/templates/rules"/*.template; do
+  if [ -f "$template" ]; then
+    rule_name=$(basename "$template" .template)
+    target=".claude/rules/$rule_name"
+    cp "$template" "$target"
+    echo "  ✅ $rule_name を更新"
+  fi
+done
+
+# 注意: ユーザーが独自に作成したルール（テンプレートにないもの）は保持される
+```
+
+### Step 9: Hooks 設定の更新（v0.3.7+）
 
 ```bash
 # スクリプトディレクトリ作成
@@ -252,7 +276,7 @@ chmod +x .claude/scripts/auto-cleanup-hook.sh
 # 注: 既存の settings.json がある場合はマージが必要
 ```
 
-### Step 9: バージョンファイルの更新
+### Step 10: バージョンファイルの更新
 
 ```bash
 cat > .cursor-cc-version << EOF

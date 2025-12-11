@@ -34,11 +34,13 @@
 - CLAUDE.md のルール・禁止事項
 - .cursor/commands/ のコマンド定義
 - .claude/memory/ の構造
+- .claude/rules/ のワークフロールール（v0.4.0+）
 
 ### 保持される内容（ユーザーデータ）
 
 - Plans.md のタスク一覧（`cc:WIP`, `cc:TODO` など）
 - .claude/memory/ の記録内容
+- .claude/rules/ のユーザー作成ルール（テンプレートにないもの）
 - プロジェクト固有のカスタマイズ
 
 ---
@@ -116,6 +118,34 @@ PROJECT_NAME=$(grep "プロジェクト" AGENTS.md | head -1 | sed 's/.*: //')
 cp ~/.claude/plugins/marketplaces/cursor-cc-marketplace/templates/cursor/commands/*.md .cursor/commands/
 ```
 
+### Phase 5.5: Claude Rules の更新
+
+**v0.4.0 で追加**: `.claude/rules/` ディレクトリのルールファイルを更新
+
+```bash
+# .claude/rules/ ディレクトリの存在確認
+if [ ! -d ".claude/rules" ]; then
+  mkdir -p .claude/rules
+fi
+
+# プラグイン提供のルールを更新（テンプレートから）
+RULES_DIR=~/.claude/plugins/marketplaces/cursor-cc-marketplace/templates/rules
+
+for template in "$RULES_DIR"/*.template; do
+  if [ -f "$template" ]; then
+    # .template を除いたファイル名
+    rule_name=$(basename "$template" .template)
+    target=".claude/rules/$rule_name"
+
+    # コピー（既存ファイルは上書き）
+    cp "$template" "$target"
+    echo "  ✅ $rule_name を更新"
+  fi
+done
+```
+
+**注意**: ユーザーが独自に作成したルールファイル（テンプレートに存在しないもの）は保持されます。
+
 ### Phase 6: バージョンファイルの更新
 
 ```bash
@@ -158,6 +188,7 @@ mv plans.md Plans.md
 - CLAUDE.md: 構造を更新
 - Plans.md: タスクを保持しつつ構造を更新
 - .cursor/commands/: 最新版に更新
+- .claude/rules/: ワークフロールールを更新
 
 📋 **保持されたデータ**:
 - 進行中タスク: X件

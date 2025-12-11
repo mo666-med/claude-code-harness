@@ -57,6 +57,9 @@ Cursor (PM) と Claude Code (Worker) の2エージェント体制を一発でセ
 │       ├── assign-to-cc.md      # タスク依頼コマンド
 │       └── review-cc-work.md    # 完了レビューコマンド
 └── .claude/
+    ├── rules/                   # ワークフロールール（v0.4.0+）
+    │   ├── workflow.md          # 2-Agent ワークフロールール
+    │   └── coding-standards.md  # コーディング規約
     └── memory/
         ├── session-log.md       # セッションログ
         ├── decisions.md         # 決定事項記録
@@ -127,6 +130,7 @@ find . -maxdepth 1 -iname "plans.md" -type f 2>/dev/null | head -1
 `ccp-setup-2agent-files` スキルが以下を配置:
 
 - **.cursor/commands/** ← `templates/cursor/commands/` からコピー
+- **.claude/rules/** ← `templates/rules/` からコピー（v0.4.0+）
 - **.claude/memory/** ← 初期構造を作成
 - **.cursor-cc-version** ← `templates/.cursor-cc-version.template` から生成
 

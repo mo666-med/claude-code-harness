@@ -3,6 +3,8 @@
 Cursor (PM) としてのセッションを開始します。
 状況確認 → ヒアリング → 計画立案 → Claude Code への依頼まで、**シームレスに進行**します。
 
+**Named Sessions 対応**: セッション名を自動生成し、後から `/resume <name>` で再開可能です。
+
 ---
 
 ## 使い方
@@ -27,6 +29,8 @@ Cursor (PM) としてのセッションを開始します。
 ┌─────────────────────────────────────────────────────┐
 │  /start-session                                     │
 │                                                     │
+│  Step 0: セッション名を生成（自動）                  │
+│    ↓                                                │
 │  Step 1: 状況確認（自動）                            │
 │    ↓                                                │
 │  Step 2: ヒアリング「今日は何をしますか？」           │
@@ -37,8 +41,35 @@ Cursor (PM) としてのセッションを開始します。
 │    ↓ ユーザー「OK」                                 │
 │  Step 5: Claude Code に依頼（自動）                  │
 │    ↓                                                │
-│  完了：Plans.md 更新 + 依頼メッセージ生成            │
+│  完了：Plans.md 更新 + セッション記録 + 依頼生成     │
 └─────────────────────────────────────────────────────┘
+```
+
+---
+
+## Step 0: セッション名の生成（自動実行）
+
+セッション名を自動生成します。後から `/resume <name>` で再開可能になります。
+
+**命名規則**: `{project}-{feature}-{YYYYMMDD}`
+
+```bash
+# プロジェクト名を取得
+PROJECT_NAME=$(basename $(pwd))
+
+# 日付を取得
+DATE=$(date +%Y%m%d)
+
+# セッション名を生成（feature はユーザー入力後に確定）
+SESSION_NAME="${PROJECT_NAME}-session-${DATE}"
+```
+
+**出力例:**
+```
+🏷️ **セッション名**: myapp-session-20250111
+
+💡 ヒント: タスク確定後、より具体的な名前に変更できます
+   `/rename myapp-darkmode-20250111`
 ```
 
 ---
@@ -149,6 +180,14 @@ git status -sb
 ### 4-1: Plans.md を自動更新
 
 ```markdown
+## 最終更新情報
+
+- **更新日時**: {{YYYY-MM-DD HH:MM}}
+- **セッション名**: {{SESSION_NAME}}
+- **再開方法**: `/resume {{SESSION_NAME}}`
+
+---
+
 ## 🟡 未着手のタスク
 
 - [ ] タスク1 `cursor:依頼中`
@@ -168,6 +207,9 @@ git status -sb
 
 Plans.md を更新しました。
 
+🏷️ **セッション名**: {{SESSION_NAME}}
+📝 **再開方法**: Claude Code で `/resume {{SESSION_NAME}}`
+
 ---
 
 ## 📋 Claude Code への依頼
@@ -175,6 +217,7 @@ Plans.md を更新しました。
 以下のタスクを Claude Code に依頼します：
 
 **タスク**: {{タスク名}}
+**セッション**: {{SESSION_NAME}}
 **依頼日時**: {{YYYY-MM-DD HH:MM}}
 
 ### 完了条件

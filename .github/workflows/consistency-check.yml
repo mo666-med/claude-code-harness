@@ -1,0 +1,128 @@
+name: Consistency Check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'commands/**'
+      - 'skills/**'
+      - 'templates/**'
+      - 'hooks/**'
+      - 'scripts/**'
+      - 'VERSION'
+      - '.claude-plugin/plugin.json'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'commands/**'
+      - 'skills/**'
+      - 'templates/**'
+      - 'hooks/**'
+      - 'scripts/**'
+      - 'VERSION'
+      - '.claude-plugin/plugin.json'
+
+jobs:
+  consistency:
+    name: Check Plugin Consistency
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run consistency check
+        run: |
+          chmod +x ./scripts/ci/check-consistency.sh
+          ./scripts/ci/check-consistency.sh
+
+  version-sync:
+    name: Check Version Sync
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Compare VERSION and plugin.json
+        run: |
+          FILE_VERSION=$(cat VERSION | tr -d '[:space:]')
+          JSON_VERSION=$(grep '"version"' .claude-plugin/plugin.json | head -1 | sed 's/.*: *"\([^"]*\)".*/\1/')
+
+          echo "VERSION file: $FILE_VERSION"
+          echo "plugin.json:  $JSON_VERSION"
+
+          if [ "$FILE_VERSION" != "$JSON_VERSION" ]; then
+            echo "::error::Version mismatch: VERSION=$FILE_VERSION, plugin.json=$JSON_VERSION"
+            exit 1
+          fi
+
+          echo "Versions are in sync"
+
+  template-exists:
+    name: Check Required Templates
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify required templates exist
+        run: |
+          ERRORS=0
+
+          TEMPLATES=(
+            "templates/AGENTS.md.template"
+            "templates/CLAUDE.md.template"
+            "templates/Plans.md.template"
+            "templates/.cursor-cc-version.template"
+            "templates/cursor/commands/start-session.md"
+            "templates/cursor/commands/assign-to-cc.md"
+            "templates/cursor/commands/review-cc-work.md"
+            "templates/rules/workflow.md.template"
+            "templates/rules/coding-standards.md.template"
+          )
+
+          for template in "${TEMPLATES[@]}"; do
+            if [ ! -f "$template" ]; then
+              echo "::error::Missing template: $template"
+              ERRORS=$((ERRORS + 1))
+            else
+              echo "Found: $template"
+            fi
+          done
+
+          if [ $ERRORS -gt 0 ]; then
+            exit 1
+          fi
+
+  hooks-validation:
+    name: Validate Hooks Configuration
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate hooks.json
+        run: |
+          if ! jq empty hooks/hooks.json 2>/dev/null; then
+            echo "::error::hooks/hooks.json is not valid JSON"
+            exit 1
+          fi
+
+          SCRIPT_REFS=$(grep -oE 'scripts/[a-zA-Z0-9_.-]+' hooks/hooks.json || true)
+          ERRORS=0
+
+          for ref in $SCRIPT_REFS; do
+            if [ ! -f "$ref" ]; then
+              echo "::error::Hook references missing script: $ref"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done
+
+          if [ $ERRORS -gt 0 ]; then
+            exit 1
+          fi
+
+          echo "hooks.json is valid"
