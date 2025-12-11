@@ -15,8 +15,9 @@ Thumbs.db
 *~
 
 # Local development
-.claude/memory/
-.claude/session-log.md
+.claude/
+.serena/
+.mcp.json
 
 # 2-Agent setup files (auto-generated)
 /AGENTS.md
