@@ -33,6 +33,8 @@ REQUIRED_TEMPLATES=(
   "templates/cursor/commands/review-cc-work.md"
   "templates/rules/workflow.md.template"
   "templates/rules/coding-standards.md.template"
+  "templates/rules/plans-management.md.template"
+  "templates/rules/testing.md.template"
 )
 
 for template in "${REQUIRED_TEMPLATES[@]}"; do

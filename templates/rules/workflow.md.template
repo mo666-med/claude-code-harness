@@ -1,3 +1,8 @@
+---
+description: 2エージェントワークフローの基本ルール
+alwaysApply: true
+---
+
 # 2-Agent Workflow Rules
 
 このプロジェクトは **Cursor ↔ Claude Code** の2エージェントワークフローを採用しています。
@@ -6,29 +11,33 @@
 
 | エージェント | 責務 |
 |-------------|------|
-| **Cursor** | 計画・レビュー・意思決定 |
-| **Claude Code** | 実装・テスト・コミット |
+| **Cursor (PM)** | 計画・レビュー・意思決定・本番デプロイ |
+| **Claude Code (Worker)** | 実装・テスト・コミット・Staging |
 
 ## タスク管理
 
-- タスクは `Plans.md` で管理
-- マーカー: `cursor:依頼中` → `cc:WIP` → `cc:完了` → `cursor:確認済`
-- 完了したタスクは即座にマークすること
+- タスクは `Plans.md` で一元管理
+- マーカーでステータスを追跡:
+  - `cursor:依頼中` → Cursor から依頼
+  - `cc:WIP` → Claude Code 作業中
+  - `cc:完了` → Claude Code 完了
+  - `cursor:確認済` → Cursor レビュー完了
 
-## ハンドオフ
+## ハンドオフプロトコル
 
 ### Cursor → Claude Code
-1. Plans.md にタスクを記載
-2. `cursor:依頼中` マーカーを付与
-3. Claude Code にハンドオフ
+1. Plans.md にタスクを記載し `cursor:依頼中` マーカー
+2. `/handoff-to-claude` でコピー可能な形式を出力
+3. Claude Code へ貼り付け
 
 ### Claude Code → Cursor
 1. 作業完了後 `cc:完了` マーカーを付与
-2. 作業サマリーを Plans.md に記載
-3. Cursor に確認依頼
+2. `/handoff-to-cursor` でサマリーを出力
+3. Cursor へ貼り付けてレビュー依頼
 
 ## 禁止事項
 
-- 開発用ファイル（CLAUDE.md, AGENTS.md, Plans.md）の外部公開
-- 明示的な依頼なしの大規模リファクタリング
-- テストなしの機能追加
+- ❌ 開発用ファイルの外部公開（CLAUDE.md, AGENTS.md, Plans.md）
+- ❌ 明示的な依頼なしの大規模リファクタリング
+- ❌ テストなしの機能追加
+- ❌ 本番環境への直接デプロイ（Cursor PM の承認必須）
