@@ -18,6 +18,18 @@
 
 ---
 
+## 使用するスキル
+
+このコマンドは以下のスキルを活用します：
+
+- `ccp-review-security` - セキュリティレビュー
+- `ccp-review-performance` - パフォーマンスレビュー
+- `ccp-review-quality` - コード品質レビュー
+- `ccp-review-accessibility` - アクセシビリティレビュー
+- `ccp-review-aggregate` - レビュー結果の集約
+
+---
+
 ## このコマンドの目的
 
 **受託開発の品質保証**を自動化します。

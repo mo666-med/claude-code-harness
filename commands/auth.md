@@ -11,6 +11,16 @@ Clerk または Supabase Auth を使用した認証機能を実装します。
 
 ---
 
+## 使用するスキル
+
+このコマンドは以下のスキルを活用します：
+
+- `ccp-work-impl-feature` - 認証機能実装
+- `ccp-review-security` - セキュリティレビュー
+- `ccp-verify-build` - ビルド検証
+
+---
+
 ## 使い方
 
 ```

@@ -17,6 +17,16 @@
 
 ---
 
+## 使用するスキル
+
+このコマンドは以下のスキルを活用します：
+
+- `ccp-adaptive-setup` - プロジェクト構造の初期化
+- `ccp-vibecoder-guide` - VibeCoder向けガイダンス
+- `ccp-core-read-repo-context` - プロジェクト状態の把握
+
+---
+
 ## このコマンドの目的
 
 **受託開発における計画フェーズを完全自動化**

@@ -10,6 +10,16 @@ Vercel/Netlifyへのデプロイを自動化します。
 
 ---
 
+## 使用するスキル
+
+このコマンドは以下のスキルを活用します：
+
+- `ccp-generate-workflow-files` - デプロイ設定生成
+- `ccp-verify-build` - デプロイ前検証
+- `ccp-error-recovery` - デプロイエラー復旧
+
+---
+
 ## 使い方
 
 ```

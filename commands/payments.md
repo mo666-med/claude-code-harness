@@ -10,6 +10,16 @@ Stripeを使用した決済機能を実装します。
 
 ---
 
+## 使用するスキル
+
+このコマンドは以下のスキルを活用します：
+
+- `ccp-work-impl-feature` - 決済機能実装
+- `ccp-review-security` - セキュリティレビュー
+- `ccp-verify-build` - ビルド検証
+
+---
+
 ## 使い方
 
 ```

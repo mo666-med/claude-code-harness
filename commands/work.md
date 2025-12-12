@@ -18,6 +18,17 @@ TodoWrite ツールで進捗を追跡しながら、着実にタスクを完了�
 
 ---
 
+## 使用するスキル
+
+このコマンドは以下のスキルを活用します：
+
+- `ccp-work-impl-feature` - 機能実装
+- `ccp-work-write-tests` - テスト作成
+- `ccp-verify-build` - ビルド検証
+- `ccp-error-recovery` - エラー復旧
+
+---
+
 ## このコマンドの目的
 
 **Plan → Work → Review** サイクルの「Work」フェーズ。

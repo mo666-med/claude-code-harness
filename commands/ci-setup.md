@@ -11,6 +11,16 @@ GitHub Actionsを使用したCI/CDパイプラインを自動構築します。
 
 ---
 
+## 使用するスキル
+
+このコマンドは以下のスキルを活用します：
+
+- `ccp-generate-workflow-files` - ワークフローファイル生成
+- `ccp-ci-analyze-failures` - CI失敗分析
+- `ccp-ci-fix-failing-tests` - テスト修正
+
+---
+
 ## 使い方
 
 ```

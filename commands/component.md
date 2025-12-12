@@ -10,6 +10,16 @@ shadcn/uiベースのUIコンポーネントを生成します。
 
 ---
 
+## 使用するスキル
+
+このコマンドは以下のスキルを活用します：
+
+- `ccp-work-impl-feature` - コンポーネント実装
+- `ccp-review-accessibility` - アクセシビリティチェック
+- `ccp-verify-build` - ビルド検証
+
+---
+
 ## 使い方
 
 ```

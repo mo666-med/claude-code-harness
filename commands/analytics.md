@@ -10,6 +10,15 @@ Google Analytics または Vercel Analytics を統合します。
 
 ---
 
+## 使用するスキル
+
+このコマンドは以下のスキルを活用します：
+
+- `ccp-work-impl-feature` - アナリティクス統合
+- `ccp-verify-build` - ビルド検証
+
+---
+
 ## 💡 バイブコーダー向けの使い方
 
 **このコマンドは、クライアントに成果を報告するためのAnalyticsを簡単に導入できます。**

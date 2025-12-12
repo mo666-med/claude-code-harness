@@ -11,6 +11,16 @@
 
 ---
 
+## 使用するスキル
+
+このコマンドは以下のスキルを活用します：
+
+- `ccp-work-impl-feature` - CRUD機能実装
+- `ccp-verify-build` - ビルド検証
+- `ccp-core-diff-aware-editing` - 差分を考慮した編集
+
+---
+
 ## 使い方
 
 ```
