@@ -1,207 +1,101 @@
-# cursor-cc-plugins
+# Claude Code Harness
 
-### Cursor ↔ Claude Code 2-Agent Development Workflow
+**Claude Code専用の開発ハーネス。自律的なPlan→Work→Reviewサイクルで高品質な開発を実現します。**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-blue)](https://docs.anthropic.com/en/docs/claude-code)
-[![2-Agent](https://img.shields.io/badge/2--Agent-Workflow-orange)](docs/usage-2agent.md)
-[![Version](https://img.shields.io/badge/version-0.5.4-green)](CHANGELOG.md)
+[![Version: 1.0.0](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/Chachamaru127/claude-code-harness)
 
-**Cursor (PM) plans. Claude Code (Worker) builds. Two AIs, one seamless workflow.**
+## 概要
 
-This plugin enables a **2-agent development workflow** where Cursor handles planning, task breakdown, and review, while Claude Code handles implementation, testing, and staging deployment. Solo mode (Claude Code only) is also available as a fallback.
+`claude-code-harness`は、Claude Codeの能力を最大限に引き出すための包括的な開発支援フレームワークです。**Skills**、**Rules**、**Hooks**といったClaude Codeの拡張機能をフル活用し、自律的な開発サイクルをサポートします。
 
-[English](README.md) | [日本語](README.ja.md)
+このプラグインは、[cursor-cc-plugins](https://github.com/Chachamaru127/cursor-cc-plugins)をベースに、Claude Code単独での使用に最適化したものです。
 
----
+## 主な特徴
 
-## How It Works
+- **自律的な開発サイクル**: `/plan`で計画を立て、`/work`で実装し、`/review`で品質をチェックする、体系的な開発フローを提供します。
+- **30+のモジュール化されたSkills**: 再利用可能なスキル群により、複雑なタスクを効率的に実行します。各スキルは「いつ使うべきか」を明記し、Claudeの自律的な発見をサポートします。
+- **セーフティファースト設計**: デフォルトで`dry-run`モード、保護されたパス設定など、安全性を最優先します。
+- **包括的な自動化**: Hooks機能により、セッション開始時の初期化から、ファイル編集後の自動テスト、セッション終了時のサマリーまで、開発プロセスを自動化します。
+- **並列処理による高速化**: `/review`コマンドでは、セキュリティ、パフォーマンス、品質のチェックを並列実行し、レビュー時間を短縮します。
 
-```
-You: "I want to build a blog app"
+## クイックスタート
 
-    ↓ Cursor (PM) creates a plan
+### 1. インストール
 
-Cursor: "Tasks organized. Handing off to Claude Code."
+このリポジトリをClaude Codeのプラグインとしてインストールします。
 
-    ↓ You copy & paste to Claude Code
-
-Claude Code (Worker): "Implemented! Ready for review."
-
-    ↓ You copy & paste back to Cursor
-
-Cursor: "Review passed. Let's deploy."
-```
-
-**The Plan → Build → Review cycle, powered by two specialized AIs.**
-
----
-
-## Quick Start
-
-### Step 1: Install
+### 2. 初期設定
 
 ```bash
-/install cursor-cc-plugins
+/init
 ```
 
-### Step 2: Setup
+プロジェクトの初期設定を行い、必要なファイル（Plans.md、CLAUDE.mdなど）を生成します。
+
+### 3. 開発サイクル
 
 ```bash
-/setup-2agent
+# 計画を立てる
+/plan
+
+# 実装する
+/work
+
+# レビューする
+/review
 ```
 
-This creates:
-```
-./
-├── AGENTS.md              # Development flow overview (shared)
-├── CLAUDE.md              # Claude Code specific settings
-├── Plans.md               # Task management (shared)
-├── .cursor-cc-version     # Version tracking
-├── .cursor/
-│   └── commands/          # Cursor PM commands
-│       ├── start-session.md
-│       ├── handoff-to-claude.md
-│       ├── review-cc-work.md
-│       ├── plan-with-cc.md
-│       └── project-overview.md
-└── .claude/
-    ├── rules/             # Workflow rules (v0.4.0+)
-    │   ├── workflow.md
-    │   └── coding-standards.md
-    └── memory/            # Session memory
-        ├── session-log.md
-        ├── decisions.md
-        └── patterns.md
+## ワークフロー
+
+```mermaid
+graph LR
+    A[/init] --> B[/plan];
+    B --> C[/work];
+    C --> D[/review];
+    D -- 改善あり --> C;
+    D -- 完了 --> E[Commit];
+    E --> B;
 ```
 
-### Step 3: Start with Cursor
+## コマンド一覧
 
-Open Cursor and describe what you want to build:
+| コマンド | 説明 |
+| :--- | :--- |
+| `/init` | プロジェクトの初期設定を行います |
+| `/plan` | 開発タスクの計画を作成・更新します |
+| `/work` | 計画に基づいてコードを実装します |
+| `/review` | コードの品質を多角的にレビューします（並列実行） |
+| `/start-task` | 特定のタスクを開始します |
+| `/health-check` | プロジェクトの健全性を診断します |
+| `/cleanup` | 不要なファイルをクリーンアップします |
+| `/localize-rules` | プロジェクト固有のルールを作成します |
+| `/remember` | 長期的な記憶を管理します |
+| `/parallel-tasks` | 複数のタスクを並列実行します |
 
-```
-You → Cursor: "I want to build an e-commerce site"
-Cursor: "Great! Let me break this down into tasks..."
-```
+## アーキテクチャ
 
-When implementation is needed, Cursor outputs a task for Claude Code.
+3層アーキテクチャ（Profile → Workflow → Skill）により、高い再利用性と保守性を実現しています。
 
----
+詳細は[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)をご覧ください。
 
-## The Workflow
+## cursor-cc-pluginsとの違い
 
-```
-┌─────────────────┐                      ┌─────────────────┐
-│  Cursor (PM)    │                      │  Claude Code    │
-│                 │                      │   (Worker)      │
-│  • Plan         │   Plans.md (shared)  │  • Implement    │
-│  • Review       │ ◄──────────────────► │  • Test         │
-│  • Prod deploy  │                      │  • Staging      │
-└────────┬────────┘                      └────────┬────────┘
-         │   /handoff-to-claude                   │
-         └───────────────────────────────────────►│
-         │◄───────────────────────────────────────┘
-         │   /handoff-to-cursor
-```
+| 項目 | cursor-cc-plugins | claude-code-harness |
+| :--- | :--- | :--- |
+| **対象** | Cursor + Claude Code（2エージェント） | Claude Code単独 |
+| **ワークフロー** | PM（Cursor）とWorker（Claude Code）の分離 | 単一エージェントでの自律的な開発 |
+| **Skills数** | 38個（PM専用含む） | 30+個（Claude Code専用） |
+| **最適化** | 2エージェント間の連携 | Claude Codeの自律性と並列処理 |
 
-**You bridge Cursor and Claude Code with copy & paste.** This keeps you in control and aware of everything happening.
+## 貢献
 
----
+バグ報告、機能提案、プルリクエストを歓迎します。
 
-## Commands
-
-### Claude Code Commands
-
-| Command | What It Does |
-|---------|--------------|
-| `/setup-2agent` | **First step.** Creates workflow files |
-| `/update-2agent` | Updates existing setup to latest version |
-| `/init` | Initialize a new project |
-| `/plan` | Create a plan |
-| `/work` | Implement tasks |
-| `/review` | Review changes |
-| `/start-task` | Receives task from Cursor |
-| `/handoff-to-cursor` | Sends completion report to Cursor |
-| `/sync-status` | Sync Plans.md status |
-| `/health-check` | Environment diagnostics |
-| `/cleanup` | Clean up files (Plans.md archiving, etc.) |
-
-### Cursor Commands
-
-| Command | What It Does |
-|---------|--------------|
-| `/handoff-to-claude` | Sends task to Claude Code |
-| `/review-cc-work` | Reviews Claude Code's work |
-| `/start-session` | Start session → plan → assign (automated flow) |
-| `/project-overview` | View project overview |
-| `/plan-with-cc` | Plan with Claude Code |
-
-> For new projects from scratch, run `/init` after `/setup-2agent`.
-
----
-
-## Features
-
-### Core Features
-- **2-Agent Workflow**: PM/Worker separation with clear responsibilities
-- **Safety First**: dry-run mode by default, protected branches, 3-retry rule
-- **VibeCoder Friendly**: Natural language interface for non-technical users
-- **Incremental Updates**: `/update-2agent` for seamless version upgrades
-
-### v0.4.0+ New Features
-- **Claude Rules** (`.claude/rules/`): Conditional rules with YAML frontmatter `paths:` support
-- **Plugin Hooks** (`hooks/hooks.json`): SessionStart and PostToolUse hooks for automation
-- **Named Sessions**: Use `/rename {name}` and `/resume {name}` for session tracking
-- **Session Memory** (`.claude/memory/`): Persist decisions, patterns, and session logs
-- **CI Consistency Check**: Automated validation of plugin integrity
-- **Self-Healing CI**: `scripts/ci/diagnose-and-fix.sh` for automatic issue detection and fixes
-
-### Auto Cleanup (v0.3.7+)
-- PostToolUse hooks for automatic file size monitoring
-- Configurable thresholds via `.cursor-cc-config.yaml`
-
----
-
-## Solo Mode (Fallback)
-
-No Cursor? Claude Code works alone too:
-
-```bash
-"I want to build a Todo app"
-```
-
-Solo mode is simpler but lacks the PM/Worker separation and cross-review benefits.
-
-> Details: [docs/usage-solo.md](docs/usage-solo.md)
-
----
-
-## Updating
-
-When a new version is released:
-
-```bash
-/update-2agent
-```
-
-This preserves your tasks in Plans.md while updating templates and commands.
-
----
-
-## Documentation
-
-| Document | Description |
-|----------|-------------|
-| [2-Agent Guide](docs/usage-2agent.md) | Full workflow details |
-| [Solo Guide](docs/usage-solo.md) | Claude Code only |
-| [Admin Guide](docs/ADMIN_GUIDE.md) | Team setup, safety config |
-| [Changelog](CHANGELOG.md) | Version history |
-
----
-
-## Links
-
-- [GitHub](https://github.com/Chachamaru127/cursor-cc-plugins)
-- [Issues](https://github.com/Chachamaru127/cursor-cc-plugins/issues)
+## ライセンス
 
 MIT License
+
+## クレジット
+
+このプロジェクトは、[cursor-cc-plugins](https://github.com/Chachamaru127/cursor-cc-plugins)をベースに作成されました。
