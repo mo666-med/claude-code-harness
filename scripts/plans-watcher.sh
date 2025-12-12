@@ -4,9 +4,49 @@
 
 set +e  # エラーで停止しない
 
-# 変更されたファイルを取得
+# 変更されたファイルを取得（stdin JSON優先 / 互換: $1,$2）
+INPUT=""
+if [ ! -t 0 ]; then
+  INPUT="$(cat 2>/dev/null)"
+fi
+
 CHANGED_FILE="${1:-}"
 TOOL_NAME="${2:-}"
+CWD=""
+
+if [ -n "$INPUT" ]; then
+  if command -v jq >/dev/null 2>&1; then
+    TOOL_NAME_FROM_STDIN="$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)"
+    FILE_PATH_FROM_STDIN="$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_response.filePath // empty' 2>/dev/null)"
+    CWD_FROM_STDIN="$(echo "$INPUT" | jq -r '.cwd // empty' 2>/dev/null)"
+  elif command -v python3 >/dev/null 2>&1; then
+    eval "$(echo "$INPUT" | python3 - <<'PY' 2>/dev/null
+import json, shlex, sys
+try:
+    data = json.load(sys.stdin)
+except Exception:
+    data = {}
+tool_name = data.get("tool_name") or ""
+cwd = data.get("cwd") or ""
+tool_input = data.get("tool_input") or {}
+tool_response = data.get("tool_response") or {}
+file_path = tool_input.get("file_path") or tool_response.get("filePath") or ""
+print(f"TOOL_NAME_FROM_STDIN={shlex.quote(tool_name)}")
+print(f"CWD_FROM_STDIN={shlex.quote(cwd)}")
+print(f"FILE_PATH_FROM_STDIN={shlex.quote(file_path)}")
+PY
+)"
+  fi
+
+  [ -z "$CHANGED_FILE" ] && CHANGED_FILE="${FILE_PATH_FROM_STDIN:-}"
+  [ -z "$TOOL_NAME" ] && TOOL_NAME="${TOOL_NAME_FROM_STDIN:-}"
+  CWD="${CWD_FROM_STDIN:-}"
+fi
+
+# 可能ならプロジェクト相対パスへ正規化
+if [ -n "$CWD" ] && [ -n "$CHANGED_FILE" ] && [[ "$CHANGED_FILE" == "$CWD/"* ]]; then
+  CHANGED_FILE="${CHANGED_FILE#$CWD/}"
+fi
 
 # Plans.md のパス（大文字小文字を区別しない）
 find_plans_file() {
@@ -22,9 +62,14 @@ find_plans_file() {
 PLANS_FILE=$(find_plans_file)
 
 # Plans.md 以外の変更はスキップ
-if [ -z "$PLANS_FILE" ] || [ "$CHANGED_FILE" != "$PLANS_FILE" ]; then
+if [ -z "$PLANS_FILE" ]; then
     exit 0
 fi
+
+case "$CHANGED_FILE" in
+    "$PLANS_FILE"|*/"$PLANS_FILE") ;;
+    *) exit 0 ;;
+esac
 
 # 状態ディレクトリ
 STATE_DIR=".claude/state"

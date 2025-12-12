@@ -2,7 +2,8 @@
 # VibeCoder向けプラグイン検証テスト
 # このスクリプトは、claude-code-harnessが正しく構成されているかを検証します
 
-set -e
+set -u
+set -o pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_ROOT="$(dirname "$SCRIPT_DIR")"
@@ -25,17 +26,51 @@ WARN_COUNT=0
 # テスト結果を記録
 pass_test() {
     echo -e "${GREEN}✓${NC} $1"
-    ((PASS_COUNT++))
+    PASS_COUNT=$((PASS_COUNT + 1))
 }
 
 fail_test() {
     echo -e "${RED}✗${NC} $1"
-    ((FAIL_COUNT++))
+    FAIL_COUNT=$((FAIL_COUNT + 1))
 }
 
 warn_test() {
     echo -e "${YELLOW}⚠${NC} $1"
-    ((WARN_COUNT++))
+    WARN_COUNT=$((WARN_COUNT + 1))
+}
+
+json_is_valid() {
+    local file="$1"
+    python3 - <<'PY' "$file" >/dev/null 2>&1
+import json, sys
+path = sys.argv[1]
+with open(path, "r", encoding="utf-8") as f:
+    json.load(f)
+PY
+}
+
+json_has_key() {
+    local file="$1"
+    local key="$2"
+    python3 - <<'PY' "$file" "$key" >/dev/null 2>&1
+import json, sys
+path, key = sys.argv[1], sys.argv[2]
+with open(path, "r", encoding="utf-8") as f:
+    data = json.load(f)
+if key not in data:
+    raise SystemExit(1)
+PY
+}
+
+has_frontmatter_description() {
+    local file="$1"
+    # frontmatter があり、その中に description: があるか
+    awk '
+      NR==1 { if ($0 != "---") exit 1 }
+      NR>1 && $0=="---" { exit 2 }  # end of frontmatter without description
+      NR>1 && $0 ~ /^description:/ { exit 0 }
+      NR>50 { exit 1 }              # safety
+    ' "$file"
 }
 
 echo "1. プラグイン構造の検証"
@@ -50,7 +85,7 @@ else
 fi
 
 # plugin.jsonの妥当性チェック
-if jq empty "$PLUGIN_ROOT/.claude-plugin/plugin.json" 2>/dev/null; then
+if json_is_valid "$PLUGIN_ROOT/.claude-plugin/plugin.json"; then
     pass_test "plugin.json は有効なJSONです"
 else
     fail_test "plugin.json が不正なJSONです"
@@ -60,7 +95,7 @@ fi
 # 必須フィールドの確認
 REQUIRED_FIELDS=("name" "version" "description" "author")
 for field in "${REQUIRED_FIELDS[@]}"; do
-    if jq -e ".$field" "$PLUGIN_ROOT/.claude-plugin/plugin.json" > /dev/null 2>&1; then
+    if json_has_key "$PLUGIN_ROOT/.claude-plugin/plugin.json" "$field"; then
         pass_test "plugin.json に $field フィールドがあります"
     else
         fail_test "plugin.json に $field フィールドがありません"
@@ -71,21 +106,24 @@ echo ""
 echo "2. コマンドの検証"
 echo "----------------------------------------"
 
-# 登録されているコマンド数
-COMMAND_COUNT=$(jq '.commands | length' "$PLUGIN_ROOT/.claude-plugin/plugin.json")
-pass_test "$COMMAND_COUNT 個のコマンドが登録されています"
+# コマンドは plugin.json で手動列挙せず、commands/ を自動検出する（Claude Code Plugins reference 準拠）
+if [ -d "$PLUGIN_ROOT/commands" ]; then
+    CMD_COUNT=$(find "$PLUGIN_ROOT/commands" -maxdepth 1 -name "*.md" -type f | wc -l | tr -d ' ')
+    pass_test "commands/ に ${CMD_COUNT} 個のコマンドファイルがあります"
 
-# 各コマンドファイルの存在確認
-MISSING_COMMANDS=0
-jq -r '.commands[].name' "$PLUGIN_ROOT/.claude-plugin/plugin.json" | while read -r cmd; do
-    cmd_name="${cmd#/}"  # 先頭の/を削除
-    if [ -f "$PLUGIN_ROOT/commands/${cmd_name}.md" ]; then
-        pass_test "コマンド $cmd のファイルが存在します"
-    else
-        fail_test "コマンド $cmd のファイルが見つかりません"
-        ((MISSING_COMMANDS++))
-    fi
-done
+    # frontmatter description の存在確認（SlashCommand tool / /help の発見性向上）
+    MISSING_DESC=0
+    while IFS= read -r cmd_file; do
+        if has_frontmatter_description "$cmd_file"; then
+            pass_test "frontmatter description: $(basename "$cmd_file")"
+        else
+            warn_test "frontmatter description が見つかりません: $(basename "$cmd_file")"
+            MISSING_DESC=$((MISSING_DESC + 1))
+        fi
+    done < <(find "$PLUGIN_ROOT/commands" -maxdepth 1 -name "*.md" -type f | sort)
+else
+    fail_test "commands ディレクトリが見つかりません"
+fi
 
 echo ""
 echo "3. スキルの検証"
@@ -136,11 +174,10 @@ echo "5. フックの検証"
 echo "----------------------------------------"
 
 if [ -f "$PLUGIN_ROOT/hooks/hooks.json" ]; then
-    if jq empty "$PLUGIN_ROOT/hooks/hooks.json" 2>/dev/null; then
+    if json_is_valid "$PLUGIN_ROOT/hooks/hooks.json"; then
         pass_test "hooks.json は有効なJSONです"
         
-        HOOK_TYPES=$(jq '.hooks | keys | length' "$PLUGIN_ROOT/hooks/hooks.json")
-        pass_test "$HOOK_TYPES 種類のフックが設定されています"
+        pass_test "hooks.json が読み込めます"
     else
         fail_test "hooks.json が不正なJSONです"
     fi
@@ -157,8 +194,8 @@ if [ -d "$PLUGIN_ROOT/scripts" ]; then
     if [ $SCRIPT_COUNT -gt 0 ]; then
         pass_test "$SCRIPT_COUNT 個のスクリプトが存在します"
         
-        # 実行権限の確認
-        EXECUTABLE_COUNT=$(find "$PLUGIN_ROOT/scripts" -name "*.sh" -type f -executable | wc -l)
+        # 実行権限の確認（GNU/BSD 両対応: -perm -111 を使用）
+        EXECUTABLE_COUNT=$(find "$PLUGIN_ROOT/scripts" -name "*.sh" -type f -perm -111 | wc -l | tr -d ' ')
         if [ $EXECUTABLE_COUNT -eq $SCRIPT_COUNT ]; then
             pass_test "全てのスクリプトに実行権限があります"
         else

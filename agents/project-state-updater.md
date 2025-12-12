@@ -1,3 +1,8 @@
+---
+description: Plans.md とセッション状態の同期・ハンドオフ支援
+capabilities: ["plans-sync", "state-tracking", "handoff-summaries", "cursor-integration"]
+---
+
 # Project State Updater Agent
 
 セッション間のハンドオフと Plans.md の状態同期を担当するエージェント。

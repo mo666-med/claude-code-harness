@@ -34,7 +34,8 @@ Phase 3: インタラクティブ確認
 ## Phase 1: プロジェクト分析
 
 ```bash
-ANALYSIS=$(~/.claude/plugins/marketplaces/cursor-cc-marketplace/scripts/analyze-project.sh)
+PLUGIN_PATH="${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/plugins/claude-code-harness}"
+ANALYSIS=$("$PLUGIN_PATH/scripts/analyze-project.sh")
 ```
 
 収集する情報：
@@ -71,4 +72,4 @@ ANALYSIS=$(~/.claude/plugins/marketplaces/cursor-cc-marketplace/scripts/analyze-
 
 - `scripts/analyze-project.sh`
 - `templates/rules/`
-- `scripts/setup-2agent.sh`
+- `commands/setup-cursor.md`

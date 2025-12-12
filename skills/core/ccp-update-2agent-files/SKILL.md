@@ -108,8 +108,8 @@ normalize_filename "$PLANS_FILE" "Plans.md"
 
 ```bash
 # プラグインバージョン
-PLUGIN_VERSION=$(cat ~/.claude/plugins/marketplaces/cursor-cc-marketplace/VERSION)
-PLUGIN_PATH="$HOME/.claude/plugins/marketplaces/cursor-cc-marketplace"
+PLUGIN_PATH="${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/plugins/claude-code-harness}"
+PLUGIN_VERSION=$(cat "$PLUGIN_PATH/VERSION" 2>/dev/null || echo "0.0.0")
 
 # インストール済みバージョン
 if [ -f .cursor-cc-version ]; then
@@ -166,14 +166,14 @@ fi
 
 | 条件 | update_type | 動作 |
 |------|-------------|------|
-| `.cursor-cc-version` なし | `not_installed` | `/setup-2agent` を案内 |
+| `.cursor-cc-version` なし | `not_installed` | `/setup-cursor` を案内 |
 | バージョン同じ & ファイル揃ってる | `current` | スキップ |
 | バージョン同じ & ファイル不足 | `missing_files` | 不足分を追加 |
 | バージョン古い | `outdated` | 更新を実行 |
 
 ```bash
 if [ "$SETUP_STATUS" = "not_installed" ]; then
-  echo "⚠️ セットアップされていません。/setup-2agent を実行してください。"
+  echo "⚠️ セットアップされていません。/setup-cursor を実行してください。"
   exit 1
 fi
 
@@ -273,20 +273,22 @@ chmod +x .claude/scripts/auto-cleanup-hook.sh
 [ ! -f .cursor-cc-config.yaml ] && \
   cp "$PLUGIN_PATH/templates/.cursor-cc-config.yaml.template" .cursor-cc-config.yaml
 
-# .claude/settings.json を更新（既存設定を保持しつつ hooks を追加）
-# 注: 既存の settings.json がある場合はマージが必要
+# .claude/settings.json を更新（既存設定は非破壊マージ）
+# ここは `ccp-generate-claude-settings` を実行して統一する
+# - permissions.allow|ask|deny: 配列マージ + 重複排除
+# - permissions.disableBypassPermissionsMode: 常に "disable"
 ```
 
 ### Step 10: バージョンファイルの更新
 
 ```bash
 cat > .cursor-cc-version << EOF
-# cursor-cc-plugins version tracking
-# Updated by /update-2agent
+# claude-code-harness version tracking
+# Updated by /setup-cursor
 
 version: ${PLUGIN_VERSION}
 installed_at: ${TODAY}
-last_setup_command: update-2agent
+last_setup_command: setup-cursor
 updated_from: ${INSTALLED_VERSION}
 update_history:
   - ${INSTALLED_VERSION} -> ${PLUGIN_VERSION} (${TODAY})
@@ -323,3 +325,4 @@ EOF
 - `ccp-merge-plans` - Plans.md のマージロジック
 - `ccp-setup-2agent-files` - 初回セットアップ
 - `ccp-generate-workflow-files` - ワークフローファイル生成
+- `ccp-generate-claude-settings` - `.claude/settings.json` の作成/更新（安全ポリシー + 非破壊マージ）

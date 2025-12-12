@@ -1,3 +1,7 @@
+---
+description: Analytics統合（GA/Vercel Analytics 等）
+---
+
 # /analytics - Analytics統合
 
 Google Analytics または Vercel Analytics を統合します。

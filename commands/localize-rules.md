@@ -1,5 +1,4 @@
 ---
-name: localize-rules
 description: プロジェクト構造に合わせてルールをローカライズ
 ---
 
@@ -24,14 +23,16 @@ description: プロジェクト構造に合わせてルールをローカライ�
 以下のスクリプトを実行してください：
 
 ```bash
-~/.claude/plugins/marketplaces/cursor-cc-marketplace/scripts/localize-rules.sh
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/localize-rules.sh"
 ```
 
 または dry-run で確認：
 
 ```bash
-~/.claude/plugins/marketplaces/cursor-cc-marketplace/scripts/localize-rules.sh --dry-run
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/localize-rules.sh" --dry-run
 ```
+
+> 補足: `CLAUDE_PLUGIN_ROOT` が使えない環境では、プラグインリポジトリ直下から `bash ./scripts/localize-rules.sh` を実行してください。
 
 ---
 

@@ -11,7 +11,7 @@
 ```mermaid
 graph TD
     subgraph Profile Layer
-        A[claude-harness.yaml]
+        A[profiles/claude-worker.yaml]
     end
     subgraph Workflow Layer
         B[init.yaml, plan.yaml, work.yaml, review.yaml]
@@ -56,7 +56,7 @@ claude-code-harness/
 
 ### 4.2. Rules
 
-`claude-code.config.schema.json`で厳密に定義された設定ファイルにより、安全性（`dry-run`モード）やパス制限（`protected`パス）を強制します。
+`cursor-cc.config.schema.json`で厳密に定義された設定ファイルにより、安全性（`dry-run`モード）やパス制限（`protected`パス）を強制します。
 
 ### 4.3. Hooks
 
@@ -67,4 +67,4 @@ claude-code-harness/
 
 ### 4.4. 並列処理
 
-`/review`コマンドでは、`code-reviewer`サブエージェントを複数同時に起動し、セキュリティ、パフォーマンス、品質のレビューを並列実行することで、フィードバック時間を大幅に短縮します。
+`/harness-review`コマンドでは、`code-reviewer`サブエージェントを複数同時に起動し、セキュリティ、パフォーマンス、品質のレビューを並列実行することで、フィードバック時間を大幅に短縮します。

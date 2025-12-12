@@ -1,3 +1,7 @@
+---
+description: 認証機能の実装（Clerk / Supabase Auth 等）
+---
+
 # /auth - 認証機能の実装
 
 Clerk または Supabase Auth を使用した認証機能を実装します。

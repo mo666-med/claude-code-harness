@@ -1,3 +1,8 @@
+---
+description: エラー復旧（原因切り分け→安全な修正→再検証）
+capabilities: ["error-triage", "safe-fixes", "retry-strategy", "environment-checks", "escalation"]
+---
+
 # Error Recovery Agent
 
 エラー検出と回復を行うエージェント。**安全性を最優先**とし、設定に基づいて動作します。

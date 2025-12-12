@@ -1,3 +1,7 @@
+---
+description: デプロイ自動化設定（Vercel/Netlify 等）
+---
+
 # /deploy-setup - デプロイ自動化設定
 
 Vercel/Netlifyへのデプロイを自動化します。

@@ -1,3 +1,8 @@
+---
+description: 新規/既存プロジェクト判定と技術スタック検出
+capabilities: ["repo-analysis", "stack-detection", "project-classification", "recommendation"]
+---
+
 # Project Analyzer Agent
 
 新規プロジェクトか既存プロジェクトかを自動検出し、適切なセットアップフローを選択するエージェント。

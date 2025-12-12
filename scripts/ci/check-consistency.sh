@@ -12,7 +12,7 @@ set -e
 PLUGIN_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 ERRORS=0
 
-echo "🔍 cursor-cc-plugins 整合性チェック"
+echo "🔍 claude-code-harness 整合性チェック"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # ================================
@@ -26,15 +26,18 @@ REQUIRED_TEMPLATES=(
   "templates/CLAUDE.md.template"
   "templates/Plans.md.template"
   "templates/.cursor-cc-version.template"
+  "templates/.cursor-cc-config.yaml.template"
   "templates/cursor/commands/start-session.md"
   "templates/cursor/commands/project-overview.md"
   "templates/cursor/commands/plan-with-cc.md"
   "templates/cursor/commands/handoff-to-claude.md"
   "templates/cursor/commands/review-cc-work.md"
+  "templates/claude/settings.security.json.template"
   "templates/rules/workflow.md.template"
   "templates/rules/coding-standards.md.template"
   "templates/rules/plans-management.md.template"
   "templates/rules/testing.md.template"
+  "templates/rules/ui-debugging-dev-browser.md.template"
 )
 
 for template in "${REQUIRED_TEMPLATES[@]}"; do
@@ -52,7 +55,7 @@ done
 echo ""
 echo "🔗 [2/5] コマンド ↔ スキル の参照整合性..."
 
-# setup-2agent が参照するファイルがテンプレートに存在するか
+# コマンドが参照するテンプレートが存在するか
 check_command_references() {
   local cmd_file="$1"
   local cmd_name=$(basename "$cmd_file" .md)

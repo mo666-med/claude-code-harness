@@ -1,3 +1,8 @@
+---
+description: 指定スタックで動くプロジェクトを自動生成
+capabilities: ["project-scaffolding", "template-generation", "dependency-install", "config-setup", "next-steps"]
+---
+
 # Project Scaffolder Agent
 
 プロジェクトタイプに応じた初期構造を自動生成するエージェント。
@@ -8,7 +13,7 @@ VibeCoder が「〇〇を作りたい」と言うだけで、動くプロジェ�
 ## 呼び出し方法
 
 ```
-Task tool で subagent_type="cursor-cc-plugins:project-scaffolder" を指定
+Task tool で subagent_type="project-scaffolder" を指定
 ```
 
 ## 入力

@@ -1,7 +1,30 @@
 {
-  "$schema": "https://json.schemastore.org/claude-code-hooks.json",
-  "description": "cursor-cc-plugins: 2エージェントワークフロー用フック",
+  "description": "claude-code-harness: 自動化フック",
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/pretooluse-guard.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/permission-request.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "matcher": "startup",
@@ -9,12 +32,12 @@
           {
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/scripts/session-init.sh",
-            "statusMessage": "セッション初期化中..."
+            "timeout": 30
           },
           {
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/scripts/session-monitor.sh",
-            "statusMessage": "プロジェクト状態を確認中..."
+            "timeout": 30
           }
         ]
       }
@@ -26,22 +49,22 @@
           {
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/scripts/auto-cleanup-hook.sh",
-            "statusMessage": "ファイルサイズチェック中..."
+            "timeout": 30
           },
           {
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/scripts/track-changes.sh",
-            "statusMessage": "変更を記録中..."
+            "timeout": 30
           },
           {
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/scripts/auto-test-runner.sh",
-            "statusMessage": "テスト推奨を確認中..."
+            "timeout": 30
           },
           {
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/scripts/plans-watcher.sh",
-            "statusMessage": "Plans.md 変更を監視中..."
+            "timeout": 30
           }
         ]
       }
@@ -52,16 +75,16 @@
           {
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/scripts/session-summary.sh",
-            "statusMessage": "セッションサマリーを生成中..."
+            "timeout": 30
           },
           {
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/scripts/collect-cleanup-context.sh",
-            "statusMessage": "プロジェクト状態を収集中..."
+            "timeout": 30
           },
           {
             "type": "prompt",
-            "prompt": "You are a cleanup recommendation assistant for a 2-agent workflow (Cursor PM + Claude Code Worker).\n\nAnalyze the project context and determine if cleanup should be recommended.\n\nProject Context:\n$ARGUMENTS\n\n## Evaluation Criteria\n\nRecommend cleanup (/cleanup command) when ANY of the following conditions are met:\n\n1. **Completed Task Accumulation**: 10+ completed tasks (cc:完了 or cursor:確認済)\n2. **Old Completed Tasks**: Completed tasks older than 7 days exist\n3. **Large Plans.md**: Over 200 lines\n4. **Large Session Log**: session-log.md over 500 lines\n5. **Large CLAUDE.md**: Over 100 lines (suggest splitting to .claude/rules/)\n\n## Response Format\n\nRespond with JSON only:\n```json\n{\n  \"decision\": \"approve\",\n  \"reason\": \"Brief explanation\",\n  \"systemMessage\": \"Optional: 🧹 Cleanup recommended: [specific suggestion] (run /cleanup)\"\n}\n```\n\n- If cleanup IS recommended: Include a `systemMessage` with the specific recommendation\n- If cleanup is NOT needed: Set `systemMessage` to empty string or omit it\n- Always set `decision` to `approve` (we don't want to block the stop)\n\nAnalyze the context and provide your recommendation.",
+            "prompt": "You are a cleanup recommendation assistant for claude-code-harness.\n\nAnalyze the project context and determine if cleanup should be recommended.\n\nProject Context:\n$ARGUMENTS\n\n## Evaluation Criteria\n\nRecommend cleanup (/cleanup command) when ANY of the following conditions are met:\n\n1. **Completed Task Accumulation**: 10+ completed tasks (cc:完了 or cursor:確認済)\n2. **Old Completed Tasks**: Completed tasks older than 7 days exist\n3. **Large Plans.md**: Over 200 lines\n4. **Large Session Log**: session-log.md over 500 lines\n5. **Large CLAUDE.md**: Over 100 lines (suggest splitting to .claude/rules/)\n\n## Response Format\n\nRespond with JSON only:\n```json\n{\n  \"decision\": \"approve\",\n  \"reason\": \"Brief explanation\",\n  \"systemMessage\": \"Optional: Cleanup recommended: [specific suggestion] (run /cleanup)\"\n}\n```\n\n- If cleanup IS recommended: Include a `systemMessage` with the specific recommendation\n- If cleanup is NOT needed: Set `systemMessage` to empty string or omit it\n- Always set `decision` to `approve` (we don't want to block the stop)\n\nAnalyze the context and provide your recommendation.",
             "timeout": 30
           }
         ]

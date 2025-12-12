@@ -1,3 +1,7 @@
+---
+description: CI/CD構築（GitHub Actions）
+---
+
 # /ci-setup - CI/CD構築（GitHub Actions）
 
 GitHub Actionsを使用したCI/CDパイプラインを自動構築します。

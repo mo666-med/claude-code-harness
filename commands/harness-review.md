@@ -1,4 +1,8 @@
-# /review - コードレビュー（ソロモード）
+---
+description: コードレビュー（組み込み review との衝突回避）
+---
+
+# /harness-review - コードレビュー（ソロモード）
 
 作成したコードの品質をチェックします。
 複数の観点から分析し、改善点を提案します。
@@ -58,10 +62,10 @@ git diff --name-only HEAD~5 2>/dev/null || find . -name "*.ts" -o -name "*.tsx" 
 各レビューを個別に実行し、`Ctrl+B`でバックグラウンドに送ることで、完全に並列で実行できます。詳細は[非同期サブエージェントガイド](../docs/ASYNC_SUBAGENTS.md)を参照してください。
 
 **手動並列実行の手順**:
-1. `/review security` を実行 → `Ctrl+B` でバックグラウンドへ
-2. `/review performance` を実行 → `Ctrl+B` でバックグラウンドへ
-3. `/review quality` を実行 → `Ctrl+B` でバックグラウンドへ
-4. `/review accessibility` を実行 → `Ctrl+B` でバックグラウンドへ
+1. `/harness-review security` を実行 → `Ctrl+B` でバックグラウンドへ
+2. `/harness-review performance` を実行 → `Ctrl+B` でバックグラウンドへ
+3. `/harness-review quality` を実行 → `Ctrl+B` でバックグラウンドへ
+4. `/harness-review accessibility` を実行 → `Ctrl+B` でバックグラウンドへ
 5. 各サブエージェントが完了すると自動的に通知されます
 
 ```python
@@ -254,8 +258,8 @@ function getNestedValue(obj: NestedObject): string | null {
 ## オプション
 
 ```
-/review              # 全てチェック
-/review security     # セキュリティのみ
-/review performance  # パフォーマンスのみ
-/review quick        # 簡易チェック
+/harness-review              # 全てチェック
+/harness-review security     # セキュリティのみ
+/harness-review performance  # パフォーマンスのみ
+/harness-review quick        # 簡易チェック
 ```

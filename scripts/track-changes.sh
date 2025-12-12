@@ -3,12 +3,54 @@
 # ファイル変更を追跡し、状態ファイルを更新
 #
 # Usage: PostToolUse hook から自動実行
-# Input: $1 = tool_name, $2 = file_path (optional)
+# Input: stdin JSON (Claude Code hooks) / 互換: $1=tool_name, $2=file_path
 
 set +e
 
-TOOL_NAME="${1:-unknown}"
+INPUT=""
+if [ ! -t 0 ]; then
+  INPUT="$(cat 2>/dev/null)"
+fi
+
+TOOL_NAME="${1:-}"
 FILE_PATH="${2:-}"
+CWD=""
+
+if [ -n "$INPUT" ]; then
+  if command -v jq >/dev/null 2>&1; then
+    TOOL_NAME_FROM_STDIN="$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)"
+    FILE_PATH_FROM_STDIN="$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_response.filePath // empty' 2>/dev/null)"
+    CWD_FROM_STDIN="$(echo "$INPUT" | jq -r '.cwd // empty' 2>/dev/null)"
+  elif command -v python3 >/dev/null 2>&1; then
+    eval "$(echo "$INPUT" | python3 - <<'PY' 2>/dev/null
+import json, shlex, sys
+try:
+    data = json.load(sys.stdin)
+except Exception:
+    data = {}
+tool_name = data.get("tool_name") or ""
+cwd = data.get("cwd") or ""
+tool_input = data.get("tool_input") or {}
+tool_response = data.get("tool_response") or {}
+file_path = tool_input.get("file_path") or tool_response.get("filePath") or ""
+print(f"TOOL_NAME_FROM_STDIN={shlex.quote(tool_name)}")
+print(f"CWD_FROM_STDIN={shlex.quote(cwd)}")
+print(f"FILE_PATH_FROM_STDIN={shlex.quote(file_path)}")
+PY
+)"
+  fi
+
+  [ -z "$TOOL_NAME" ] && TOOL_NAME="${TOOL_NAME_FROM_STDIN:-}"
+  [ -z "$FILE_PATH" ] && FILE_PATH="${FILE_PATH_FROM_STDIN:-}"
+  CWD="${CWD_FROM_STDIN:-}"
+fi
+
+TOOL_NAME="${TOOL_NAME:-unknown}"
+
+# 可能ならプロジェクト相対パスへ正規化
+if [ -n "$CWD" ] && [ -n "$FILE_PATH" ] && [[ "$FILE_PATH" == "$CWD/"* ]]; then
+  FILE_PATH="${FILE_PATH#$CWD/}"
+fi
 STATE_FILE=".claude/state/session.json"
 CURRENT_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 

@@ -1,3 +1,7 @@
+---
+description: 決済機能の実装（Stripe）
+---
+
 # /payments - 決済機能の実装
 
 Stripeを使用した決済機能を実装します。

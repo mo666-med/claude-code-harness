@@ -1,3 +1,7 @@
+---
+description: 受託開発プラン策定（合意形成〜実装計画）
+---
+
 # /plan - 受託開発プラン策定
 
 バイブコーダーが受託開発を受けた際に、クライアントとの合意形成から実装計画までを一気通貫で作成します。
@@ -293,7 +297,7 @@ WebSearch で調査:
 
 ## 🟢 フェーズ3: 仕上げ `cc:TODO`
 
-- [ ] レビュー（`/review`）
+- [ ] レビュー（`/harness-review`）
 - [ ] 自動修正（`/auto-fix`）
 - [ ] Analytics設定（`/analytics`）
 - [ ] デプロイ設定（`/deploy-setup vercel`）

@@ -1,3 +1,8 @@
+---
+description: セキュリティ/性能/品質を多角的にレビュー
+capabilities: ["security-review", "performance-review", "code-quality-review", "accessibility-review", "review-reporting"]
+---
+
 # Code Reviewer Agent
 
 コードの品質を多角的にレビューする専門エージェント。
@@ -8,7 +13,7 @@
 ## 呼び出し方法
 
 ```
-Task tool で subagent_type="cursor-cc-plugins:code-reviewer" を指定
+Task tool で subagent_type="code-reviewer" を指定
 ```
 
 ## 入力

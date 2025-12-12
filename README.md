@@ -3,7 +3,7 @@
 **Claude Code専用の開発ハーネス。自律的なPlan→Work→Reviewサイクルで高品質な開発を実現します。**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version: 1.0.0](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/Chachamaru127/claude-code-harness)
+[![Version: 2.0.0](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/Chachamaru127/claude-code-harness)
 
 ## 概要
 
@@ -13,11 +13,11 @@
 
 ## 主な特徴
 
-- **自律的な開発サイクル**: `/plan`で計画を立て、`/work`で実装し、`/review`で品質をチェックする、体系的な開発フローを提供します。
+- **自律的な開発サイクル**: `/plan`で計画を立て、`/work`で実装し、`/harness-review`で品質をチェックする、体系的な開発フローを提供します。
 - **30+のモジュール化されたSkills**: 再利用可能なスキル群により、複雑なタスクを効率的に実行します。各スキルは「いつ使うべきか」を明記し、Claudeの自律的な発見をサポートします。
 - **セーフティファースト設計**: デフォルトで`dry-run`モード、保護されたパス設定など、安全性を最優先します。
 - **包括的な自動化**: Hooks機能により、セッション開始時の初期化から、ファイル編集後の自動テスト、セッション終了時のサマリーまで、開発プロセスを自動化します。
-- **並列処理による高速化**: `/review`コマンドでは、セキュリティ、パフォーマンス、品質のチェックを並列実行し、レビュー時間を短縮します。
+- **並列処理による高速化**: `/harness-review`コマンドでは、セキュリティ、パフォーマンス、品質のチェックを並列実行し、レビュー時間を短縮します。
 
 ## クイックスタート
 
@@ -28,10 +28,16 @@
 ### 2. 初期設定
 
 ```bash
-/init
+/harness-init
 ```
 
 プロジェクトの初期設定を行い、必要なファイル（Plans.md、CLAUDE.mdなど）を生成します。
+
+#### 既存プロジェクトの場合
+
+- `/harness-init` は **既存コードを破壊せず**、`AGENTS.md` / `CLAUDE.md` / `Plans.md` など **不足しているファイルのみ** を追加します。
+- 既存の仕様書・README・計画書がある場合は、それらを最優先で参照してください。
+- （任意）シェルでセットアップしたい場合は `scripts/setup-existing-project.sh` を利用できます（既存ファイルは上書きしません）。
 
 ### 3. 開発サイクル
 
@@ -43,16 +49,16 @@
 /work
 
 # レビューする
-/review
+/harness-review
 ```
 
 ## ワークフロー
 
 ```mermaid
 graph LR
-    A[/init] --> B[/plan];
+    A[/harness-init] --> B[/plan];
     B --> C[/work];
-    C --> D[/review];
+    C --> D[/harness-review];
     D -- 改善あり --> C;
     D -- 完了 --> E[Commit];
     E --> B;
@@ -62,12 +68,13 @@ graph LR
 
 | コマンド | 説明 |
 | :--- | :--- |
-| `/init` | プロジェクトの初期設定を行います |
+| `/harness-init` | プロジェクトの初期設定を行います（推奨） |
 | `/plan` | 開発タスクの計画を作成・更新します |
 | `/work` | 計画に基づいてコードを実装します |
-| `/review` | コードの品質を多角的にレビューします（並列実行） |
+| `/harness-review` | コードの品質を多角的にレビューします（並列実行・推奨） |
 | `/start-task` | 特定のタスクを開始します |
 | `/setup-cursor` | **[オプション]** Cursor連携を有効化します |
+| `/handoff-to-cursor` | **[オプション]** Cursor(PM)向けの完了報告を生成します |
 | `/health-check` | プロジェクトの健全性を診断します |
 | `/cleanup` | 不要なファイルをクリーンアップします |
 | `/localize-rules` | プロジェクト固有のルールを作成します |
@@ -83,7 +90,7 @@ Claude Codeの**非同期サブエージェント機能**を活用すること�
 - **長時間タスクの監視**: ビルドやテストをバックグラウンドで実行し、その間に他の作業を続ける
 
 **使い方**:
-1. タスクを開始（例: `/review security`）
+1. タスクを開始（例: `/harness-review security`）
 2. `Ctrl + B` でバックグラウンドに送る
 3. 次のタスクを開始
 4. 各タスクが完了すると自動的に通知

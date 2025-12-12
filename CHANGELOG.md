@@ -1,6 +1,30 @@
 # Changelog
 
-cursor-cc-plugins のバージョン履歴です。
+claude-code-harness の変更履歴です。
+
+---
+
+## [2.0.0] - 2025-12-13
+
+### Added
+- PreToolUse/PermissionRequest hooks（ガードレール + 安全コマンド自動許可）
+- Cursor連携用テンプレート（`templates/cursor/commands/*`）と `/setup-cursor`
+- `/handoff-to-cursor`（Cursor(PM)向け完了報告）
+
+### Changed
+- `.claude-plugin/plugin.json` を最新Plugins reference準拠へ（authorをobject化、commands手動列挙を廃止）
+- コマンド衝突回避: `/harness-init` `/harness-review` に統一（旧名コマンドは廃止）
+- README/Docs を `/harness-init` `/harness-review` 前提に更新
+
+### Fixed
+- hooks の stdin JSON 入力対応を統一（PostToolUse系スクリプトの空振りを解消）
+- CI整合性チェックの不足テンプレート問題を解消
+
+---
+
+## (Imported) cursor-cc-plugins history
+
+以下の `0.5.x` 系は、ベースとなった `cursor-cc-plugins` の履歴を参考として残しています。
 
 ---
 
@@ -294,7 +318,7 @@ cursor-cc-plugins のバージョン履歴です。
   - `/plan-with-cc` - 計画立案
 
 ### Changed
-- `/plan`, `/work`, `/review` に「モード別の使い分け」セクション追加
+- `/plan`, `/work`, `/harness-review` に「モード別の使い分け」セクション追加
 - セットアップ完了メッセージを改善（Cursor/Claude Code 別表示）
 
 ---

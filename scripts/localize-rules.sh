@@ -11,7 +11,9 @@
 
 set -e
 
-PLUGIN_PATH="${PLUGIN_PATH:-$HOME/.claude/plugins/marketplaces/cursor-cc-marketplace}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DEFAULT_PLUGIN_PATH="$(cd "${SCRIPT_DIR}/.." && pwd)"
+PLUGIN_PATH="${CLAUDE_PLUGIN_ROOT:-${PLUGIN_PATH:-$DEFAULT_PLUGIN_PATH}}"
 DRY_RUN=false
 
 # 引数解析

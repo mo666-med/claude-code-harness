@@ -43,7 +43,11 @@ cd my-client-project
 # Gitリポジトリを初期化
 git init
 
-# Claude Codeを起動（ハーネス付き）
+# Claude Codeを起動
+# プラグイン導入済みなら:
+claude
+#
+# （開発中などでプラグインディレクトリを指定して起動したい場合）
 claude --plugin-dir /path/to/claude-code-harness
 ```
 
@@ -233,7 +237,7 @@ cat docs/proposal.md
 #### 5-1. コードレビュー
 
 ```
-/review
+/harness-review
 ```
 
 **Claude Codeがチェックすること：**
@@ -400,7 +404,10 @@ cat .claude-code-harness/existing-docs-summary.md
 ### ステップ4: Claude Codeで開く
 
 ```bash
-# ハーネス付きでClaude Codeを起動
+# プラグイン導入済みなら:
+claude
+#
+# （開発中などでプラグインディレクトリを指定して起動したい場合）
 claude --plugin-dir /path/to/claude-code-harness
 ```
 
@@ -561,20 +568,20 @@ A: 既存のAPIをそのまま使う
 ```
 /work（機能A実装）
 ↓
-/review（機能Aレビュー）
+/harness-review（機能Aレビュー）
 ↓
 /auto-fix（問題修正）
 ↓
 /work（機能B実装）
 ↓
-/review（機能Bレビュー）
+/harness-review（機能Bレビュー）
 ```
 
 **非推奨：** 全実装後に1回だけ
 ```
 /work（全機能実装）
 ↓
-/review（大量の問題発見）
+/harness-review（大量の問題発見）
 ↓
 修正が大変...
 ```
@@ -592,7 +599,11 @@ cd task-manager
 git init
 
 # 2. Claude Code起動
-claude --plugin-dir ~/claude-code-harness
+# プラグイン導入済みなら:
+claude
+#
+# （開発中などでプラグインディレクトリを指定して起動したい場合）
+claude --plugin-dir /path/to/claude-code-harness
 
 # 3. 計画
 /plan
@@ -618,7 +629,7 @@ claude --plugin-dir ~/claude-code-harness
 > タスク一覧画面を実装
 
 # 7. レビュー
-/review
+/harness-review
 /auto-fix
 
 # 8. デプロイ
@@ -654,7 +665,11 @@ git commit -m "chore: ハーネス適用前"
 cat .claude-code-harness/existing-docs-summary.md
 
 # 4. Claude Code起動
-claude --plugin-dir ~/claude-code-harness
+# プラグイン導入済みなら:
+claude
+#
+# （開発中などでプラグインディレクトリを指定して起動したい場合）
+claude --plugin-dir /path/to/claude-code-harness
 
 # 5. 既存仕様を確認してから計画更新
 /plan
@@ -665,7 +680,7 @@ claude --plugin-dir ~/claude-code-harness
 > 商品詳細ページにレビュー表示エリアを追加
 
 # 7. レビュー
-/review
+/harness-review
 
 # 8. データモデル追加
 /crud reviews
@@ -688,7 +703,7 @@ git commit -m "feat: レビュー機能追加"
 2. `/auth` で認証
 3. `/crud` でデータ
 4. `/work` で実装
-5. `/review` でチェック
+5. `/harness-review` でチェック
 6. `/deploy-setup` でデプロイ
 7. `/validate` で検証
 

@@ -1,3 +1,7 @@
+---
+description: 学習事項をRules/Commands/Skillsとして記録
+---
+
 # /remember - 学習事項をルール化・コマンド化・スキル化
 
 作業中に「これは次回も同じようにやってほしい」と思った事項を、最適な形式（Rules/Commands/Skills）で記録します。
@@ -315,5 +319,5 @@ paths: "**/*.{ts,tsx,js,jsx}"
 | コマンド | 用途 |
 |---------|------|
 | `/remember` | 学習事項を記録（本コマンド） |
-| `/setup-2agent` | 初期セットアップ |
+| `/setup-cursor` | 初期セットアップ（Cursor連携） |
 | `/health-check` | 設定の健全性チェック |

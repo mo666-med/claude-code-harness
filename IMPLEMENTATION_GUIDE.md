@@ -60,6 +60,10 @@ git clone https://github.com/Chachamaru127/claude-code-harness.git
 
 # プロジェクトでClaude Codeを起動
 cd ~/your-project
+# プラグイン導入済みなら:
+claude
+#
+# （ローカルにクローンしたプラグインを明示して起動する場合）
 claude --plugin-dir ~/claude-plugins/claude-code-harness
 ```
 
@@ -91,7 +95,7 @@ cd claude-code-harness
    ↓
 3. /work で機能実装
    ↓
-4. /review でコードレビュー
+4. /harness-review でコードレビュー
    ↓
 5. /validate で納品前検証
    ↓
@@ -115,7 +119,7 @@ cd claude-code-harness
    - `/deploy-setup` で自動デプロイ設定
 
 4. **品質保証フェーズ（1-2時間）**
-   - `/review` でコード品質チェック
+   - `/harness-review` でコード品質チェック
    - `/auto-fix` で自動修正
    - `/validate` で最終検証
 
@@ -265,13 +269,13 @@ Claude Codeが以下を生成します：
 
 ### フェーズ5: 品質保証と納品
 
-#### `/review` - コードレビュー
+#### `/harness-review` - コードレビュー
 
 **使用タイミング**: 実装が完了した時
 
 **実行例**:
 ```
-/review
+/harness-review
 ```
 
 Claude Codeが以下をチェック：
@@ -319,7 +323,10 @@ Claude Codeが以下をチェック：
 # プラグインが正しくロードされているか確認
 claude --help | grep plan
 
-# プラグインディレクトリを指定して起動
+# プラグイン導入済みならそのまま起動
+claude
+
+# （開発中などでプラグインディレクトリを指定して起動したい場合）
 claude --plugin-dir /path/to/claude-code-harness
 ```
 
@@ -403,7 +410,7 @@ sudo apt-get install jq  # Linux
 ```
 （全実装完了）
 ↓
-/review
+/harness-review
 （大量の問題が見つかる）
 ```
 
@@ -411,11 +418,11 @@ sudo apt-get install jq  # Linux
 ```
 /work（機能A実装）
 ↓
-/review（機能Aレビュー）
+/harness-review（機能Aレビュー）
 ↓
 /work（機能B実装）
 ↓
-/review（機能Bレビュー）
+/harness-review（機能Bレビュー）
 ```
 
 ### 4. ドキュメントを残す

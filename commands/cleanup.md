@@ -1,3 +1,7 @@
+---
+description: Plans.md / session-log.md 等の自動整理
+---
+
 # /cleanup - ファイルの自動整理
 
 Plans.md、session-log.md 等の古いエントリを整理し、ファイルの肥大化を防ぎます。

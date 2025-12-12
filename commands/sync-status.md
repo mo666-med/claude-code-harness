@@ -1,3 +1,7 @@
+---
+description: Plans.mdの進捗集計・状態同期（Cursor報告用）
+---
+
 # /sync-status - 状態同期・進捗サマリー
 
 Plans.md の現在の状態を確認し、進捗サマリーを出力します。

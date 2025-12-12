@@ -1,3 +1,7 @@
+---
+description: Plans.mdの計画を実行して実装する
+---
+
 # /work - 計画の実行
 
 Plans.md の計画を実行し、実際のコードを生成します。
@@ -12,7 +16,7 @@ TodoWrite ツールで進捗を追跡しながら、着実にタスクを完了�
 | **ソロモード** | `/work` (このコマンド) | Claude Code だけで実行 |
 | **2エージェントモード** | `/start-task` | Cursor から依頼されたタスクを実行 |
 
-**2エージェント体制** (`/setup-2agent` 済み) の場合:
+**2エージェント体制** (`/setup-cursor` 済み) の場合:
 - **Cursor** から `/handoff-to-claude` でタスクを依頼された後、`/start-task` を使ってください
 - `/work` は Cursor との連携を行わないソロ実行用です
 

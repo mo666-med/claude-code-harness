@@ -1,3 +1,8 @@
+---
+description: CI失敗時の診断・修正を安全第一で支援
+capabilities: ["ci-triage", "github-actions", "dependency-fixes", "test-fixes", "safe-auto-fix"]
+---
+
 # CI/CD Fixer Agent
 
 CI失敗時の診断・修正を行うエージェント。**安全性を最優先**とし、設定に基づいて動作します。

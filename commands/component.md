@@ -1,3 +1,7 @@
+---
+description: UIコンポーネント生成（shadcn/ui 等）
+---
+
 # /component - UIコンポーネント生成
 
 shadcn/uiベースのUIコンポーネントを生成します。

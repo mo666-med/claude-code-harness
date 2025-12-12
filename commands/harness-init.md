@@ -1,4 +1,8 @@
-# /init - プロジェクトセットアップ
+---
+description: プロジェクトセットアップ（組み込み init との衝突回避）
+---
+
+# /harness-init - プロジェクトセットアップ
 
 VibeCoder が自然言語だけで開発を始められるよう、プロジェクトをセットアップします。
 **実際に動くコードまで生成**します。
@@ -51,13 +55,13 @@ VibeCoder が自然言語だけで開発を始められるよう、プロジェ�
 > ```
 >
 > **今すぐセットアップしますか？**
-> - 「はい」→ 2-Agent 用のファイルを生成（/setup-2agent 相当）
+> - 「はい」→ 2-Agent 用のファイルを生成（/setup-cursor 相当）
 > - 「いいえ」→ Solo モードで進める
 
 **回答を待つ**
 
 「はい」の場合:
-→ `/setup-2agent` のフロー（Phase 2〜5）を実行
+→ `/setup-cursor` のフロー（Phase 2〜5）を実行
 → 完了後、「Cursor で『〇〇を作りたい』と相談してください」と案内
 
 「いいえ」の場合:
@@ -206,7 +210,17 @@ cd {{PROJECT_NAME}}
 npm install @supabase/supabase-js lucide-react
 ```
 
-### Step 6: ワークフローファイル生成
+### Step 6: セーフティ設定（.claude/settings.json）生成/更新
+
+**目的**: 破壊的操作や機密情報露出の事故を減らすため、プロジェクトの `.claude/settings.json` を整備します。
+
+- 既存 `.claude/settings.json` がある場合は **非破壊でマージ**（既存の hooks/env 等は保持）
+- `permissions.allow|ask|deny` は **追記 + 重複排除**
+- `permissions.disableBypassPermissionsMode` は **必ず `"disable"`** にする（`--dangerously-skip-permissions` 抑止）
+
+**実行**: `ccp-generate-claude-settings` スキルを実行して作成/更新すること。
+
+### Step 7: ワークフローファイル生成
 
 以下を生成（templates/ を使用）：
 
@@ -229,7 +243,7 @@ npm install @supabase/supabase-js lucide-react
 - [ ] {{機能2}}
 ```
 
-### Step 7: 次のアクションを案内
+### Step 8: 次のアクションを案内
 
 > ✅ **プロジェクトを作成しました！**
 >
@@ -270,6 +284,7 @@ cat package.json 2>/dev/null | head -10
 - AGENTS.md（なければ作成）
 - CLAUDE.md（なければ作成）
 - Plans.md（なければ作成）
+- `.claude/settings.json`（**作成/更新**。既存があれば非破壊マージ）
 
 ---
 

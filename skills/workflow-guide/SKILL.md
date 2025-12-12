@@ -101,7 +101,7 @@ cursor:依頼中 → cc:WIP → cc:完了 → cursor:確認済
 
 | コマンド | 用途 |
 |---------|------|
-| `/init` | プロジェクトセットアップ |
+| `/harness-init` | プロジェクトセットアップ |
 | `/start-task` | タスク開始 |
 | `/handoff-to-cursor` | 完了報告 |
 | `/sync-status` | 状態確認 |

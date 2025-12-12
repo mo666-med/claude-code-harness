@@ -5,17 +5,49 @@
 # 入力: stdin から JSON（tool_name, tool_input 等）
 # 出力: additionalContext でフィードバック
 
-set -e
+set +e
 
-# 入力JSONを読み取り
-INPUT=$(cat)
+# 入力JSONを読み取り（Claude Code hooks は stdin で JSON を渡す）
+INPUT=""
+if [ ! -t 0 ]; then
+  INPUT="$(cat 2>/dev/null)"
+fi
 
-# tool_input から file_path を取得
-FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
+# stdin JSON から file_path / cwd を取得（jq がなければ python3 を試す）
+FILE_PATH=""
+CWD=""
+if [ -n "$INPUT" ]; then
+  if command -v jq >/dev/null 2>&1; then
+    FILE_PATH="$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_response.filePath // empty' 2>/dev/null)"
+    CWD="$(echo "$INPUT" | jq -r '.cwd // empty' 2>/dev/null)"
+  elif command -v python3 >/dev/null 2>&1; then
+    eval "$(echo "$INPUT" | python3 - <<'PY' 2>/dev/null
+import json, shlex, sys
+try:
+    data = json.load(sys.stdin)
+except Exception:
+    data = {}
+cwd = data.get("cwd") or ""
+tool_input = data.get("tool_input") or {}
+tool_response = data.get("tool_response") or {}
+file_path = tool_input.get("file_path") or tool_response.get("filePath") or ""
+print(f"CWD_FROM_STDIN={shlex.quote(cwd)}")
+print(f"FILE_PATH_FROM_STDIN={shlex.quote(file_path)}")
+PY
+)"
+    FILE_PATH="${FILE_PATH_FROM_STDIN:-}"
+    CWD="${CWD_FROM_STDIN:-}"
+  fi
+fi
 
 # file_path が空なら終了
 if [ -z "$FILE_PATH" ]; then
   exit 0
+fi
+
+# 可能ならプロジェクト相対パスへ正規化（絶対パスでも動作するが判定が安定する）
+if [ -n "$CWD" ] && [[ "$FILE_PATH" == "$CWD/"* ]]; then
+  FILE_PATH="${FILE_PATH#$CWD/}"
 fi
 
 # デフォルト閾値
