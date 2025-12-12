@@ -1,6 +1,7 @@
 ---
 name: ccp-review-quality
-description: "コード品質（可読性、保守性、ベストプラクティス）をチェックするスキル"
+description: "コード品質（可読性、保守性、ベストプラクティス）をチェックするスキル。コードレビューが要求された場合、リファクタリング後、または複雑なロジックの実装後に使用します。"
+allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 metadata:
   skillport:
     category: worker

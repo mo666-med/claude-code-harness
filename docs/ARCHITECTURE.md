@@ -1,412 +1,70 @@
-# cursor-cc-plugins Architecture
+# Claude Code Harness Architecture
 
-> **Version**: 0.3
-> **Last Updated**: 2025-12-09
+## 1. 概要
 
-This document describes the internal architecture of cursor-cc-plugins, which uses a 3-layer Skill / Workflow / Profile separation.
+`claude-code-harness`は、Claude Codeの能力を最大限に引き出すための、モジュール化された自律的な開発フレームワークです。中心的な設計思想は、**Plan → Work → Review**という体系的な開発サイクルを、**Skills**、**Rules**、**Hooks**という3つの主要な拡張機能でサポートすることです。
 
----
+## 2. 3層アーキテクチャ
 
-## Overview
+このプラグインは、再利用性と保守性を高めるために、以下の3層アーキテクチャを採用しています。
 
-cursor-cc-plugins v3 uses a modular architecture with three main layers:
+```mermaid
+graph TD
+    subgraph Profile Layer
+        A[claude-harness.yaml]
+    end
+    subgraph Workflow Layer
+        B[init.yaml, plan.yaml, work.yaml, review.yaml]
+    end
+    subgraph Skill Layer
+        C[30+ SKILL.md files]
+    end
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        Profile Layer                                 │
-│  (cursor-pm.yaml, claude-worker.yaml)                                │
-│  - Defines which client uses which workflows                         │
-│  - Specifies skill category permissions                              │
-└──────────────────────────────┬──────────────────────────────────────┘
-                               │ references
-                               ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                       Workflow Layer                                 │
-│  (init.yaml, plan.yaml, work.yaml, review.yaml, etc.)               │
-│  - Defines phase sequences                                           │
-│  - Orchestrates skills in steps                                      │
-│  - Handles conditions and error recovery                             │
-└──────────────────────────────┬──────────────────────────────────────┘
-                               │ uses
-                               ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                        Skill Layer                                   │
-│  (SKILL.md files)                                                    │
-│  - Self-contained knowledge units                                    │
-│  - Reusable across workflows                                         │
-└─────────────────────────────────────────────────────────────────────┘
+    A -- references --> B;
+    B -- uses --> C;
 ```
 
----
+- **Skill Layer**: `SKILL.md`ファイルとして定義される、自己完結した知識ユニットです。特定のタスク（例：セキュリティレビュー、コード実装）を実行するための具体的な手順と知識が含まれています。
+- **Workflow Layer**: `*.yaml`ファイルとして定義され、特定の開発フェーズ（例：`/work`）を実行するための**Skills**のオーケストレーションを行います。ステップの順序、条件分岐、エラーハンドリングなどを管理します。
+- **Profile Layer**: プラグイン全体の動作を定義します。どのワークフローをどのコマンドに割り当てるか、どのSkillカテゴリを許可するかなどを指定します。
 
-## Directory Structure
+## 3. ディレクトリ構造
 
 ```
-plugins/cursor-cc-plugins/
-├── skills/                     # Skill definitions (SKILL.md)
-│   ├── core/                   # Core skills (always loaded)
-│   │   ├── ccp-core-general-principles/
-│   │   │   └── SKILL.md        # Safety principles (alwaysApply: true)
-│   │   ├── ccp-core-read-repo-context/
-│   │   │   └── SKILL.md        # Repository context reading
-│   │   └── ccp-core-diff-aware-editing/
-│   │       └── SKILL.md        # Minimal diff editing (alwaysApply: true)
-│   ├── pm/                     # PM-specific skills
-│   │   ├── ccp-init-requirements/
-│   │   ├── ccp-plan-feature/
-│   │   └── ccp-plan-review/
-│   ├── worker/                 # Worker-specific skills
-│   │   ├── ccp-work-impl-feature/
-│   │   ├── ccp-work-write-tests/
-│   │   └── ccp-review-changes/
-│   └── ci/                     # CI-specific skills
-│       ├── ccp-ci-analyze-failures/
-│       └── ccp-ci-fix-failing-tests/
-├── workflows/                  # Workflow definitions (YAML)
-│   └── default/                # Default workflow set
-│       ├── init.yaml
-│       ├── plan.yaml
-│       ├── work.yaml
-│       ├── review.yaml
-│       ├── sync-status.yaml
-│       └── start-task.yaml
-├── profiles/                   # Profile definitions (YAML)
-│   ├── cursor-pm.yaml          # Cursor (PM) profile
-│   └── claude-worker.yaml      # Claude Code (Worker) profile
-├── generators/                 # Code generators (future)
-├── commands/                   # Slash commands (existing)
-└── agents/                     # Agent definitions (existing)
+claude-code-harness/
+├── .claude-plugin/         # プラグインメタデータ
+│   └── plugin.json
+├── skills/                 # Skill定義 (SKILL.md)
+│   ├── core/               # コアスキル (常にロード)
+│   ├── worker/             # 実装・レビュー用スキル
+│   └── ci/                 # CI/CD関連スキル
+├── workflows/              # Workflow定義 (YAML)
+│   └── default/
+├── commands/               # スラッシュコマンド定義 (Markdown)
+├── agents/                 # サブエージェント定義 (Markdown)
+├── hooks/                  # Hooks定義 (hooks.json)
+├── scripts/                # 自動化用シェルスクリプト
+├── docs/                   # ドキュメント
+└── templates/              # 各種テンプレート
 ```
 
----
+## 4. 主要コンポーネント
 
-## Layer Details
+### 4.1. Skills
 
-### 1. Skill Layer
+各スキルは、`description`（いつ使うべきか）と`allowed-tools`（使用許可ツール）を明記することで、Claudeによる自律的な発見と安全な実行をサポートします。
 
-Skills are self-contained knowledge units stored as `SKILL.md` files.
+### 4.2. Rules
 
-#### SKILL.md Format
+`claude-code.config.schema.json`で厳密に定義された設定ファイルにより、安全性（`dry-run`モード）やパス制限（`protected`パス）を強制します。
 
-```markdown
----
-name: ccp-example-skill
-description: "Brief description of what this skill does"
-metadata:
-  skillport:
-    category: core|pm|worker|ci
-    tags: [tag1, tag2, tag3]
-    alwaysApply: true|false
----
+### 4.3. Hooks
 
-# Skill Title
+`hooks.json`で定義され、開発プロセスの重要なポイントで自動的にスクリプトを実行します。
+- **SessionStart**: セッション開始時の環境チェック
+- **PostToolUse**: ファイル編集後の自動テストや変更追跡
+- **Stop**: セッション終了時のサマリー生成
 
-Detailed content and instructions...
-```
+### 4.4. 並列処理
 
-#### Frontmatter Fields
-
-| Field | Required | Description |
-|-------|----------|-------------|
-| `name` | Yes | Unique skill identifier (ccp-{category}-{name}) |
-| `description` | Yes | Brief description of skill purpose |
-| `metadata.skillport.category` | Yes | Skill category: core, pm, worker, ci |
-| `metadata.skillport.tags` | Yes | Searchable tags |
-| `metadata.skillport.alwaysApply` | No | If true, always applied (default: false) |
-
-#### Skill Categories
-
-| Category | Purpose | Used By |
-|----------|---------|---------|
-| `core` | Base principles, safety rules | Both Cursor and Claude Code |
-| `pm` | Requirements, planning, review | Cursor (PM) |
-| `worker` | Implementation, testing | Claude Code (Worker) |
-| `ci` | CI failure analysis and fixes | Claude Code (Worker) |
-
-### 2. Workflow Layer
-
-Workflows define phase sequences using YAML configuration.
-
-#### Workflow YAML Format
-
-```yaml
-phase: init|plan|work|review|sync-status|start-task
-description: "What this workflow does"
-
-steps:
-  - id: step-name
-    skill: ccp-skill-name        # Reference to skill
-    input:
-      files: [file1.md, file2.json]
-      context_from: [git_status, repo_tree]
-    output:
-      variables: [var1, var2]
-      update_files: [Plans.md]
-    mode: required|optional
-    condition: "variable_name"   # Optional condition
-    parallel: true|false         # Run in parallel with other steps
-
-on_success:
-  message: |
-    Success message template with {{variables}}
-
-on_error:
-  message: |
-    Error message template
-```
-
-#### Step Configuration
-
-| Field | Description |
-|-------|-------------|
-| `id` | Unique step identifier |
-| `skill` | Referenced skill name |
-| `input` | Input configuration (files, context, variables) |
-| `output` | Output configuration (variables, file updates) |
-| `mode` | `required` = must succeed, `optional` = can fail |
-| `condition` | Variable condition for step execution |
-| `parallel` | Run concurrently with other parallel steps |
-
-### 3. Profile Layer
-
-Profiles define client-specific configurations.
-
-#### Profile YAML Format
-
-```yaml
-id: profile-name
-client: cursor|claude-code
-description: "Profile description"
-
-roles:
-  - phase: init
-    workflow: default
-    description: "What this role does"
-
-skills:
-  categories:
-    include: [core, pm]
-    exclude: [worker, ci]
-
-markers:
-  todo: "cc:TODO"
-  wip: "cc:WIP"
-  done: "cc:完了"
-
-constraints:
-  no_production_deploy: true
-  allow_staging_deploy: true
-
-handoff:
-  to_pm: "/handoff-to-cursor"
-  from_pm: "/start-task"
-
-output_style:
-  vibecoder_friendly: true
-  include_technical_details: false
-```
-
----
-
-## Backward Compatibility
-
-v3 maintains full backward compatibility with existing commands:
-
-| v1 Command | v3 Behavior |
-|------------|-------------|
-| `/init` | Triggers `init.yaml` workflow |
-| `/plan` | Triggers `plan.yaml` workflow |
-| `/work` | Triggers `work.yaml` workflow |
-| `/review` | Triggers `review.yaml` workflow |
-| `/sync-status` | Triggers `sync-status.yaml` workflow |
-| `/start-task` | Triggers `start-task.yaml` workflow |
-
-### Simple Mode vs Advanced Mode
-
-| Mode | Description | Configuration |
-|------|-------------|---------------|
-| Simple | Use as before (no changes needed) | Default |
-| Advanced | Customize workflows and skills | Edit YAML files |
-
----
-
-## Extending Skills
-
-### Creating a New Skill
-
-1. Create directory: `skills/{category}/{skill-name}/`
-2. Create `SKILL.md` with proper frontmatter
-3. Add content following the format
-
-Example:
-
-```markdown
----
-name: ccp-custom-my-skill
-description: "Description of my custom skill"
-metadata:
-  skillport:
-    category: worker
-    tags: [custom, example]
-    alwaysApply: false
----
-
-# My Custom Skill
-
-Instructions for the skill...
-```
-
-### Best Practices
-
-1. **Use clear naming**: `ccp-{category}-{descriptive-name}`
-2. **Write good descriptions**: Helps understand skill purpose
-3. **Choose appropriate tags**: Help with discovery
-4. **Use alwaysApply sparingly**: Only for essential rules
-
----
-
-## Customizing Workflows
-
-### Modifying Existing Workflows
-
-1. Copy `workflows/default/{workflow}.yaml` to customize
-2. Edit steps, add/remove skills
-3. Test with dry-run mode first
-
-### Creating Custom Workflows
-
-1. Create new directory: `workflows/custom/`
-2. Add workflow YAML files
-3. Reference in profile: `workflow: custom`
-
----
-
-## Plans.md Markers
-
-Both profiles use Plans.md for shared state:
-
-| Marker | Meaning | Set By |
-|--------|---------|--------|
-| `cursor:依頼中` | Task assigned by PM | Cursor |
-| `cc:TODO` | Not started | Claude Code |
-| `cc:WIP` | Work in progress | Claude Code |
-| `cc:完了` | Completed | Claude Code |
-| `cursor:確認済` | Verified by PM | Cursor |
-
----
-
-## Error Recovery
-
-### Automatic Recovery
-
-Workflows include automatic error recovery:
-
-```yaml
-error_recovery:
-  max_retries: 3
-  escalate_to: cursor-pm
-```
-
-### Escalation
-
-After max retries, Claude Code escalates to Cursor with:
-- Error description
-- Attempted fixes
-- Recommended actions
-
----
-
-## Concrete Example: Tracing /init Workflow
-
-This section shows exactly how a workflow calls skills, so you can understand and extend them.
-
-### Step 1: User runs /init
-
-```
-User: "I want to build a blog app"
-```
-
-### Step 2: Workflow YAML is loaded
-
-**File**: `workflows/default/init.yaml`
-
-```yaml
-phase: init
-description: "プロジェクトを初期化し、開発ワークフローをセットアップする"
-
-steps:
-  - id: read-context
-    skill: ccp-core-read-repo-context  # ← This skill is called
-    input:
-      files:
-        - README.md
-        - package.json
-    mode: required
-```
-
-### Step 3: Skill is executed
-
-**File**: `skills/core/ccp-core-read-repo-context/SKILL.md`
-
-```markdown
----
-name: ccp-core-read-repo-context
-description: "リポジトリのコンテキストを読み取り理解する"
-metadata:
-  skillport:
-    category: core
----
-
-# Read Repository Context
-
-リポジトリの構造とコンテキストを把握するためのスキル。
-
-## 実行手順
-
-### Step 1: 基本構造の把握
-- ls -la
-- find . -maxdepth 2 -type d
-- cat README.md
-...
-```
-
-### Step 4: What happens in the conversation
-
-```
-Claude Code: (ccp-core-read-repo-context executing)
-"プロジェクトを確認しています...
-
-📁 現在のディレクトリ: 空のフォルダ
-📝 README.md: なし
-📦 package.json: なし
-
-→ 新規プロジェクトとして初期化します"
-
-Claude Code: (ccp-init-requirements executing)
-"🎯 どんなものを作りたいですか？"
-```
-
-### Complete Skill Chain for /init
-
-| Step | Skill | File Location |
-|------|-------|---------------|
-| 1 | ccp-core-read-repo-context | `skills/core/ccp-core-read-repo-context/SKILL.md` |
-| 2 | ccp-init-requirements | `skills/pm/ccp-init-requirements/SKILL.md` |
-| 3 | ccp-project-scaffolder | `skills/core/ccp-project-scaffolder/SKILL.md` |
-| 4 | ccp-generate-workflow-files | `skills/core/ccp-generate-workflow-files/SKILL.md` |
-| 5 | ccp-plan-review | `skills/pm/ccp-plan-review/SKILL.md` |
-| 6 | ccp-vibecoder-guide | `skills/core/ccp-vibecoder-guide/SKILL.md` |
-
-### Adding Your Own Skill
-
-1. Create: `skills/worker/ccp-my-custom-skill/SKILL.md`
-2. Add frontmatter with `name`, `description`, `metadata.skillport.category`
-3. Reference in workflow: `skill: ccp-my-custom-skill`
-
----
-
-## Related Documents
-
-- [Admin Guide](ADMIN_GUIDE.md) - Team deployment and configuration
-- [Limitations](LIMITATIONS.md) - Known limitations and workarounds
-- [Contributing](../CONTRIBUTING.md) - How to contribute
+`/review`コマンドでは、`code-reviewer`サブエージェントを複数同時に起動し、セキュリティ、パフォーマンス、品質のレビューを並列実行することで、フィードバック時間を大幅に短縮します。

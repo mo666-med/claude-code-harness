@@ -1,6 +1,7 @@
 ---
 name: ccp-review-performance
-description: "コードのパフォーマンス問題をチェックするスキル"
+description: "コードのパフォーマンス問題をチェックするスキル。パフォーマンスレビューが要求された場合、レスポンスが遅いと報告された場合、または大量のデータ処理を行うコードの変更時に使用します。"
+allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 metadata:
   skillport:
     category: worker

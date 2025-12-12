@@ -1,6 +1,7 @@
 ---
 name: ccp-review-security
-description: "コードのセキュリティ脆弱性をチェックするスキル"
+description: "コードのセキュリティ脆弱性をチェックするスキル。セキュリティレビューが要求された場合、本番デプロイ前、または機密情報を扱うコードの変更時に使用します。"
+allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 metadata:
   skillport:
     category: worker

@@ -1,16 +1,15 @@
 {
-  "name": "cursor-cc-plugins",
-  "version": "0.5.4",
-  "description": "Cursor ↔ Claude Code 2エージェントワークフロー。VibeCoder が自然言語だけで高品質なプロジェクトを開発できる Plan→Work→Review サイクルを提供。セーフティファースト設計・設定可能な動作モード・環境診断機能付き。",
+  "name": "claude-code-harness",
+  "version": "1.0.0",
+  "description": "Claude Code専用の開発ハーネス。自律的なPlan→Work→Reviewサイクルで高品質な開発を実現。Skills、Rules、Hooksを活用した包括的な開発支援フレームワーク。",
   "author": {
-    "name": "Cursor-CC Plugins"
+    "name": "Claude Code Harness Contributors"
   },
   "license": "MIT",
   "keywords": [
-    "cursor",
+    "claude-code",
     "workflow",
-    "2-agent",
-    "vibecoder",
+    "autonomous",
     "plan-work-review",
     "project-scaffolding",
     "ci-cd",
@@ -20,18 +19,15 @@
     "session-memory",
     "troubleshoot"
   ],
-  "repository": "https://github.com/Chachamaru127/cursor-cc-plugins",
-  "homepage": "https://github.com/Chachamaru127/cursor-cc-plugins",
+  "repository": "https://github.com/Chachamaru127/claude-code-harness",
+  "homepage": "https://github.com/Chachamaru127/claude-code-harness",
   "commands": [
     "./commands/init.md",
     "./commands/plan.md",
     "./commands/work.md",
     "./commands/review.md",
     "./commands/start-task.md",
-    "./commands/handoff-to-cursor.md",
-    "./commands/sync-status.md",
-    "./commands/setup-2agent.md",
-    "./commands/update-2agent.md",
+
     "./commands/health-check.md",
     "./commands/cleanup.md",
     "./commands/localize-rules.md",

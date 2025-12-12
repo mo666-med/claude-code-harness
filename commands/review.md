@@ -37,7 +37,29 @@ git diff --name-only HEAD~5 2>/dev/null || find . -name "*.ts" -o -name "*.tsx" 
 
 ### Step 2: 並列レビューの実行
 
-以下の観点で並列レビューを実行（Task tool を使用）：
+以下の観点で並列レビューを実行します。**Task tool**を使用して複数のサブエージェントを同時に起動し、レビュー時間を短縮します。
+
+```python
+# 並列レビューの実装例
+from anthropic import Anthropic
+
+client = Anthropic()
+
+# 4つのレビュータスクを並列実行
+tasks = [
+    {"type": "security", "agent": "claude-code-workflow:code-reviewer", "focus": "security"},
+    {"type": "performance", "agent": "claude-code-workflow:code-reviewer", "focus": "performance"},
+    {"type": "quality", "agent": "claude-code-workflow:code-reviewer", "focus": "quality"},
+    {"type": "accessibility", "agent": "claude-code-workflow:code-reviewer", "focus": "accessibility"}
+]
+
+# Task toolで並列実行
+for task in tasks:
+    # 各タスクを同時に起動
+    pass
+```
+
+レビュー観点：
 
 #### 🔒 セキュリティチェック
 
