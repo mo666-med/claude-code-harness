@@ -39,6 +39,16 @@ git diff --name-only HEAD~5 2>/dev/null || find . -name "*.ts" -o -name "*.tsx" 
 
 以下の観点で並列レビューを実行します。**Task tool**を使用して複数のサブエージェントを同時に起動し、レビュー時間を短縮します。
 
+**💡 非同期サブエージェントによる真の並列実行**:
+各レビューを個別に実行し、`Ctrl+B`でバックグラウンドに送ることで、完全に並列で実行できます。詳細は[非同期サブエージェントガイド](../docs/ASYNC_SUBAGENTS.md)を参照してください。
+
+**手動並列実行の手順**:
+1. `/review security` を実行 → `Ctrl+B` でバックグラウンドへ
+2. `/review performance` を実行 → `Ctrl+B` でバックグラウンドへ
+3. `/review quality` を実行 → `Ctrl+B` でバックグラウンドへ
+4. `/review accessibility` を実行 → `Ctrl+B` でバックグラウンドへ
+5. 各サブエージェントが完了すると自動的に通知されます
+
 ```python
 # 並列レビューの実装例
 import subprocess
