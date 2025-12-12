@@ -1,6 +1,7 @@
 ---
 name: ccp-vibecoder-guide
-description: "VibeCoder（非技術者）が自然言語で開発を進められるようガイドするスキル"
+description: "VibeCoder（非技術者）が自然言語で開発を進められるようガイドするスキル非技術者向けのガイダンスを提供する場合に使用します。非技術者向けのガイダンスを提供する場合に使用します。非技術者向けのガイダンスを提供する場合に使用します。"
+allowed-tools: ["Read"]
 metadata:
   skillport:
     category: core

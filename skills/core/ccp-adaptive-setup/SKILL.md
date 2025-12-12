@@ -1,6 +1,7 @@
 ---
 name: ccp-adaptive-setup
-description: "プロジェクト分析に基づいた適応型セットアップを実行するスキル"
+description: "プロジェクト分析に基づいた適応型セットアップを実行するスキルプロジェクトの状況に応じて適切なセットアップを自動選択する場合に使用します。プロジェクトの状況に応じて適切なセットアップを自動選択する場合に使用します。プロジェクトの状況に応じて適切なセットアップを自動選択する場合に使用します。"
+allowed-tools: ["Read", "Write", "Bash"]
 metadata:
   skillport:
     category: core

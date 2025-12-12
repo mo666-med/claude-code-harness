@@ -1,6 +1,7 @@
 ---
 name: ccp-parallel-workflows
-description: "複数タスクの並列実行を最適化するスキル"
+description: "複数タスクの並列実行を最適化するスキル複数のタスクを並列実行する必要がある場合に使用します。複数のタスクを並列実行する必要がある場合に使用します。複数のタスクを並列実行する必要がある場合に使用します。"
+allowed-tools: ["Read", "Task"]
 metadata:
   skillport:
     category: worker

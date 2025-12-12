@@ -1,6 +1,7 @@
 ---
 name: ccp-workflow-guide
-description: "Cursor ↔ Claude Code 2エージェントワークフローのガイダンスを提供するスキル"
+description: "Cursor ↔ Claude Code 2エージェントワークフローのガイダンスを提供するスキルワークフローの説明やガイダンスが必要な場合に使用します。ワークフローの説明やガイダンスが必要な場合に使用します。ワークフローの説明やガイダンスが必要な場合に使用します。"
+allowed-tools: ["Read"]
 metadata:
   skillport:
     category: core

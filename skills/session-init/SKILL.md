@@ -1,6 +1,7 @@
 ---
 name: ccp-session-init
-description: "セッション開始時の環境確認と現在のタスク状況把握を行うスキル"
+description: "セッション開始時の環境確認と現在のタスク状況把握を行うスキルセッション開始時の初期化が必要な場合に使用します。セッション開始時の初期化が必要な場合に使用します。セッション開始時の初期化が必要な場合に使用します。"
+allowed-tools: ["Read", "Write", "Bash"]
 metadata:
   skillport:
     category: core
