@@ -40,6 +40,8 @@ description: 学習事項をRules/Commands/Skillsとして記録
 | **Skills** | 複雑なタスクの実装パターン・戦略 | 「認証機能の実装方法」「エラーハンドリング戦略」 |
 | **Memory** | プロジェクト固有の決定事項・一時的な情報 | 「APIキーの場所」「担当者の連絡先」 |
 
+> 重要: **決定（Why）/パターン（How）**は SSOT として `.claude/memory/decisions.md` / `.claude/memory/patterns.md` に集約する運用を推奨します（詳細: `docs/MEMORY_POLICY.md`）。
+
 ### Step 3: 判断基準フローチャート
 
 ```
@@ -228,9 +230,9 @@ paths: "[適用対象のglobパターン]"  # または alwaysApply: true
 - セッションログ
 
 **特徴**:
-- 一時的・文脈依存の情報
-- セッション間で引き継ぎ
-- 後でRules/Skills化の候補
+- **SSOT推奨**: `decisions.md` / `patterns.md` は Git で共有する前提の単一の正にする
+- **ローカル推奨**: `session-log.md` / `context.json` / `.claude/state/` はノイズになりやすいため Git 管理しない運用を推奨（詳細: `docs/MEMORY_POLICY.md`）
+- **検索性**: 先頭に Index を置き、各エントリのタイトル行にタグ（例: `#decision #db`）を付ける
 
 ---
 

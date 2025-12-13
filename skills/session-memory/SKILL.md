@@ -32,6 +32,8 @@ metadata:
 このスキルは `.claude/memory/` に作業履歴を保存し、
 セッション間での知識の継続を実現します。
 
+あわせて、重要な情報は「どこに残すべきか」を明確にします（詳細: `docs/MEMORY_POLICY.md`）。
+
 ---
 
 ## メモリ構造
@@ -44,6 +46,14 @@ metadata:
     ├── patterns.md         # 学んだパターン
     └── context.json        # プロジェクトコンテキスト
 ```
+
+### 推奨運用（SSOT/ローカル分離）
+
+- **SSOT（共有推奨）**: `decisions.md` / `patterns.md`  
+  - 「決定（Why）」と「再利用できる解法（How）」を集約する
+  - 各エントリは **タイトル + タグ**（例: `#decision #db`）を付け、先頭に **Index** を置く
+- **ローカル推奨**: `session-log.md` / `context.json` / `.claude/state/`  
+  - ノイズ/肥大化しやすいため、基本は Git 管理しない（必要なら個別に判断）
 
 ---
 
@@ -191,7 +201,7 @@ Claude Code:
 
 ## 注意事項
 
-- **自動保存**: 明示的に保存する必要はない
+- **自動保存**: `hooks/Stop` により、セッション終了時に `session-log.md` へ要約を自動追記する運用を推奨（未導入の場合は手動運用でOK）
 - **プライバシー**: 機密情報は記録しない
-- **.gitignore**: `.claude/memory/` は Git に含めることを推奨
-- **容量管理**: 古いログは自動でアーカイブ
+- **Git方針**: `decisions.md`/`patterns.md`は共有推奨、`session-log.md`/`context.json`/`.claude/state/`はローカル推奨（詳細: `docs/MEMORY_POLICY.md`）
+- **容量管理**: ログが大きくなったら `/cleanup sessions` を推奨

@@ -103,6 +103,10 @@ Claude Codeの**非同期サブエージェント機能**を活用すること�
 
 詳細は[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)をご覧ください。
 
+## メモリ管理（SSOT）
+
+プロジェクトの意思決定と再利用パターンは `.claude/memory/decisions.md` / `.claude/memory/patterns.md` を **SSOT** として運用することを推奨します。詳細は[docs/MEMORY_POLICY.md](docs/MEMORY_POLICY.md)をご覧ください。
+
 ## Cursor連携（オプション）
 
 `/setup-cursor`コマンドでCursorとの連携を有効化できます。

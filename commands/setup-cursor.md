@@ -6,6 +6,8 @@ description: Cursor連携のセットアップ（.cursor/commands 生成）
 
 このコマンドは、**Cursor側のカスタムコマンド**（`.cursor/commands/*.md`）を生成し、2-agent運用（Cursor PM + Claude Code Worker）を開始できる状態にします。
 
+あわせて、2-agent運用で必須になりやすい **SSOTメモリ（decisions/patterns）** も初期化することを推奨します（詳細: `docs/MEMORY_POLICY.md`）。
+
 ## 生成するファイル
 
 - `.cursor/commands/start-session.md`
@@ -13,12 +15,30 @@ description: Cursor連携のセットアップ（.cursor/commands 生成）
 - `.cursor/commands/plan-with-cc.md`
 - `.cursor/commands/handoff-to-claude.md`
 - `.cursor/commands/review-cc-work.md`
+- （推奨）`.claude/memory/decisions.md`（SSOT）
+- （推奨）`.claude/memory/patterns.md`（SSOT）
+- （任意）`.claude/memory/session-log.md`（ローカル推奨）
 
 ## 実行手順
 
 1. `.cursor/commands/` を作成
 2. 上記5ファイルを生成（このコマンド内の内容をそのまま書き込み）
-3. 生成後、Cursorを再起動してコマンドが表示されることを案内
+3. （推奨）`.claude/memory/` を作成し、SSOTファイルを初期化
+4. 生成後、Cursorを再起動してコマンドが表示されることを案内
+
+### （推奨）メモリ（SSOT）の初期化
+
+以下を **存在しない場合のみ** 作成します：
+
+- `.claude/memory/decisions.md`（重要な意思決定のSSOT）
+- `.claude/memory/patterns.md`（再利用できる解法のSSOT）
+- `.claude/memory/session-log.md`（セッションログ。ローカル推奨）
+
+テンプレートは `templates/memory/*.template` を使用し、`{{DATE}}` は当日の日付に置換します。
+
+### （推奨）`.gitignore` の方針
+
+`decisions.md` / `patterns.md` はコミット対象、`session-log.md` / `.claude/state/` はローカル推奨（詳細: `docs/MEMORY_POLICY.md`）。
 
 ## 生成内容（そのまま書き込み）
 

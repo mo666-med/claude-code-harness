@@ -71,6 +71,21 @@ steps:
         - Plans.md
     mode: required
 
+  # Step 4.5: メモリ（SSOT）の初期化
+  - id: init-memory-ssot
+    skill: ccp-init-memory-ssot
+    input:
+      templates:
+        - templates/memory/decisions.md.template
+        - templates/memory/patterns.md.template
+        - templates/memory/session-log.md.template
+    output:
+      create_files:
+        - .claude/memory/decisions.md
+        - .claude/memory/patterns.md
+        - .claude/memory/session-log.md
+    mode: optional
+
   # Step 5: 計画のレビュー（オプション）
   - id: review-plan
     skill: ccp-plan-review

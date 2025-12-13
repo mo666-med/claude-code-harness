@@ -263,6 +263,8 @@ render_template_if_missing() {
         echo -e "${YELLOW}⚠${NC} ${label}: テンプレートが見つかりません: $template_path"
         return 0
     fi
+    # ネストしたパスにも対応
+    mkdir -p "$(dirname "$dest_path")" 2>/dev/null || true
 
     local project_esc date_esc lang_esc
     project_esc=$(escape_sed_repl "$PROJECT_NAME")
@@ -366,6 +368,20 @@ render_template_if_missing "$TEMPLATE_DIR/Plans.md.template" "Plans.md" "Plans.m
 echo ""
 
 # ================================
+# Step 5.5: プロジェクトメモリ（SSOT）の初期化
+# ================================
+echo -e "${BLUE}[5.5/6] プロジェクトメモリ（SSOT）の初期化${NC}"
+echo "----------------------------------------"
+
+# decisions/patterns は SSOT として共有推奨。session-log はローカル運用向け。
+mkdir -p .claude/memory
+render_template_if_missing "$TEMPLATE_DIR/memory/decisions.md.template" ".claude/memory/decisions.md" "decisions.md (SSOT)"
+render_template_if_missing "$TEMPLATE_DIR/memory/patterns.md.template" ".claude/memory/patterns.md" "patterns.md (SSOT)"
+render_template_if_missing "$TEMPLATE_DIR/memory/session-log.md.template" ".claude/memory/session-log.md" "session-log.md"
+
+echo ""
+
+# ================================
 # Step 6: セットアップ完了
 # ================================
 
@@ -406,6 +422,19 @@ if [ -f ".gitignore" ]; then
         echo "# Claude Code Harness" >> .gitignore
         echo ".claude-code-harness/" >> .gitignore
         echo -e "${GREEN}✓${NC} .gitignoreに追加しました"
+    fi
+
+    # メモリ運用の推奨（重複追記しない）
+    if ! grep -q "Claude Memory Policy" .gitignore; then
+        echo "" >> .gitignore
+        echo "# Claude Memory Policy (recommended)" >> .gitignore
+        echo "# - Keep (shared SSOT): .claude/memory/decisions.md, .claude/memory/patterns.md" >> .gitignore
+        echo "# - Ignore (local): .claude/state/, session-log.md, context.json, archives" >> .gitignore
+        echo ".claude/state/" >> .gitignore
+        echo ".claude/memory/session-log.md" >> .gitignore
+        echo ".claude/memory/context.json" >> .gitignore
+        echo ".claude/memory/archive/" >> .gitignore
+        echo -e "${GREEN}✓${NC} .gitignoreにメモリ運用の推奨を追記しました（必要に応じて調整してください）"
     fi
 fi
 
