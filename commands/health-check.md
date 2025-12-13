@@ -11,7 +11,7 @@ description: 環境診断（依存/設定/利用可能機能の確認）
 ## このコマンドの特徴
 
 - 🔍 **環境チェック**: 必要なツールの存在確認
-- ⚙️ **設定検証**: cursor-cc.config.json の妥当性チェック
+- ⚙️ **設定検証**: `claude-code-harness.config.json`（推奨）/ `cursor-cc.config.json`（互換・旧） の妥当性チェック
 - 📋 **機能診断**: どの機能が使用可能かをレポート
 - 💡 **推奨事項**: 問題がある場合の解決策を提示
 
@@ -86,17 +86,24 @@ command -v yarn >/dev/null 2>&1 && echo "✅ yarn $(yarn -v)"
 ### 5. 設定ファイル
 
 ```bash
-# cursor-cc.config.json
-if [ -f cursor-cc.config.json ]; then
-  echo "✅ cursor-cc.config.json 検出"
+# claude-code-harness.config.json（推奨） / cursor-cc.config.json（互換・旧）
+if [ -f claude-code-harness.config.json ]; then
+  echo "✅ claude-code-harness.config.json 検出"
   # JSON の妥当性チェック
+  if node -e "JSON.parse(require('fs').readFileSync('claude-code-harness.config.json'))" 2>/dev/null; then
+    echo "  ✅ JSON 形式: 有効"
+  else
+    echo "  ❌ JSON 形式: 無効（修正が必要）"
+  fi
+elif [ -f cursor-cc.config.json ]; then
+  echo "⚠️ cursor-cc.config.json（互換・旧）を検出（将来廃止予定）"
   if node -e "JSON.parse(require('fs').readFileSync('cursor-cc.config.json'))" 2>/dev/null; then
     echo "  ✅ JSON 形式: 有効"
   else
     echo "  ❌ JSON 形式: 無効（修正が必要）"
   fi
 else
-  echo "📝 cursor-cc.config.json (なし - デフォルト設定を使用)"
+  echo "📝 設定ファイルなし（デフォルト設定を使用）"
 fi
 ```
 
@@ -148,7 +155,7 @@ fi
 
 | ファイル | 状態 | 備考 |
 |---------|------|------|
-| cursor-cc.config.json | ⚠️ なし | デフォルト設定を使用 |
+| claude-code-harness.config.json | ⚠️ なし | デフォルト設定を使用（互換: cursor-cc.config.json） |
 
 ---
 
@@ -176,9 +183,9 @@ fi
    winget install --id GitHub.cli
    ```
 
-2. **cursor-cc.config.json を作成**（カスタマイズする場合）
+2. **claude-code-harness.config.json を作成**（カスタマイズする場合）
    ```bash
-   cp cursor-cc.config.example.json cursor-cc.config.json
+   cp claude-code-harness.config.example.json claude-code-harness.config.json
    ```
 
 3. **ワークフローファイルを作成**（初回のみ）
@@ -229,7 +236,7 @@ fi
 
 ### 警告（推奨）
 
-1. **cursor-cc.config.json の JSON 形式が無効です**
+1. **claude-code-harness.config.json の JSON 形式が無効です**（互換: cursor-cc.config.json）
    - 修正方法: JSON バリデーターで確認してください
    - オンラインツール: https://jsonlint.com/
 

@@ -1,12 +1,12 @@
-# Contributing to cursor-cc-plugins
+# Contributing to claude-code-harness
 
-Thank you for your interest in contributing to cursor-cc-plugins! This document provides guidelines for contributing.
+Thank you for your interest in contributing to **claude-code-harness**! This document provides guidelines for contributing.
 
 ## How to Contribute
 
 ### Reporting Issues
 
-1. Check if the issue already exists in [GitHub Issues](https://github.com/Chachamaru127/cursor-cc-plugins/issues)
+1. Check if the issue already exists in [GitHub Issues](https://github.com/Chachamaru127/claude-code-harness/issues)
 2. If not, create a new issue with:
    - Clear title describing the problem
    - Steps to reproduce
@@ -43,7 +43,7 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 ## Plugin Structure
 
 ```
-cursor-cc-plugins/
+claude-code-harness/
 ├── .claude-plugin/
 │   ├── plugin.json      # Plugin manifest
 │   └── marketplace.json # Marketplace config
@@ -67,8 +67,9 @@ cursor-cc-plugins/
 
 1. Create `agents/your-agent.md`
 2. Define the agent with YAML frontmatter
-3. Add to `plugin.json` agents array
-4. Update README.md
+3. Update README.md (recommended)
+
+> Note: agents/ are auto-discovered by Claude Code. You typically do not need to manually enumerate them in `plugin.json`.
 
 ### Adding a New Skill
 
@@ -91,15 +92,14 @@ Version is defined in two places that must stay in sync:
 # Sync plugin.json to VERSION
 ./scripts/sync-version.sh sync
 
-# Bump patch version (0.3.1 → 0.3.2)
+# Bump patch version (e.g., 2.0.0 → 2.0.1)
 ./scripts/sync-version.sh bump
 ```
 
-### Pre-commit Hook
+### Version Consistency Checks
 
-A pre-commit hook automatically checks version consistency. If `VERSION` or `plugin.json` is modified and they don't match, the commit will fail.
-
-To fix: `./scripts/sync-version.sh sync`
+- **Local (recommended)**: run `./scripts/sync-version.sh check` before committing
+- **CI (recommended)**: run `./tests/validate-plugin.sh` and `./scripts/ci/check-consistency.sh` on PRs
 
 ---
 
@@ -107,14 +107,26 @@ To fix: `./scripts/sync-version.sh sync`
 
 Before submitting:
 
-1. Install the plugin locally:
+1. Validate plugin structure and consistency:
+
    ```bash
-   /plugin marketplace add ./path/to/cursor-cc-plugins
-   /plugin install cursor-cc-plugins
+   ./tests/validate-plugin.sh
+   ./scripts/ci/check-consistency.sh
    ```
 
-2. Test commands work as expected
-3. Verify no errors in plugin loading
+2. Test locally in a separate project using `--plugin-dir`:
+
+   ```bash
+   cd /path/to/your-project
+   claude --plugin-dir /path/to/claude-code-harness
+   ```
+
+3. Verify commands work as expected (`/help`), and the core loop runs:
+
+   - `/harness-init`
+   - `/plan`
+   - `/work`
+   - `/harness-review`
 
 ## Questions?
 

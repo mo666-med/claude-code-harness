@@ -1,0 +1,26 @@
+name: validate-plugin
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate plugin structure
+        run: |
+          bash ./tests/validate-plugin.sh
+
+      - name: Check consistency (templates/refs/version/hooks)
+        run: |
+          bash ./scripts/ci/check-consistency.sh
+
+

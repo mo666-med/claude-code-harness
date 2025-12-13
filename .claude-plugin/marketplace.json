@@ -1,31 +1,31 @@
 {
-  "name": "cursor-cc-marketplace",
+  "name": "claude-code-harness-marketplace",
   "metadata": {
-    "description": "Cursor ↔ Claude Code 2エージェントワークフローを実現するプラグインマーケットプレース",
-    "version": "1.0.0"
+    "description": "claude-code-harness の配布/導入を支援する（単一プラグイン）マーケットプレース",
+    "version": "2.0.0"
   },
   "owner": {
-    "name": "Cursor-CC Plugins"
+    "name": "Manus AI & Chachamaru"
   },
   "plugins": [
     {
-      "name": "cursor-cc-plugins",
+      "name": "claude-code-harness",
       "source": "./",
-      "description": "Cursor（PM）と Claude Code（Worker）の2エージェント体制でプロジェクトを管理。Plans.md タスク管理、CI/CD 自動修正（3回ルール）、VibeCoder 向けセットアップを提供。",
-      "version": "1.0.0",
+      "description": "A harness for solo developers (Vibecoders) to handle full-cycle contract development.",
+      "version": "2.0.0",
       "author": {
-        "name": "Cursor-CC Plugins"
+        "name": "Manus AI & Chachamaru",
+        "url": "https://github.com/Chachamaru127"
       },
-      "homepage": "https://github.com/Chachamaru127/cursor-cc-plugins",
+      "homepage": "https://github.com/Chachamaru127/claude-code-harness",
+      "repository": "https://github.com/Chachamaru127/claude-code-harness",
       "license": "MIT",
       "keywords": [
-        "cursor",
-        "workflow",
-        "2-agent",
-        "plans-management",
-        "ci-cd",
+        "claude-code",
+        "plugin",
         "vibecoder",
-        "project-management"
+        "workflow",
+        "plan-work-review"
       ],
       "category": "productivity",
       "strict": true

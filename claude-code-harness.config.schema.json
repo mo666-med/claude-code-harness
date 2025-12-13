@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "claude-code-harness Configuration (deprecated filename)",
-  "description": "Deprecated filename kept for compatibility. Prefer claude-code-harness.config.schema.json.",
+  "title": "claude-code-harness Configuration",
+  "description": "Configuration schema for claude-code-harness safety and behavior settings",
   "type": "object",
   "properties": {
     "version": {
@@ -171,3 +171,5 @@
   },
   "additionalProperties": false
 }
+
+

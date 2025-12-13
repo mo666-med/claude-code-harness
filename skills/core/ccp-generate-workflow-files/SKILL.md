@@ -11,7 +11,7 @@ metadata:
 
 # Generate Workflow Files
 
-cursor-cc-plugins のワークフローに必要なファイルを生成するスキル。
+claude-code-harness のワークフローに必要なファイルを生成するスキル。
 
 ---
 

@@ -71,7 +71,7 @@ VibeCoder が自然言語だけで開発を始められるよう、プロジェ�
 
 ## 設定の読み込み
 
-実行前に `cursor-cc.config.json` を確認：
+実行前に `claude-code-harness.config.json`（推奨）/ `cursor-cc.config.json`（互換・旧） を確認：
 
 ```json
 {
@@ -145,7 +145,7 @@ ls -la 2>/dev/null | head -10
 #### モード: `fixed`（社内標準がある場合）
 
 ```
-cursor-cc.config.json の base_stack を使用:
+claude-code-harness.config.json の base_stack を使用（互換: cursor-cc.config.json）:
   - "next-supabase" → Next.js + Supabase + Tailwind
   - "rails-postgres" → Ruby on Rails + PostgreSQL
   - "express-mongodb" → Express.js + MongoDB
