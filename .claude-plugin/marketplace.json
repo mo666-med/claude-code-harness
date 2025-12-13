@@ -1,8 +1,7 @@
 {
   "name": "claude-code-harness-marketplace",
   "metadata": {
-    "description": "claude-code-harness の配布/導入を支援する（単一プラグイン）マーケットプレース",
-    "version": "2.0.1"
+    "description": "claude-code-harness の配布/導入を支援する（単一プラグイン）マーケットプレース"
   },
   "owner": {
     "name": "Manus AI & Chachamaru"
@@ -12,7 +11,6 @@
       "name": "claude-code-harness",
       "source": "./",
       "description": "A harness for solo developers (Vibecoders) to handle full-cycle contract development.",
-      "version": "2.0.1",
       "author": {
         "name": "Manus AI & Chachamaru",
         "url": "https://github.com/Chachamaru127"
