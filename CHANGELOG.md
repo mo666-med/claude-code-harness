@@ -4,6 +4,20 @@ claude-code-harness の変更履歴です。
 
 ---
 
+## [2.0.1] - 2025-12-14
+
+### Added
+- README: 目次（TOC）を追加し、長文でも迷子にならない導線を整備
+- GitHub Actions: `validate-plugin` / `check-consistency` を自動実行（`.github/workflows/validate-plugin.yml`）
+- 設定ファイル: `claude-code-harness.config.schema.json` / `claude-code-harness.config.example.json` を追加（互換: `cursor-cc.config.*` を維持）
+
+### Changed
+- `CONTRIBUTING.md` のプロダクト名/導線/導入手順を現行に同期
+- 旧 `cursor-cc.config.*` 参照を「新名称優先 + 互換あり」に整理
+- Marketplace メタデータを `claude-code-harness` に同期
+
+---
+
 ## [2.0.0] - 2025-12-13
 
 ### Added

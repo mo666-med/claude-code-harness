@@ -6,7 +6,7 @@
 Claude Code を「Plan → Work → Review」の型で自律運用し、個人開発を“もう1段”プロ品質へ引き上げる **開発ハーネス（Claude Code プラグイン）** です。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version: 2.0.0](https://img.shields.io/badge/version-2.0.0-blue.svg)](VERSION)
+[![Version: 2.0.1](https://img.shields.io/badge/version-2.0.1-blue.svg)](VERSION)
 
 **現在のハーネススコア**: **92 / 100（S）**（→ [採点基準](#個人開発ハーネスの採点基準--スコア)）
 
@@ -359,7 +359,7 @@ Claude Code 組み込みコマンドと衝突しうるため、**移行用に残
 - **B（70–79）**: 便利だが運用が属人化しやすい
 - **C（〜69）**: アイデア段階。仕組みの整合/検証が不足
 
-### 採点表（このリポジトリ: v2.0.0）
+### 採点表（このリポジトリ: v2.0.1）
 
 | カテゴリ | 配点 | 何を見るか | 本リポジトリ |
 | --- | ---: | --- | ---: |
@@ -421,7 +421,20 @@ claude-code-harness/
 
 > 詳細は [CHANGELOG.md](CHANGELOG.md) を参照してください（0.5.x は Imported history として同梱）。
 
-### 現行: v2.0.0（2025-12-13）
+### 現行: v2.0.1（2025-12-14）
+
+**Added**
+
+- README: 目次を追加（長文でも迷子にならない導線）
+- GitHub Actions: `validate-plugin` / `check-consistency` を自動実行（`.github/workflows/validate-plugin.yml`）
+- 設定ファイル: `claude-code-harness.config.*` を追加（互換: `cursor-cc.config.*` を維持）
+
+**Changed**
+
+- `CONTRIBUTING.md` のプロダクト名/導線/導入手順を現行に同期
+- 旧 `cursor-cc.config.*` 参照を「新名称優先 + 互換あり」に整理
+
+### 直前: v2.0.0（2025-12-13）
 
 **Added**
 
