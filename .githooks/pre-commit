@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+#
+# pre-commit hook (repo-managed)
+#
+# Purpose:
+# - If "code paths" are modified but VERSION isn't bumped, auto-bump patch version and stage it.
+# - Keep VERSION and .claude-plugin/plugin.json in sync.
+#
+# Install:
+#   ./scripts/install-git-hooks.sh
+#
+
+set -euo pipefail
+
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+if [ -z "$ROOT" ]; then
+  exit 0
+fi
+
+cd "$ROOT"
+
+CODE_PATHS=(commands/ skills/ templates/ scripts/ hooks/ agents/ workflows/)
+
+# Staged code changes?
+CHANGED_CODE="$(git diff --cached --name-only -- "${CODE_PATHS[@]}" 2>/dev/null | grep -v '^$' || true)"
+if [ -z "$CHANGED_CODE" ]; then
+  # Even if no code changes, keep VERSION/plugin.json consistent when those files are staged.
+  if [ -f "./scripts/sync-version.sh" ]; then
+    if ! bash ./scripts/sync-version.sh check >/dev/null 2>&1; then
+      echo "⚠️  VERSION と plugin.json が不一致です。自動で同期します..."
+      bash ./scripts/sync-version.sh sync
+      git add VERSION .claude-plugin/plugin.json 2>/dev/null || true
+    fi
+  fi
+  exit 0
+fi
+
+# If we have code changes staged, require version bump (auto-fix by bumping patch).
+BASE_VERSION="$(git show HEAD:VERSION 2>/dev/null | tr -d '[:space:]' || true)"
+INDEX_VERSION="$(git show :VERSION 2>/dev/null | tr -d '[:space:]' || true)"
+
+if [ -z "$INDEX_VERSION" ] && [ -f VERSION ]; then
+  INDEX_VERSION="$(cat VERSION | tr -d '[:space:]')"
+fi
+
+if [ -z "$BASE_VERSION" ] || [ -z "$INDEX_VERSION" ]; then
+  # Initial commit or missing VERSION; don't block.
+  exit 0
+fi
+
+if [ "$BASE_VERSION" = "$INDEX_VERSION" ]; then
+  echo "⚠️  コード変更が staged されていますが VERSION が更新されていません（$INDEX_VERSION）。"
+  echo "    → 自動でパッチバージョンを上げてコミットに含めます。"
+
+  bash ./scripts/sync-version.sh bump
+
+  # Stage version files (and optional synced files if updated by scripts)
+  git add VERSION .claude-plugin/plugin.json 2>/dev/null || true
+  git add .claude-plugin/marketplace.json README.md 2>/dev/null || true
+
+  NEW_VERSION="$(cat VERSION | tr -d '[:space:]')"
+  echo "✅ VERSION を自動更新しました: $BASE_VERSION → $NEW_VERSION"
+fi
+
+exit 0
+
+

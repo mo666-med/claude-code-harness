@@ -10,6 +10,8 @@ set -e
 
 VERSION_FILE="VERSION"
 PLUGIN_JSON=".claude-plugin/plugin.json"
+MARKETPLACE_JSON=".claude-plugin/marketplace.json"
+README_FILE="README.md"
 
 # 現在のバージョンを取得
 get_version() {
@@ -54,6 +56,32 @@ sync_version() {
     fi
 
     echo "✅ plugin.json を更新: $current → $version"
+
+    # Optional: marketplace.json / README badge also follow VERSION
+    sync_optional_files "$version"
+}
+
+# Optional sync for marketplace + README badge
+sync_optional_files() {
+    local version="$1"
+
+    # marketplace.json
+    if [ -f "$MARKETPLACE_JSON" ]; then
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            sed -i '' -E "s/\"version\": \"[0-9]+\.[0-9]+\.[0-9]+\"/\"version\": \"$version\"/g" "$MARKETPLACE_JSON"
+        else
+            sed -i -E "s/\"version\": \"[0-9]+\.[0-9]+\.[0-9]+\"/\"version\": \"$version\"/g" "$MARKETPLACE_JSON"
+        fi
+    fi
+
+    # README badge
+    if [ -f "$README_FILE" ]; then
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            sed -i '' -E "s|\\[!\\[Version: [0-9]+\\.[0-9]+\\.[0-9]+\\]\\(https://img\\.shields\\.io/badge/version-[0-9]+\\.[0-9]+\\.[0-9]+-blue\\.svg\\)\\]\\(VERSION\\)|[![Version: ${version}](https://img.shields.io/badge/version-${version}-blue.svg)](VERSION)|" "$README_FILE" || true
+        else
+            sed -i -E "s|\\[!\\[Version: [0-9]+\\.[0-9]+\\.[0-9]+\\]\\(https://img\\.shields\\.io/badge/version-[0-9]+\\.[0-9]+\\.[0-9]+-blue\\.svg\\)\\]\\(VERSION\\)|[![Version: ${version}](https://img.shields.io/badge/version-${version}-blue.svg)](VERSION)|" "$README_FILE" || true
+        fi
+    fi
 }
 
 # パッチバージョンを上げる

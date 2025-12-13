@@ -114,6 +114,12 @@ Before submitting:
    ./scripts/ci/check-consistency.sh
    ```
 
+2. (Recommended) Enable pre-commit hooks (auto bump patch version when code changes):
+
+   ```bash
+   ./scripts/install-git-hooks.sh
+   ```
+
 2. Test locally in a separate project using `--plugin-dir`:
 
    ```bash
