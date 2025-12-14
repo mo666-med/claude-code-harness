@@ -1,5 +1,5 @@
 ---
-description: Plans.md / session-log.md 等の自動整理
+description: "[オプション] Plans.md / session-log.md 等の自動整理"
 ---
 
 # /cleanup - ファイルの自動整理

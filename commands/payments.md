@@ -1,5 +1,5 @@
 ---
-description: 決済機能の実装（Stripe）
+description: "[オプション] 決済機能の実装（Stripe）"
 ---
 
 # /payments - 決済機能の実装

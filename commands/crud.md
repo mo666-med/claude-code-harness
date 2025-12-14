@@ -1,5 +1,5 @@
 ---
-description: CRUD自動生成（検証・認可・本番対応）
+description: "[オプション] CRUD自動生成（検証・認可・本番対応）"
 ---
 
 # /crud - CRUD自動生成（本番環境対応）

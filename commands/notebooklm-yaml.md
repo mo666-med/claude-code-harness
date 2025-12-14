@@ -1,5 +1,5 @@
 ---
-description: NotebookLMの「スライド資料をカスタマイズ」で使うデザインYAMLを2案生成
+description: "[オプション] NotebookLMの「スライド資料をカスタマイズ」で使うデザインYAMLを2案生成"
 ---
 
 # /notebooklm-yaml - NotebookLM用スライドデザインYAML（2案）

@@ -1,5 +1,5 @@
 ---
-description: UIコンポーネント生成（shadcn/ui 等）
+description: "[オプション] UIコンポーネント生成（shadcn/ui 等）"
 ---
 
 # /component - UIコンポーネント生成

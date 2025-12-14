@@ -6,7 +6,7 @@
 Claude Code を「Plan → Work → Review」の型で自律運用し、個人開発を“もう1段”プロ品質へ引き上げる **開発ハーネス（Claude Code プラグイン）** です。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version: 2.0.9](https://img.shields.io/badge/version-2.0.9-blue.svg)](VERSION)
+[![Version: 2.1.0](https://img.shields.io/badge/version-2.1.0-blue.svg)](VERSION)
 
 **現在のハーネススコア**: **92 / 100（S）**（→ [採点基準](#個人開発ハーネスの採点基準--スコア)）
 
@@ -314,7 +314,8 @@ export CLAUDE_MD_MAX_LINES=150
 | `/validate` | プロジェクト検証（env/依存/ビルド/テスト/デプロイ準備） |
 | `/auto-fix` | レビュー指摘事項の自動修正 |
 | `/cleanup` | Plans.md / session-log.md 等の自動整理 |
-| `/sync-status` | Plans.mdの進捗集計・状態同期（Cursor報告用） |
+| `/sync-status` | 進捗確認→Plans.md更新→次アクション提案（状況把握の起点） |
+| `/refactor` | コードの安全なリファクタリング（テスト維持・段階的実行） |
 
 ### 実装支援（よくある機能を最短で）
 
@@ -342,7 +343,7 @@ export CLAUDE_MD_MAX_LINES=150
 | `/remember` | 学習事項をRules/Commands/Skillsとして記録 |
 | `/localize-rules` | プロジェクト構造に合わせてルールをローカライズ |
 | `/sync-ssot-from-serena` | Serenaメモリを読み込み、decisions/patterns（SSOT）へ反映 |
-| `/sync-project-specs` | 仕様書/運用ドキュメント（Plans/AGENTS/Rules）を最新運用（PM↔Impl, pm:*）へ同期 |
+| `/sync-project-specs` | [念のため] 作業後にPlans.md等が更新されているか不明な時に実行 |
 | `/notebooklm-yaml` | NotebookLMのスライド用デザインYAMLを生成 |
 
 ---
@@ -360,7 +361,7 @@ export CLAUDE_MD_MAX_LINES=150
 - **B（70–79）**: 便利だが運用が属人化しやすい
 - **C（〜69）**: アイデア段階。仕組みの整合/検証が不足
 
-### 採点表（このリポジトリ: v2.0.3）
+### 採点表（このリポジトリ: v2.1.0）
 
 | カテゴリ | 配点 | 何を見るか | 本リポジトリ |
 | --- | ---: | --- | ---: |
@@ -422,7 +423,22 @@ claude-code-harness/
 
 > 詳細は [CHANGELOG.md](CHANGELOG.md) を参照してください（0.5.x は Imported history として同梱）。
 
-### 現行: v2.0.5（2025-12-14）
+### 現行: v2.1.0（2025-12-15）
+
+**Added**
+
+- `/refactor` コマンド: コードの安全なリファクタリング（テスト維持・段階的実行）
+- 並列実行ガイダンス: `/validate`, `/harness-review`, `/refactor`, `/work`, `/sync-status`, `/sync-project-specs` に判断ポイントを追加
+- 開発用/リポジトリ用ファイルの判断ガイド: `/harness-init`, `/ci-setup`, `/deploy-setup` に追加
+
+**Changed**
+
+- `/sync-status`: 進捗確認 → Plans.md更新 → 次アクション提案の一連フローに改善
+- `/sync-project-specs`: 「念のため」実行するオプションコマンドとして位置づけを明確化
+- コマンド説明の視覚的区別: メインコマンド 8 個 vs オプションコマンド（`[オプション]` プレフィックス）
+- `/start-task` を `[統合済→/work]` としてマーク（/work に機能統合）
+
+### 直前: v2.0.5（2025-12-14）
 
 **Changed**
 

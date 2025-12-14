@@ -1,5 +1,5 @@
 ---
-description: 学習事項をRules/Commands/Skillsとして記録
+description: "[オプション] 学習事項をRules/Commands/Skillsとして記録"
 ---
 
 # /remember - 学習事項をルール化・コマンド化・スキル化

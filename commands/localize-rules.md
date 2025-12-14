@@ -1,5 +1,5 @@
 ---
-description: プロジェクト構造に合わせてルールをローカライズ
+description: "[オプション] プロジェクト構造に合わせてルールをローカライズ"
 ---
 
 # /localize-rules

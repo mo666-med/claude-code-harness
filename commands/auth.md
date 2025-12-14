@@ -1,5 +1,5 @@
 ---
-description: 認証機能の実装（Clerk / Supabase Auth 等）
+description: "[オプション] 認証機能の実装（Clerk / Supabase Auth 等）"
 ---
 
 # /auth - 認証機能の実装

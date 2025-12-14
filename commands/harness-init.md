@@ -1,22 +1,27 @@
 ---
-description: プロジェクトセットアップ（組み込み init との衝突回避）
+description: プロジェクトセットアップ（環境診断→ファイル生成→SSOT同期→検証まで一括）
 ---
 
 # /harness-init - プロジェクトセットアップ
 
 VibeCoder が自然言語だけで開発を始められるよう、プロジェクトをセットアップします。
-**実際に動くコードまで生成**します。
+**環境診断から検証まで一括で実行**し、すぐに開発を始められる状態にします。
 
 ## バイブコーダー向け（こう言えばOK）
 
 - 「**新規プロジェクトを最速で立ち上げたい**」→ このコマンド
 - 「**Next.js + Supabase で**」のように希望があれば添える（未指定なら質問して決めます）
 - 「**まず動くものを作って、後で整えたい**」→ まず動作する土台を作り、Plans.md で次の手を提示します
+- 「**既存プロジェクトにハーネスを導入したい**」→ 既存コードを分析してワークフローを追加
 
 ## できること（成果物）
 
 - 実プロジェクト生成（例: create-next-app 等）＋初期セットアップ
-- `Plans.md` / `AGENTS.md` / `.claude/` 等を整備して、Plan→Work→Review を回せる状態にする
+- `Plans.md` / `AGENTS.md` / `CLAUDE.md` / `.claude/` 等を整備
+- **環境診断**（health-check 相当）
+- **SSOT 初期化**（decisions.md / patterns.md）
+- **最終検証**（validate 相当）
+- → **Plan→Work→Review をすぐに回せる状態**にする
 
 ---
 
@@ -306,13 +311,77 @@ cat package.json 2>/dev/null | head -10
 
 ### Step 3B: 新フォーマットへ移行（B を選択・推奨）
 
-1. まず `.claude/settings.json` を **安全ポリシー込みで作成/更新**（既存は非破壊マージ）  
+1. まず `.claude/settings.json` を **安全ポリシー込みで作成/更新**（既存は非破壊マージ）
    → `ccp-generate-claude-settings` を実行
-2. 次に `AGENTS.md` / `CLAUDE.md` / `Plans.md` を **既存内容を引き継ぎつつ新フォーマットへ移行**（対話で引き継ぎ項目を確定）  
+2. 次に `AGENTS.md` / `CLAUDE.md` / `Plans.md` を **既存内容を引き継ぎつつ新フォーマットへ移行**（対話で引き継ぎ項目を確定）
    → `ccp-migrate-workflow-files` を実行
    - `Plans.md` はタスク保持マージ（`ccp-merge-plans` 方針）
    - `AGENTS.md` / `CLAUDE.md` はテンプレ骨格 + 「移行したプロジェクト固有ルール」を適切な場所に再配置
    - 変更前に `.claude-code-harness/backups/` にバックアップを残す
+
+---
+
+## Phase 3: セットアップ完了処理（共通）
+
+**新規・既存プロジェクト共通で実行する**
+
+### Step 1: 環境診断
+
+必須ツールの存在確認：
+
+```bash
+# Git
+command -v git >/dev/null 2>&1 && echo "✅ git" || echo "❌ git"
+
+# Node.js / npm（該当する場合）
+command -v node >/dev/null 2>&1 && echo "✅ node $(node -v)" || echo "⚠️ node"
+
+# GitHub CLI（オプション）
+command -v gh >/dev/null 2>&1 && echo "✅ gh" || echo "⚠️ gh (CI自動修正に必要)"
+```
+
+問題があれば警告を表示し、解決方法を提示。
+
+### Step 2: SSOT 初期化
+
+`.claude/memory/` が存在しない場合、作成：
+
+- `decisions.md` - 意思決定記録（空テンプレート）
+- `patterns.md` - 再利用パターン（空テンプレート）
+
+**既存の Serena メモリ（`.serena/memories/`）がある場合**:
+→ 重要な決定事項を抽出して SSOT に反映（`/sync-ssot-from-serena` 相当）
+
+### Step 3: 運用ドキュメント同期
+
+`Plans.md` / `AGENTS.md` / `CLAUDE.md` が最新の運用形式（PM↔Impl マーカー等）に沿っているか確認。
+古い形式の場合は更新を提案（`/sync-project-specs` 相当）。
+
+### Step 4: 最終検証
+
+プラグイン/プロジェクト構造の検証：
+
+```bash
+# プラグインリポジトリの場合
+[ -f tests/validate-plugin.sh ] && bash tests/validate-plugin.sh
+
+# 一般プロジェクトの場合
+[ -f package.json ] && npm run lint --if-present
+```
+
+### Step 5: セットアップ完了レポート
+
+> ✅ **セットアップが完了しました！**
+>
+> **環境診断**: ✅ OK
+> **ワークフローファイル**: ✅ 作成済み
+> **SSOT**: ✅ 初期化済み
+> **検証**: ✅ OK
+>
+> **次にやること：**
+> - 「`/plan` 〇〇を作りたい」→ プランを作成
+> - 「`/work`」→ Plans.md のタスクを実行
+> - 「`/sync-status`」→ 現在の状態を確認
 
 ---
 
@@ -336,3 +405,26 @@ cat package.json 2>/dev/null | head -10
 - **実際にコードを生成**: ファイル構造だけでなく動くコード
 - **具体的なタスクを Plans.md に追加**: 空の計画にしない
 - **次のアクションを常に提示**: VibeCoder が迷わないように
+
+---
+
+## ⚠️ 開発用 vs リポジトリ用のファイル
+
+**このコマンドで生成されるファイルの分類:**
+
+| ファイル | 用途 | コミット |
+|---------|------|---------|
+| `AGENTS.md`, `CLAUDE.md`, `Plans.md` | 開発ワークフロー | プロジェクトによる |
+| `.claude/settings.json` | 開発時セーフティ | 開発用（.gitignore） |
+| `.claude/memory/*` | セッション記憶 | 開発用（.gitignore） |
+
+**判断基準:**
+
+| 質問 | Yes → | No → |
+|------|-------|------|
+| このプロジェクトの機能に影響するか？ | リポジトリにコミット | 開発用 |
+| エンドユーザーや他の開発者に必要か？ | リポジトリにコミット | 開発用 |
+
+**例: プラグイン開発でこのコマンドを実行した場合**
+- プラグインの機能には関係ないため、生成されたワークフローファイルは開発用
+- `.gitignore` にすでに追加されていることを確認

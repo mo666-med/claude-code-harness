@@ -1,5 +1,5 @@
 ---
-description: Analytics統合（GA/Vercel Analytics 等）
+description: "[オプション] Analytics統合（GA/Vercel Analytics 等）"
 ---
 
 # /analytics - Analytics統合

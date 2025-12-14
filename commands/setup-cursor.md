@@ -1,5 +1,5 @@
 ---
-description: Cursor連携のセットアップ（.cursor/commands 生成）
+description: "[オプション] Cursor連携のセットアップ（.cursor/commands 生成）"
 ---
 
 # /setup-cursor - Cursor連携の有効化
