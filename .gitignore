@@ -18,6 +18,7 @@ Thumbs.db
 .claude/
 .serena/
 .mcp.json
+.github/mlc_config.json
 
 # 2-Agent setup files (auto-generated)
 /AGENTS.md
