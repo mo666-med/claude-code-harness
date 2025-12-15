@@ -303,9 +303,8 @@ export CLAUDE_MD_MAX_LINES=150
 | --- | --- | --- | --- |
 | `/harness-init` | 初期化・導線づくり | 最初に1回（新規/既存どちらも） | `Plans.md`/`AGENTS.md`/`CLAUDE.md`（+任意でSSOT） |
 | `/plan-with-agent` | 計画・合意形成 | 何を作るか決める/詰まった時 | `Plans.md` 更新 |
-| `/work` | 実装 | Plans のタスクを進める | コード変更 + `Plans.md` 更新 |
+| `/work` | 実装（並列実行対応） | Plans のタスクを進める | コード変更 + `Plans.md` 更新 |
 | `/harness-review` | レビュー | 実装後/PR前/納品前 | 多観点レビュー結果（必要なら修正へ） |
-| `/parallel-tasks` | 並列実行 | 複数タスクを同時に進める | 統合レポート |
 | `/skill-list` | スキル一覧 | 使える機能を確認したい | スキル一覧表示 |
 
 ### 品質/運用（信頼性を上げる）
@@ -510,7 +509,7 @@ claude-code-harness/
 
 - Adaptive Setup（プロジェクト分析）
 - セッション監視フック（セッション開始/終了サマリー、変更追跡）
-- `/parallel-tasks`（並列タスク実行）
+- `/work`（並列実行対応を強化）
 - `/remember`（学習事項の自動ルール化）
 
 ### 移行メモ（重要）
