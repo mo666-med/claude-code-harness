@@ -1,5 +1,6 @@
 ---
 description: Cursor(PM)向けの完了報告を生成
+description-en: Generate completion report for Cursor (PM)
 ---
 
 # /handoff-to-cursor - 完了報告（PMへ貼り付け / 互換）

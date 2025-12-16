@@ -1,5 +1,6 @@
 ---
 description: Plans.md / session-log.md 等の自動整理
+description-en: Auto-cleanup Plans.md / session-log.md
 ---
 
 # /cleanup - ファイルの自動整理

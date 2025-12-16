@@ -1,5 +1,6 @@
 ---
 description: "[オプション] Serenaメモリを読み込み、decisions/patterns（SSOT）へ反映"
+description-en: "[Optional] Sync Serena memory to SSOT (decisions/patterns)"
 ---
 
 # /sync-ssot-from-serena - Serenaメモリ→SSOT反映

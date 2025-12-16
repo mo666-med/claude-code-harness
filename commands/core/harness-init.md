@@ -1,5 +1,6 @@
 ---
 description: プロジェクトセットアップ（環境診断→ファイル生成→SSOT同期→検証まで一括）
+description-en: Project setup (environment check → file generation → SSOT sync → validation)
 ---
 
 # /harness-init - プロジェクトセットアップ
@@ -34,23 +35,50 @@ VibeCoder が自然言語だけで開発を始められるよう、プロジェ�
 
 ---
 
-## ⚠️ 最初に確認: モード選択（Phase 0）
+## ⚠️ 最初に確認: 言語選択 & モード選択（Phase 0）
 
 **重要**: プロジェクト分析の前に、必ずこのステップを実行すること。
 
-> 🤔 **どのモードで開発しますか？**
+### Step 0-1: 言語選択 / Language Selection
+
+> 🌐 **Which language? / どの言語で使いますか？**
 >
-> **🅰️ Solo モード**（Claude Code だけで開発）
+> **🇯🇵 日本語 (JA)**
+> - すべてのメッセージ・コマンド説明を日本語で表示
+> - VibeCoder 向けの自然な言い回しに対応
+>
+> **🇺🇸 English (EN)**
+> - All messages and command descriptions in English
+> - Natural language commands supported
+>
+> JA / EN ?
+
+**回答を待つ**
+
+選択に応じて `claude-code-harness.config.json` に以下を設定:
+```json
+{
+  "i18n": {
+    "language": "ja"  // or "en"
+  }
+}
+```
+
+### Step 0-2: モード選択
+
+> 🤔 **どのモードで開発しますか？ / Which development mode?**
+>
+> **🅰️ Solo モード / Solo Mode**（Claude Code だけで開発）
 > - あなたが直接 Claude Code に話しかけて開発
 > - シンプル・すぐ始められる
 > - 個人プロジェクト向け
 >
-> **🅱️ 2-Agent モード**（Cursor + Claude Code で役割分担）
+> **🅱️ 2-Agent モード / 2-Agent Mode**（Cursor + Claude Code で役割分担）
 > - **Cursor (PM)** が計画・レビュー・本番デプロイ
 > - **Claude Code (Worker)** が実装・テスト・stagingデプロイ
 > - チーム開発・大規模プロジェクト向け
 >
-> A / B どちらですか？
+> A / B どちらですか？ / Which one?
 
 **回答を待つ**
 

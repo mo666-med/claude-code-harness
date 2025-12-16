@@ -167,6 +167,19 @@
         }
       },
       "default": {}
+    },
+    "i18n": {
+      "type": "object",
+      "description": "Internationalization settings / 国際化設定",
+      "properties": {
+        "language": {
+          "type": "string",
+          "enum": ["ja", "en"],
+          "default": "ja",
+          "description": "Display language for commands and messages (ja: 日本語, en: English)"
+        }
+      },
+      "default": {}
     }
   },
   "additionalProperties": false

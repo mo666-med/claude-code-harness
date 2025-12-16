@@ -1,5 +1,6 @@
 ---
 description: "[オプション] CI/CD構築（GitHub Actions）"
+description-en: "[Optional] Set up CI/CD (GitHub Actions)"
 ---
 
 # /ci-setup - CI/CD構築（GitHub Actions）

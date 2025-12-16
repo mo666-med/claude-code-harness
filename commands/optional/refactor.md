@@ -1,5 +1,6 @@
 ---
 description: "[オプション] コードの安全なリファクタリング（テスト維持・段階的実行）"
+description-en: "[Optional] Safe refactoring (test-preserved, incremental)"
 ---
 
 # /refactor - 安全なリファクタリング

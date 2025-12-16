@@ -1,5 +1,6 @@
 ---
 description: 受託開発プラン策定（合意形成〜実装計画）
+description-en: Create development plan (requirements → implementation plan)
 ---
 
 # /plan-with-agent - 受託開発プラン策定

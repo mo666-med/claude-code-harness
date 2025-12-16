@@ -1,5 +1,6 @@
 ---
 description: Plans.mdのタスクを実行（Solo/2-Agent両対応、並列実行を積極活用）
+description-en: Execute Plans.md tasks (Solo/2-Agent, parallel execution enabled)
 ---
 
 # /work - 計画の実行

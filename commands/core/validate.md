@@ -1,5 +1,6 @@
 ---
 description: "[オプション] プロジェクト検証（env/依存/ビルド/テスト/デプロイ準備）"
+description-en: "[Optional] Project validation (env/deps/build/test/deploy)"
 ---
 
 # /validate - プロジェクトの検証

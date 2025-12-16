@@ -5,7 +5,7 @@
 **思考の流れを妨げない開発体験**
 Claude Code を「Plan → Work → Review」の型で自律運用し、個人開発を“もう1段”プロ品質へ引き上げる **開発ハーネス（Claude Code プラグイン）** です。
 
-[![Version: 2.2.2](https://img.shields.io/badge/version-2.2.2-blue.svg)](VERSION)
+[![Version: 2.3.0](https://img.shields.io/badge/version-2.3.0-blue.svg)](VERSION)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE.md)
 
 **現在のハーネススコア**: **92 / 100（S）**（→ [採点基準](#個人開発ハーネスの採点基準--スコア)）
@@ -425,13 +425,18 @@ claude-code-harness/
 
 > 詳細は [CHANGELOG.md](CHANGELOG.md) を参照してください（0.5.x は Imported history として同梱）。
 
-### 現行: v2.2.2（2025-12-17）
+### 現行: v2.3.0（2025-12-17）
+
+**Added**
+
+- **i18n（国際化）対応**: 日本語/英語を選べるように
+  - `/harness-init` で言語選択（JA/EN）
+  - 全16コマンドに英語説明を追加
+  - 設定ファイルで `i18n.language` を指定可能
 
 **Changed**
 
 - **ライセンスをMITに変更**: 公式リポジトリへのPR提出が可能に
-  - 配布・再配布が自由（fork、PR、パッケージ化OK）
-  - 使い方は変わらず（個人利用・商用利用・改変は引き続き自由）
 
 ### 直前: v2.2.1（2025-12-16）
 
