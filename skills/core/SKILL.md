@@ -1,6 +1,6 @@
 ---
 name: core
-description: "Claude Code Harness の中核機能。プロジェクト設定、ワークフローファイル生成、メモリ管理など基盤となるスキル群。"
+description: "Provides core setup and configuration capabilities. Use when user mentions 'セットアップ', '初期化', 'CLAUDE.md', 'AGENTS.md', 'Plans.md', 'ワークフローファイル', '2-Agent', 'メモリ', 'SSOT', or asks to initialize/configure a project."
 allowed-tools: ["Read", "Write", "Edit", "Grep", "Glob", "Bash"]
 metadata:
   skillport:

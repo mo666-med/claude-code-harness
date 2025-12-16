@@ -1,6 +1,6 @@
 ---
 name: optional
-description: "拡張機能スキル群。認証、決済、デプロイ、アナリティクス等の機能を追加する際に使用。"
+description: "Adds optional features to projects. Use when user mentions 'ログイン', '認証', 'auth', 'Clerk', 'Supabase', '決済', 'Stripe', 'payments', 'デプロイ', 'Vercel', 'Netlify', 'アナリティクス', 'GA', 'コンポーネント', 'フィードバック', or asks to add authentication/payments/deploy features."
 allowed-tools: ["Read", "Write", "Edit", "Grep", "Glob", "Bash"]
 metadata:
   skillport:

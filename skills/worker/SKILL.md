@@ -1,6 +1,6 @@
 ---
 name: worker
-description: "タスク実行スキル群。機能実装、テスト作成、コードレビュー、ビルド検証など実作業を担当。"
+description: "Executes implementation tasks including coding, testing, and reviewing. Use when user mentions '実装', 'implement', 'テスト', 'test', 'レビュー', 'review', 'コードレビュー', 'セルフレビュー', 'ビルド', 'build', '品質チェック', or asks to implement features, write tests, or review code."
 allowed-tools: ["Read", "Write", "Edit", "Grep", "Glob", "Bash"]
 metadata:
   skillport:
@@ -8,7 +8,6 @@ metadata:
     tags: [implementation, testing, review, build]
     alwaysApply: false
 ---
-
 # Worker Skills
 
 実際のタスク実行を担当するスキル群です。
@@ -28,34 +27,34 @@ metadata:
 
 ### 実装系
 
-| スキル | 用途 |
-|--------|------|
-| ccp-work-impl-feature | 機能の実装 |
-| ccp-work-write-tests | テストコードの作成 |
+| スキル                | 用途               |
+| --------------------- | ------------------ |
+| ccp-work-impl-feature | 機能の実装         |
+| ccp-work-write-tests  | テストコードの作成 |
 
 ### レビュー系
 
-| スキル | 用途 |
-|--------|------|
-| ccp-review-changes | 変更内容のレビュー |
-| ccp-review-quality | コード品質チェック |
-| ccp-review-security | セキュリティレビュー |
-| ccp-review-performance | パフォーマンスレビュー |
+| スキル                   | 用途                     |
+| ------------------------ | ------------------------ |
+| ccp-review-changes       | 変更内容のレビュー       |
+| ccp-review-quality       | コード品質チェック       |
+| ccp-review-security      | セキュリティレビュー     |
+| ccp-review-performance   | パフォーマンスレビュー   |
 | ccp-review-accessibility | アクセシビリティチェック |
-| ccp-review-aggregate | レビュー結果の集約 |
-| ccp-review-apply-fixes | レビュー指摘の適用 |
+| ccp-review-aggregate     | レビュー結果の集約       |
+| ccp-review-apply-fixes   | レビュー指摘の適用       |
 
 ### 検証系
 
-| スキル | 用途 |
-|--------|------|
-| ccp-verify-build | ビルド検証 |
+| スキル             | 用途       |
+| ------------------ | ---------- |
+| ccp-verify-build   | ビルド検証 |
 | ccp-error-recovery | エラー復旧 |
 
 ### ドキュメント系
 
-| スキル | 用途 |
-|--------|------|
+| スキル                         | 用途             |
+| ------------------------------ | ---------------- |
 | ccp-docs-notebooklm-slide-yaml | スライドYAML生成 |
 
 ---

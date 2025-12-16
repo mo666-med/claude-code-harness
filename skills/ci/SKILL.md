@@ -1,6 +1,6 @@
 ---
 name: ci
-description: "CI/CD パイプラインの問題を解決する。GitHub Actions、GitLab CI 等でビルドやテストが失敗した場合に使用。"
+description: "Diagnoses and fixes CI/CD pipeline failures. Use when user mentions 'CI', 'GitHub Actions', 'GitLab CI', 'ビルドエラー', 'テスト失敗', 'パイプライン', 'CIが落ちた', or asks to analyze build/test failures."
 allowed-tools: ["Read", "Grep", "Bash"]
 metadata:
   skillport:

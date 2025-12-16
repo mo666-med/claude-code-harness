@@ -1,6 +1,6 @@
 ---
 name: maintenance
-description: "ファイルの整理・クリーンアップ。Plans.mdやログが肥大化した場合に使用。"
+description: "Cleans up and organizes project files. Use when user mentions '整理', 'cleanup', 'アーカイブ', 'archive', '肥大化', 'Plans.md', 'session-log', or asks to clean up old tasks, archive completed items, or organize files."
 allowed-tools: ["Read", "Write", "Edit", "Bash"]
 metadata:
   skillport:
