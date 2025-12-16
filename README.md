@@ -425,7 +425,23 @@ claude-code-harness/
 
 > 詳細は [CHANGELOG.md](CHANGELOG.md) を参照してください（0.5.x は Imported history として同梱）。
 
-### 現行: v2.1.2（2025-12-15）
+### 現行: v2.2.1（2025-12-16）
+
+**Changed**
+
+- **エージェント定義を公式形式に統一**: 6つのエージェント（code-reviewer、ci-cd-fixer、error-recovery、project-analyzer、project-scaffolder、project-state-updater）のフロントマターを `name/tools/model/color` 形式に標準化
+- **スキルにProgressive Disclosure構造を追加**: `plans-management` と `workflow-guide` に `references/` と `examples/` サブディレクトリを追加し、段階的情報開示を実現
+- **CHANGELOGをユーザー目線形式に改善**: Before/After比較と「あなたにとって何が変わるか」セクションを追加
+
+### 直前: v2.2.0（2025-12-15）
+
+**Changed**
+
+- **ライセンス変更**: MITライセンスから独自ライセンスに変更
+  - 使い方は変わらず（個人利用・商用利用・改変は自由）
+  - 再配布・販売・類似サービス化は禁止
+
+### 直前: v2.1.2（2025-12-15）
 
 **Changed**
 
