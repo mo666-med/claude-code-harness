@@ -1,4 +1,4 @@
-# Claude Code Harness - 開発フロー完全ガイド
+# Claude harness - 開発フロー完全ガイド
 
 **VibeCoder向け**: 1人でクライアントプロジェクトを遂行するための実践的な開発フロー
 

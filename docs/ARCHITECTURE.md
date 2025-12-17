@@ -1,4 +1,4 @@
-# Claude Code Harness Architecture
+# Claude harness Architecture
 
 ## 1. 概要
 

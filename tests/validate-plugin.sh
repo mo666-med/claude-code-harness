@@ -9,7 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_ROOT="$(dirname "$SCRIPT_DIR")"
 
 echo "=========================================="
-echo "Claude Code Harness - プラグイン検証テスト"
+echo "Claude harness - プラグイン検証テスト"
 echo "=========================================="
 echo ""
 

@@ -18,7 +18,7 @@ RED='\033[0;31m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}Claude Code Harness - 既存プロジェクト適用${NC}"
+echo -e "${BLUE}Claude harness - 既存プロジェクト適用${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 
@@ -286,7 +286,7 @@ if [ -f "$RULES_PATH" ]; then
     echo -e "${YELLOW}⚠${NC}  Project Rules は既に存在します（上書きしません）: $RULES_PATH"
 else
     cat > "$RULES_PATH" << EOF
-# Claude Code Harness - Project Rules
+# Claude harness - Project Rules
 
 このプロジェクトは **claude-code-harness** を使用しています。
 
@@ -419,7 +419,7 @@ echo ""
 if [ -f ".gitignore" ]; then
     if ! grep -q ".claude-code-harness" .gitignore; then
         echo "" >> .gitignore
-        echo "# Claude Code Harness" >> .gitignore
+        echo "# Claude harness" >> .gitignore
         echo ".claude-code-harness/" >> .gitignore
         echo -e "${GREEN}✓${NC} .gitignoreに追加しました"
     fi

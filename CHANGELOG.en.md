@@ -10,6 +10,29 @@ Change history for claude-code-harness.
 
 ---
 
+## [2.4.1] - 2025-12-17
+
+### What's Changed for You
+
+**Plugin renamed to "Claude harness". Fresh branding with new logo and hero image.**
+
+#### Before
+- Plugin was named "Claude Code Harness"
+- Old naming scattered across documentation and scripts
+
+#### After
+- **New name "Claude harness"**: Simpler and easier to remember
+- **New logo & hero image**: Added SVG logo and PNG hero image
+- Unified naming across all documentation
+
+### Changes
+- Changed plugin.json name to `claude-harness`
+- Set logo and hero image in README.md
+- Updated naming in all documentation (9 files)
+- Removed old hero image (hero.png)
+
+---
+
 ## [2.4.0] - 2025-12-17
 
 ### What's Changed for You

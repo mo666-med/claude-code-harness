@@ -1,11 +1,13 @@
-# Claude Code Harness
+# Claude harness
 
-![Claude Code Harness](docs/images/hero.png)
+![Claude harness](docs/images/Claude%20harness_logo.svg)
+
+![Claude harness](docs/images/Claude%20harness_TOP.png)
 
 **思考の流れを妨げない開発体験**
 Claude Code を「Plan → Work → Review」の型で自律運用し、個人開発を“もう1段”プロ品質へ引き上げる **開発ハーネス（Claude Code プラグイン）** です。
 
-[![Version: 2.4.0](https://img.shields.io/badge/version-2.4.0-blue.svg)](VERSION)
+[![Version: 2.4.1](https://img.shields.io/badge/version-2.4.1-blue.svg)](VERSION)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE.md)
 
 **現在のハーネススコア**: **92 / 100（S）**（→ [採点基準](#個人開発ハーネスの採点基準--スコア)）
@@ -363,7 +365,7 @@ export CLAUDE_MD_MAX_LINES=150
 - **B（70–79）**: 便利だが運用が属人化しやすい
 - **C（〜69）**: アイデア段階。仕組みの整合/検証が不足
 
-### 採点表（このリポジトリ: v2.4.0）
+### 採点表（このリポジトリ: v2.4.1）
 
 | カテゴリ | 配点 | 何を見るか | 本リポジトリ |
 | --- | ---: | --- | ---: |
@@ -425,28 +427,22 @@ claude-code-harness/
 
 > 詳細は [CHANGELOG.md](CHANGELOG.md) を参照してください（0.5.x は Imported history として同梱）。
 
-### 現行: v2.4.0（2025-12-17）
+### 現行: v2.4.1（2025-12-17）
+
+**Changed**
+
+- **リブランディング**: 「Claude Code Harness」→「Claude harness」に名称変更
+  - 新ロゴ（SVG）とヒーロー画像（PNG）を追加
+  - 全ドキュメントの名称参照を更新
+
+### 直前: v2.4.0（2025-12-17）
 
 **Added**
 
-- **i18n（国際化）対応**: 日本語/英語を選べるように
-  - `/harness-init` で言語選択（JA/EN）
-  - 全16コマンドに英語説明を追加
-  - 設定ファイルで `i18n.language` を指定可能
-
-**Changed**
-
-- **ライセンスをMITに変更**: 公式リポジトリへのPR提出が可能に
+- **並列レビュー機能**: `/harness-review` がサブエージェントを並列起動（最大75%時間短縮）
+- **CI修正委譲**: 複雑なCI失敗を ci-cd-fixer サブエージェントに自動委譲
 
 ### 直前: v2.2.1（2025-12-16）
-
-**Changed**
-
-- **エージェント定義を公式形式に統一**: 6つのエージェントのフロントマターを `name/tools/model/color` 形式に標準化
-- **スキルにProgressive Disclosure構造を追加**: `plans-management` と `workflow-guide` に `references/` と `examples/` サブディレクトリを追加
-- **CHANGELOGをユーザー目線形式に改善**: Before/After比較と「あなたにとって何が変わるか」セクションを追加
-
-### 直前: v2.2.0（2025-12-15）
 
 **Changed**
 

@@ -1,4 +1,4 @@
-# Claude Code Harness - 実装ガイド
+# Claude harness - 実装ガイド
 
 このガイドは、**VibeCoder**（技術的理解のある非エンジニア）が、claude-code-harnessを使ってクライアントプロジェクトを効率的に遂行するための実践的な手順を提供します。
 
