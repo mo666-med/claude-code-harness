@@ -50,6 +50,9 @@ claude-code-harness の変更履歴です。
 - CLAUDE.md にスキルカテゴリ表を追加
 - 旧カテゴリ（core, optional, worker）を削除
 
+### 謝辞
+- 階層型スキル構造のアイデア: [AIまさお氏](https://note.com/masa_wunder) のフィードバックに基づいて実装
+
 ---
 
 ## [2.3.1] - 2025-12-16

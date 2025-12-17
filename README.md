@@ -574,7 +574,7 @@ claude-code-harness/
 - [アーキテクチャ](docs/ARCHITECTURE.md)
 - [Cursor統合（任意）](docs/CURSOR_INTEGRATION.md)
 - [非同期サブエージェント](docs/ASYNC_SUBAGENTS.md)
-- [変更履歴](CHANGELOG.md)
+- [変更履歴 / Changelog](CHANGELOG.md) | [English](CHANGELOG.en.md)
 
 ---
 
@@ -610,6 +610,13 @@ claude-code-harness/
 2. [解決策](docs/presentation/slide2_solution.png)
 3. [具体的な体験](docs/presentation/slide3_experience.png)
 4. [今すぐ始める](docs/presentation/slide4_cta.png)
+
+---
+
+## 謝辞 / Acknowledgements
+
+- **階層型スキル構造のアイデア**: [AIまさお氏](https://note.com/masa_wunder) のフィードバックに基づいて実装
+- **Hierarchical Skill Structure**: Implemented based on feedback from [AI Masao](https://note.com/masa_wunder)
 
 ---
 
