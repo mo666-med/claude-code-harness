@@ -24,8 +24,8 @@ Cursor (PM)          Claude Code (Worker)
     │  (/handoff-to-claude)      │
     │──────────────────────>│
     │                       │
-    │                       │ 2. 実装・テスト・コミット
-    │                       │    (/start-task)
+    │                       │ 2. 状況把握→実装→コミット
+    │                       │    (/sync-status → /work)
     │                       │
     │  3. 完了報告          │
     │  (/handoff-to-cursor) │

@@ -16,9 +16,6 @@ roles:
   - phase: sync-status
     workflow: default
     description: "進捗状況の確認・報告"
-  - phase: start-task
-    workflow: default
-    description: "タスクの開始・セットアップ"
 
 # このプロファイルで使用可能なスキル
 skills:
@@ -59,8 +56,8 @@ error_recovery:
 handoff:
   # 作業完了を Cursor に報告するコマンド
   to_pm: "/handoff-to-pm-claude"
-  # Cursor からタスクを受け取る際のコマンド
-  from_pm: "/start-task"
+  # PM からタスクを受け取り状況を確認するコマンド
+  from_pm: "/sync-status"
 
 # セーフティ設定（claude-code-harness.config.json の設定を優先）
 safety:

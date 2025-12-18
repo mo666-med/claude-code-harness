@@ -180,6 +180,18 @@
         }
       },
       "default": {}
+    },
+    "constitution": {
+      "type": "object",
+      "description": "Constitution file settings / 開発原則設定",
+      "properties": {
+        "path": {
+          "type": "string",
+          "default": "docs/constitution.md",
+          "description": "Path to the constitution file (quality gates, DoD, principles)"
+        }
+      },
+      "default": {}
     }
   },
   "additionalProperties": false

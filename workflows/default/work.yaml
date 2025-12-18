@@ -31,6 +31,22 @@ steps:
         - current_phase
     mode: required
 
+  # Step 2.5: タスク開始時のマーカー更新（/start-task 相当の機能を吸収）
+  # pm:依頼中 / cursor:依頼中 / cc:TODO → cc:WIP に自動遷移
+  - id: update-marker-to-wip
+    skill: ccp-plans-management
+    input:
+      files:
+        - Plans.md
+      action: update_marker
+      from: "pm:依頼中|cursor:依頼中|cc:TODO"
+      to: "cc:WIP"
+      target: target_tasks
+    output:
+      update_files:
+        - Plans.md
+    mode: required
+
   # Step 3: タスクの実行（ループ）
   - id: execute-task
     skill: ccp-work-impl-feature

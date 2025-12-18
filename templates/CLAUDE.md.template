@@ -158,9 +158,9 @@ git push
 
 | コマンド | 用途 |
 |---------|------|
-| `/start-task` | タスク開始 |
+| `/sync-status` | 状況把握・次アクション提案 |
+| `/work` | タスク実行（着手時に cc:WIP に自動更新） |
 | `/handoff-to-cursor` | 完了報告 |
-| `/sync-status` | 状態確認 |
 
 ---
 

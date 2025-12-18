@@ -138,6 +138,82 @@ if [ -f "$HOOKS_JSON" ]; then
 fi
 
 # ================================
+# 6. /start-task 廃止の回帰チェック
+# ================================
+echo ""
+echo "🚫 [6/7] /start-task 廃止の回帰チェック..."
+
+# 運用導線ファイル（CHANGELOG等の履歴は除外）
+START_TASK_TARGETS=(
+  "commands/"
+  "skills/"
+  "workflows/"
+  "profiles/"
+  "templates/"
+  "scripts/"
+  "DEVELOPMENT_FLOW_GUIDE.md"
+  "IMPLEMENTATION_GUIDE.md"
+  "README.md"
+)
+
+START_TASK_FOUND=0
+for target in "${START_TASK_TARGETS[@]}"; do
+  if [ -e "$PLUGIN_ROOT/$target" ]; then
+    # /start-task への参照を検索（履歴・説明文脈は除外）
+    # 除外パターン: 削除/廃止/Removed（履歴）, 相当/統合/従来/吸収（移行説明）, 改善/使い分け（CHANGELOG）
+    REFS=$(grep -rn "/start-task" "$PLUGIN_ROOT/$target" 2>/dev/null \
+      | grep -v "削除" | grep -v "廃止" | grep -v "Removed" \
+      | grep -v "相当" | grep -v "統合" | grep -v "従来" | grep -v "吸収" \
+      | grep -v "改善" | grep -v "使い分け" | grep -v "CHANGELOG" \
+      | grep -v "check-consistency.sh" \
+      || true)
+    if [ -n "$REFS" ]; then
+      echo "  ❌ /start-task 参照が残存: $target"
+      echo "$REFS" | head -3 | sed 's/^/      /'
+      START_TASK_FOUND=$((START_TASK_FOUND + 1))
+    fi
+  fi
+done
+
+if [ $START_TASK_FOUND -eq 0 ]; then
+  echo "  ✅ /start-task 参照なし（運用導線）"
+else
+  ERRORS=$((ERRORS + START_TASK_FOUND))
+fi
+
+# ================================
+# 7. docs/ 正規化の回帰チェック
+# ================================
+echo ""
+echo "📁 [7/7] docs/ 正規化の回帰チェック..."
+
+# proposal.md / priority_matrix.md のルート参照をチェック
+DOCS_TARGETS=(
+  "commands/"
+  "skills/"
+)
+
+DOCS_ISSUES=0
+for target in "${DOCS_TARGETS[@]}"; do
+  if [ -d "$PLUGIN_ROOT/$target" ]; then
+    # ルート直下の proposal.md / technical-spec.md / priority_matrix.md への参照を検索
+    # docs/ プレフィックスがないものを検出
+    REFS=$(grep -rn "proposal.md\|technical-spec.md\|priority_matrix.md" "$PLUGIN_ROOT/$target" 2>/dev/null | grep -v "docs/" | grep -v "\.template" || true)
+    if [ -n "$REFS" ]; then
+      echo "  ❌ docs/ プレフィックスなしの参照: $target"
+      echo "$REFS" | head -3 | sed 's/^/      /'
+      DOCS_ISSUES=$((DOCS_ISSUES + 1))
+    fi
+  fi
+done
+
+if [ $DOCS_ISSUES -eq 0 ]; then
+  echo "  ✅ docs/ 正規化OK"
+else
+  ERRORS=$((ERRORS + DOCS_ISSUES))
+fi
+
+# ================================
 # 結果サマリー
 # ================================
 echo ""
