@@ -33,6 +33,7 @@ REQUIRED_TEMPLATES=(
   "templates/cursor/commands/handoff-to-claude.md"
   "templates/cursor/commands/review-cc-work.md"
   "templates/claude/settings.security.json.template"
+  "templates/claude/settings.local.json.template"
   "templates/rules/workflow.md.template"
   "templates/rules/coding-standards.md.template"
   "templates/rules/plans-management.md.template"
@@ -141,7 +142,7 @@ fi
 # 6. /start-task 廃止の回帰チェック
 # ================================
 echo ""
-echo "🚫 [6/7] /start-task 廃止の回帰チェック..."
+echo "🚫 [6/8] /start-task 廃止の回帰チェック..."
 
 # 運用導線ファイル（CHANGELOG等の履歴は除外）
 START_TASK_TARGETS=(
@@ -185,7 +186,7 @@ fi
 # 7. docs/ 正規化の回帰チェック
 # ================================
 echo ""
-echo "📁 [7/7] docs/ 正規化の回帰チェック..."
+echo "📁 [7/8] docs/ 正規化の回帰チェック..."
 
 # proposal.md / priority_matrix.md のルート参照をチェック
 DOCS_TARGETS=(
@@ -211,6 +212,57 @@ if [ $DOCS_ISSUES -eq 0 ]; then
   echo "  ✅ docs/ 正規化OK"
 else
   ERRORS=$((ERRORS + DOCS_ISSUES))
+fi
+
+# ================================
+# 8. bypassPermissions 前提運用の回帰チェック
+# ================================
+echo ""
+echo "🔓 [8/8] bypassPermissions 前提運用の回帰チェック..."
+
+BYPASS_ISSUES=0
+
+# Check 1: disableBypassPermissionsMode が templates に戻っていないこと
+SECURITY_TEMPLATE="$PLUGIN_ROOT/templates/claude/settings.security.json.template"
+if [ -f "$SECURITY_TEMPLATE" ]; then
+  if grep -q "disableBypassPermissionsMode" "$SECURITY_TEMPLATE"; then
+    echo "  ❌ settings.security.json.template に disableBypassPermissionsMode が残存"
+    echo "      bypassPermissions 前提運用のため、この設定は削除してください"
+    BYPASS_ISSUES=$((BYPASS_ISSUES + 1))
+  else
+    echo "  ✅ disableBypassPermissionsMode なし"
+  fi
+fi
+
+# Check 2: permissions.ask に Edit / Write が入っていないこと
+if [ -f "$SECURITY_TEMPLATE" ]; then
+  if grep -q '"Edit' "$SECURITY_TEMPLATE" || grep -q '"Write' "$SECURITY_TEMPLATE"; then
+    echo "  ❌ settings.security.json.template の ask に Edit/Write が含まれている"
+    echo "      bypassPermissions 前提運用のため、Edit/Write は ask に入れないでください"
+    BYPASS_ISSUES=$((BYPASS_ISSUES + 1))
+  else
+    echo "  ✅ ask に Edit/Write なし"
+  fi
+fi
+
+# Check 3: settings.local.json.template が存在し、defaultMode が bypassPermissions であること
+LOCAL_TEMPLATE="$PLUGIN_ROOT/templates/claude/settings.local.json.template"
+if [ -f "$LOCAL_TEMPLATE" ]; then
+  if grep -q '"defaultMode"[[:space:]]*:[[:space:]]*"bypassPermissions"' "$LOCAL_TEMPLATE"; then
+    echo "  ✅ settings.local.json.template: defaultMode=bypassPermissions"
+  else
+    echo "  ❌ settings.local.json.template に defaultMode=bypassPermissions がありません"
+    BYPASS_ISSUES=$((BYPASS_ISSUES + 1))
+  fi
+else
+  echo "  ❌ settings.local.json.template が存在しません"
+  BYPASS_ISSUES=$((BYPASS_ISSUES + 1))
+fi
+
+if [ $BYPASS_ISSUES -eq 0 ]; then
+  echo "  ✅ bypassPermissions 前提運用OK"
+else
+  ERRORS=$((ERRORS + BYPASS_ISSUES))
 fi
 
 # ================================

@@ -27,7 +27,8 @@ claude-code-harness の変更履歴です。
 - **依存関係・並列記法**: Plans.md で `[depends:X]`, `[parallel:A,B]` などの拡張記法が使える
 - **docs/ 統一**: `/plan-with-agent` の成果物が `docs/proposal.md`, `docs/technical-spec.md`, `docs/priority_matrix.md` に統一
 - **constitution サポート**: `docs/constitution.md` で品質ゲート・DoD・原則を一元管理
-- **回帰防止**: CI で `/start-task` 廃止と docs/ 正規化の回帰をチェック
+- **bypassPermissions 前提運用**: 危険操作のみ deny/ask で制御し、編集確認の負担を削減（`settings.local.json` テンプレ追加）
+- **回帰防止**: CI で `/start-task` 廃止・docs/ 正規化・bypassPermissions 前提運用の回帰をチェック
 
 ### 変更内容
 
@@ -52,12 +53,13 @@ claude-code-harness の変更履歴です。
 
 #### Phase 5: 回帰防止チェックの強化
 - `scripts/ci/check-consistency.sh` に以下を追加：
-  - `/start-task` 廃止の回帰チェック（6/7）
-  - docs/ 正規化チェック（7/7）- `technical-spec.md` も対象に追加
+  - `/start-task` 廃止の回帰チェック（6/8）
+  - docs/ 正規化チェック（7/8）- `technical-spec.md` も対象に追加
+  - bypassPermissions 前提運用チェック（8/8）
 
 #### その他
 - `commands/core/plan-with-agent.md` の成果物一覧を統一
-- すべての検証テスト合格（35/35 plugin validation, 7/7 consistency checks）
+- すべての検証テスト合格（35/35 plugin validation, 8/8 consistency checks）
 
 ### 参照元（Based on）
 - [OpenSpec/spec-kit/cc-sdd](https://github.com/OpenSpec) - 依存関係・並列記法のコンセプト

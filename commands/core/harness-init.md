@@ -260,7 +260,8 @@ npm install @supabase/supabase-js lucide-react
 
 - 既存 `.claude/settings.json` がある場合は **非破壊でマージ**（既存の hooks/env 等は保持）
 - `permissions.allow|ask|deny` は **追記 + 重複排除**
-- `permissions.disableBypassPermissionsMode` は **必ず `"disable"`** にする（`--dangerously-skip-permissions` 抑止）
+- `permissions.disableBypassPermissionsMode` は **設定しない**（bypassPermissions を許可）
+  - セキュリティ要件で bypass を禁止したい場合のみ `"disable"` を設定（例: managed-settings.json）
 
 **実行**: `ccp-generate-claude-settings` スキルを実行して作成/更新すること。
 

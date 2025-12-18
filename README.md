@@ -7,7 +7,7 @@
 **思考の流れを妨げない開発体験**
 Claude Code を「Plan → Work → Review」の型で自律運用し、個人開発を“もう1段”プロ品質へ引き上げる **開発ハーネス（Claude Code プラグイン）** です。
 
-[![Version: 2.5.0](https://img.shields.io/badge/version-2.5.0-blue.svg)](VERSION)
+[![Version: 2.5.1](https://img.shields.io/badge/version-2.5.1-blue.svg)](VERSION)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE.md)
 
 **現在のハーネススコア**: **92 / 100（S）**（→ [採点基準](#個人開発ハーネスの採点基準--スコア)）
@@ -81,6 +81,12 @@ Claude Code の強み（実装スピード）を活かしつつ、個人開発�
 - **PermissionRequest 自動許可**（`scripts/permission-request.sh`）
   - `git status/diff/log`、`npm test`、`pytest` 等の **安全なコマンドは自動許可**
   - パイプ/リダイレクト/変数展開など “複雑そうなコマンド” は保守的に手動許可
+
+### bypassPermissions 前提の運用（推奨）
+
+- **方針**: `Edit` / `Write` を `permissions.ask` に入れず、**危険操作だけ** `deny` / `ask` で制御します（毎回の編集確認を避ける）
+- **使い方（プロジェクト限定・未コミット推奨）**: `.claude/settings.local.json` で `permissions.defaultMode: "bypassPermissions"` を設定
+  - テンプレ: `templates/claude/settings.local.json.template`
 
 ### “続きから自然に”再開できる（継続性）
 

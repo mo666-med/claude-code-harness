@@ -17,10 +17,24 @@ metadata:
 
 - **既存設定は保持**（`hooks` / `env` / `model` / `enabledPlugins` 等を消さない）
 - `permissions.allow|ask|deny` は **配列マージ + 重複排除**
-- `permissions.disableBypassPermissionsMode` は **常に `"disable"`**（bypassPermissions を封じる）
+- **bypassPermissions を前提とした運用**（危険操作のみ deny/ask で制御）
 - 既存ファイルが壊れている場合は **バックアップを残して再生成**
 
-根拠（公式）: `settings.json` と `permissions`（ask/deny/disableBypassPermissionsMode）  
+## bypassPermissions 前提の運用ポリシー
+
+**重要**: Edit / Write を `permissions.ask` に入れると毎回確認が出て生産性が落ちます。
+代わりに、bypassPermissions を有効にして危険操作のみを制御する方針を推奨します。
+
+- `permissions.deny`: 機密ファイル読み取り（.env, secrets, SSH鍵）、危険なDB操作
+- `permissions.ask`: ファイル削除、git push/reset/rebase/merge
+- **Edit / Write は ask に入れない**（確認が毎回出るのを避ける）
+
+初回 init 後は、以下どちらかで bypassPermissions を有効化する導線を案内します：
+
+- **推奨（プロジェクト限定・未コミット）**: `.claude/settings.local.json` に `permissions.defaultMode: "bypassPermissions"` を設定
+- **一時的（セッション限定）**: `claude --dangerously-skip-permissions`
+
+根拠（公式）: `settings.json` と `permissions`（ask/deny/disableBypassPermissionsMode）
 https://code.claude.com/docs/ja/settings
 
 ---
@@ -64,7 +78,7 @@ https://code.claude.com/docs/ja/settings
 
 - **top-level**: 既存を優先しつつ、ポリシー側の `permissions` を統合
 - `permissions.allow|ask|deny`: **ユニーク化して結合**（既存→ポリシーの順）
-- `permissions.disableBypassPermissionsMode`: **必ず `"disable"` に上書き**
+- `permissions.disableBypassPermissionsMode`: **設定しない**（bypassPermissions を許可）
 
 #### 実装（推奨コマンド）
 
@@ -72,16 +86,14 @@ https://code.claude.com/docs/ja/settings
 
 1. 既存とポリシーを読み込み
 2. `allow/ask/deny` を配列として結合 → `unique`（順序は多少変わってOK）
-3. `disableBypassPermissionsMode` を `"disable"` で固定
-4. `.claude/settings.json.tmp` に書き出し → 置換
+3. `.claude/settings.json.tmp` に書き出し → 置換
 
 `jq` がない場合（python3）:
 
 1. `json.load` で既存/ポリシーを読み込み
 2. `permissions` を辞書としてマージ
 3. `allow/ask/deny` は list を `dict.fromkeys` 等で重複排除（順序維持）
-4. `disableBypassPermissionsMode="disable"` を固定
-5. `indent=2, sort_keys=false` で出力
+4. `indent=2, sort_keys=false` で出力
 
 **注意**: 既存の `hooks` は消さないこと。`permissions` 以外は原則、既存を尊重する。
 
@@ -96,8 +108,8 @@ https://code.claude.com/docs/ja/settings
 
 - `.claude/settings.json` が存在し、JSONとしてパース可能
 - `permissions.deny` に `.env` / `secrets` / SSH鍵系の `Read(...)` が含まれる
-- `permissions.ask` に `Bash(rm:*)` / `Bash(git push:*)` 等が含まれる
-- `permissions.disableBypassPermissionsMode` が `"disable"`
+- `permissions.ask` に `Bash(rm:*)` / `Bash(git push:*)` 等が含まれる（**Edit / Write は含まない**）
+- `permissions.disableBypassPermissionsMode` が **設定されていない**（bypassPermissions 許可）
 
 ---
 
@@ -106,4 +118,35 @@ https://code.claude.com/docs/ja/settings
 - パース不可の場合でも **必ずバックアップ**を残す
 - 生成後に `jq empty` または `python -m json.tool` で妥当性を確認
 
+---
 
+## bypassPermissions 有効化の導線
+
+### Step 5: ユーザーへの案内（生成後に表示）
+
+設定ファイル生成後、以下のメッセージを表示してユーザーに案内します:
+
+```
+✅ .claude/settings.json を生成しました
+
+📌 推奨（プロジェクト限定・未コミット）: `.claude/settings.local.json` で bypassPermissions を既定化できます。
+   cp templates/claude/settings.local.json.template .claude/settings.local.json
+
+一時的に試すだけなら:
+   claude --dangerously-skip-permissions
+
+⚠️ 注意: deny/ask に設定した危険操作（rm、git push等）は引き続き制御されます。
+```
+
+### オプション: settings.local.json の配置
+
+Claude Code の設定優先順位は `.claude/settings.local.json`（ローカル）→ `.claude/settings.json`（共有）→ `~/.claude/settings.json`（ユーザー）です。
+よって、bypassPermissions を「このプロジェクトだけ」有効にしたい場合は `.claude/settings.local.json` を推奨します。
+
+```bash
+# テンプレートをコピー
+cp templates/claude/settings.local.json.template .claude/settings.local.json
+
+# 必要に応じてカスタマイズ
+# settings.local.json は settings.json より優先されます
+```

@@ -27,7 +27,8 @@ Change history for claude-code-harness.
 - **Dependency & parallel notation**: Plans.md supports `[depends:X]`, `[parallel:A,B]` syntax
 - **docs/ standardization**: `/plan-with-agent` outputs unified to `docs/proposal.md`, `docs/technical-spec.md`, `docs/priority_matrix.md`
 - **Constitution support**: Centralized quality gates, DoD, and principles in `docs/constitution.md`
-- **Regression prevention**: CI checks for `/start-task` removal and docs/ normalization
+- **bypassPermissions-first workflow**: Control only dangerous actions with deny/ask, reducing repetitive edit prompts (added a `settings.local.json` template)
+- **Regression prevention**: CI checks for `/start-task` removal, docs/ normalization, and bypassPermissions-first setup
 
 ### Changes
 
@@ -52,13 +53,14 @@ Change history for claude-code-harness.
 
 #### Phase 5: Strengthen regression checks
 - Added to `scripts/ci/check-consistency.sh`:
-  - `/start-task` removal regression check (6/7)
-  - docs/ normalization check (7/7)
+  - `/start-task` removal regression check (6/8)
+  - docs/ normalization check (7/8)
   - Added `technical-spec.md` to coverage
+  - bypassPermissions-first regression check (8/8)
 
 #### Other
 - Unified output list in `commands/core/plan-with-agent.md`
-- All validation tests passed (35/35 plugin validation, 7/7 consistency checks)
+- All validation tests passed (35/35 plugin validation, 8/8 consistency checks)
 
 ### Based on
 - [OpenSpec/spec-kit/cc-sdd](https://github.com/OpenSpec) - Dependency & parallel notation concepts
