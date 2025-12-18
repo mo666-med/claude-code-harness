@@ -1,10 +1,6 @@
 ---
 name: ui
-description: >
-  Generates UI components and feedback forms.
-  Use when user mentions コンポーネント, component, UI, ヒーロー, hero, フォーム, form, フィードバック, feedback, 問い合わせ.
-  Triggers: コンポーネント, component, UI, ヒーロー, hero, フォーム, フィードバック.
-  Do not use for authentication or deployment - use auth, deploy skills instead.
+description: "Generates UI components and feedback forms. Use when user mentions コンポーネント, component, UI, ヒーロー, hero, フォーム, form, フィードバック, feedback, 問い合わせ."
 allowed-tools: ["Read", "Write", "Edit", "Bash"]
 metadata:
   skillport:

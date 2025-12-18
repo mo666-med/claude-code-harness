@@ -1,10 +1,6 @@
 ---
 name: 2agent
-description: >
-  Configures and manages 2-Agent workflow between PM and implementation roles.
-  Use when user mentions 2-Agent, 2エージェント, PM連携設定, Cursor設定, Cursor連携, 2-agent運用.
-  Triggers: 2-Agent, 2エージェント, PM連携, Cursor設定, Cursor連携.
-  Do not use for handoffs during work - use handoff skill instead.
+description: "Configures 2-Agent workflow between PM and implementation roles. Use when user mentions 2-Agent, 2エージェント, PM連携設定, Cursor設定, Cursor連携, 2-agent運用."
 allowed-tools: ["Read", "Write", "Edit", "Bash"]
 metadata:
   skillport:

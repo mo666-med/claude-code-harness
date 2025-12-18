@@ -1,10 +1,6 @@
 ---
 name: setup
-description: >
-  Sets up new projects and generates workflow files like CLAUDE.md, AGENTS.md, Plans.md.
-  Use when user mentions セットアップ, setup, 初期化, initialize, CLAUDE.md, AGENTS.md, Plans.md, 新規プロジェクト, ワークフローファイル.
-  Triggers: セットアップ, setup, 初期化, CLAUDE.md, AGENTS.md, Plans.md, 新規プロジェクト.
-  Do not use for 2-Agent configuration - use 2agent skill instead.
+description: "Sets up new projects and generates workflow files like CLAUDE.md, AGENTS.md, Plans.md. Use when user mentions セットアップ, setup, 初期化, initialize, 新規プロジェクト, ワークフローファイル生成."
 allowed-tools: ["Read", "Write", "Edit", "Grep", "Glob", "Bash"]
 metadata:
   skillport:

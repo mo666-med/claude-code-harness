@@ -1,10 +1,6 @@
 ---
 name: memory
-description: >
-  Manages memory, SSOT files, and Plans.md operations.
-  Use when user mentions メモリ, memory, SSOT, decisions.md, patterns.md, マージ, merge, Plans.md, 移行, migrate.
-  Triggers: メモリ, memory, SSOT, decisions.md, patterns.md, マージ, 移行.
-  Do not use for initial setup - use setup skill instead.
+description: "Manages memory, SSOT files, and Plans.md operations. Use when user mentions メモリ, memory, SSOT, decisions.md, patterns.md, マージ, merge, Plans.md, 移行, migrate."
 allowed-tools: ["Read", "Write", "Edit", "Bash"]
 metadata:
   skillport:

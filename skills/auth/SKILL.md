@@ -1,10 +1,6 @@
 ---
 name: auth
-description: >
-  Implements authentication and payment features using Clerk, Supabase Auth, or Stripe.
-  Use when user mentions ログイン, 認証, auth, authentication, Clerk, Supabase Auth, 決済, payment, Stripe, 課金, subscription.
-  Triggers: ログイン, 認証, auth, Clerk, Supabase, 決済, Stripe, 課金, サブスクリプション.
-  Do not use for deployment or analytics - use deploy skill instead.
+description: "Implements authentication and payment features using Clerk, Supabase Auth, or Stripe. Use when user mentions ログイン, 認証, auth, authentication, Clerk, Supabase, 決済, payment, Stripe, 課金, サブスクリプション."
 allowed-tools: ["Read", "Write", "Edit", "Bash"]
 metadata:
   skillport:

@@ -1,10 +1,6 @@
 ---
 name: verify
-description: >
-  Verifies builds, recovers from errors, and applies review fixes.
-  Use when user mentions ビルド, build, 検証, verify, エラー復旧, error recovery, 指摘を適用, apply fixes.
-  Triggers: ビルド, build, 検証, verify, エラー, error, 復旧, recovery, 指摘適用.
-  Do not use for code review or implementation - use review, impl skills instead.
+description: "Verifies builds, recovers from errors, and applies review fixes. Use when user mentions ビルド, build, 検証, verify, エラー復旧, error recovery, 指摘を適用, apply fixes, テスト実行."
 allowed-tools: ["Read", "Write", "Edit", "Grep", "Glob", "Bash"]
 metadata:
   skillport:

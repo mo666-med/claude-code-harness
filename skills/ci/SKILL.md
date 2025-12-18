@@ -1,7 +1,7 @@
 ---
 name: ci
 description: "Diagnoses and fixes CI/CD pipeline failures. Use when user mentions 'CI', 'GitHub Actions', 'GitLab CI', 'ビルドエラー', 'テスト失敗', 'パイプライン', 'CIが落ちた', or asks to analyze build/test failures."
-allowed-tools: ["Read", "Grep", "Bash"]
+allowed-tools: ["Read", "Grep", "Bash", "Task"]
 metadata:
   skillport:
     category: ci
@@ -74,7 +74,7 @@ CI/CD パイプラインに関する問題を解決するスキル群です。
 
 ```
 Task tool:
-  subagent_type="claude-code-harness:ci-cd-fixer"
+  subagent_type="ci-cd-fixer"
   prompt="CI失敗を診断・修正してください。エラーログ: {error_log}"
 ```
 

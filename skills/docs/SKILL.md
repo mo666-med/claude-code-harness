@@ -1,10 +1,6 @@
 ---
 name: docs
-description: >
-  Generates documentation files including NotebookLM YAML and slide content.
-  Use when user mentions ドキュメント, document, YAML, NotebookLM, スライド, slide, プレゼン.
-  Triggers: ドキュメント, document, YAML, NotebookLM, スライド, slide.
-  Do not use for code implementation - use impl skill instead.
+description: "Generates documentation files including NotebookLM YAML and slide content. Use when user mentions ドキュメント, document, YAML, NotebookLM, スライド, slide, プレゼン."
 allowed-tools: ["Read", "Write", "Edit"]
 metadata:
   skillport:

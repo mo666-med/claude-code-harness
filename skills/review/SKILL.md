@@ -1,11 +1,7 @@
 ---
 name: review
-description: >
-  Reviews code for quality, security, performance, and accessibility issues.
-  Use when user mentions レビュー, review, コードレビュー, セルフレビュー, 品質チェック, quality, security check, performance, accessibility.
-  Triggers: レビュー, review, 品質, セキュリティ, パフォーマンス, アクセシビリティ, PR, diff, 変更確認.
-  Do not use for implementation or build verification - use impl, verify skills instead.
-allowed-tools: ["Read", "Grep", "Glob", "Bash"]
+description: "Reviews code for quality, security, performance, and accessibility issues. Use when user mentions レビュー, review, コードレビュー, セキュリティ, パフォーマンス, 品質チェック, セルフレビュー, PR, diff, 変更確認. Spawns parallel subagents for multi-perspective reviews."
+allowed-tools: ["Read", "Grep", "Glob", "Bash", "Task"]
 metadata:
   skillport:
     category: review
@@ -55,11 +51,11 @@ metadata:
 
 ```
 Task tool 並列呼び出し:
-  #1: subagent_type="claude-code-harness:code-reviewer"
+  #1: subagent_type="code-reviewer"
       prompt="セキュリティ観点でレビュー: {files}"
-  #2: subagent_type="claude-code-harness:code-reviewer"
+  #2: subagent_type="code-reviewer"
       prompt="パフォーマンス観点でレビュー: {files}"
-  #3: subagent_type="claude-code-harness:code-reviewer"
+  #3: subagent_type="code-reviewer"
       prompt="コード品質観点でレビュー: {files}"
 ```
 

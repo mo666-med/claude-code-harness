@@ -1,10 +1,6 @@
 ---
 name: deploy
-description: >
-  Sets up deployment, analytics, and health monitoring for projects.
-  Use when user mentions デプロイ, deploy, Vercel, Netlify, 公開, アナリティクス, analytics, GA, Google Analytics, 環境診断, health check.
-  Triggers: デプロイ, deploy, Vercel, Netlify, 公開, アナリティクス, GA, 環境診断.
-  Do not use for authentication or payments - use auth skill instead.
+description: "Sets up deployment, analytics, and health monitoring for projects. Use when user mentions デプロイ, deploy, Vercel, Netlify, 公開, アナリティクス, analytics, GA, Google Analytics, 環境診断, health check."
 allowed-tools: ["Read", "Write", "Edit", "Bash"]
 metadata:
   skillport:

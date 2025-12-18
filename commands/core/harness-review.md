@@ -76,25 +76,25 @@ git diff --name-only HEAD~5 2>/dev/null || find . -name "*.ts" -o -name "*.tsx" 
 
 Task tool #1:
   description: "Security review"
-  subagent_type: "claude-code-harness:code-reviewer"
+  subagent_type: "code-reviewer"
   prompt: "セキュリティ観点でレビュー。対象: {changed_files}
           チェック項目: 環境変数管理、入力バリデーション、SQL/XSS対策"
 
 Task tool #2:
   description: "Performance review"
-  subagent_type: "claude-code-harness:code-reviewer"
+  subagent_type: "code-reviewer"
   prompt: "パフォーマンス観点でレビュー。対象: {changed_files}
           チェック項目: 再レンダリング、N+1クエリ、メモ化"
 
 Task tool #3:
   description: "Quality review"
-  subagent_type: "claude-code-harness:code-reviewer"
+  subagent_type: "code-reviewer"
   prompt: "コード品質観点でレビュー。対象: {changed_files}
           チェック項目: 型安全性、エラーハンドリング、命名規則"
 
 Task tool #4:
   description: "Accessibility review"
-  subagent_type: "claude-code-harness:code-reviewer"
+  subagent_type: "code-reviewer"
   prompt: "アクセシビリティ観点でレビュー。対象: {changed_files}
           チェック項目: セマンティックHTML、alt、キーボード操作"
 

@@ -1,10 +1,6 @@
 ---
 name: impl
-description: >
-  Implements features and writes code based on Plans.md tasks.
-  Use when user mentions 実装, implement, 機能追加, コードを書いて, 機能を作って, feature, coding.
-  Triggers: 実装, implement, 機能追加, コードを書いて, 新機能, feature.
-  Do not use for review, testing verification, or build - use review, verify skills instead.
+description: "Implements features and writes code based on Plans.md tasks. Use when user mentions 実装, implement, 機能追加, コードを書いて, 機能を作って, feature, coding, 新機能. Do not use for review or build verification."
 allowed-tools: ["Read", "Write", "Edit", "Grep", "Glob", "Bash"]
 metadata:
   skillport:
