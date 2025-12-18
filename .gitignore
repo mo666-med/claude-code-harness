@@ -38,3 +38,6 @@ Thumbs.db
 
 # Test sandbox (for plugin development)
 /test-sandbox/
+
+# Benchmarks (local testing only, not for distribution)
+/benchmarks/
