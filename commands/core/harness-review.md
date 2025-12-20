@@ -27,11 +27,11 @@ description-en: Code review (multi-perspective security/performance/quality)
 
 このコマンドは以下のスキルを活用します：
 
-- `ccp-review-security` - セキュリティレビュー
-- `ccp-review-performance` - パフォーマンスレビュー
-- `ccp-review-quality` - コード品質レビュー
-- `ccp-review-accessibility` - アクセシビリティレビュー
-- `ccp-review-aggregate` - レビュー結果の集約
+- `review-security` - セキュリティレビュー
+- `review-performance` - パフォーマンスレビュー
+- `review-quality` - コード品質レビュー
+- `review-accessibility` - アクセシビリティレビュー
+- `review-aggregate` - レビュー結果の集約
 
 ---
 

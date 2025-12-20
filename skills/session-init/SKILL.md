@@ -1,6 +1,6 @@
 ---
-name: ccp-session-init
-description: "セッション開始時の環境確認と現在のタスク状況把握を行うスキルセッション開始時の初期化が必要な場合に使用します。セッション開始時の初期化が必要な場合に使用します。セッション開始時の初期化が必要な場合に使用します。"
+name: session-init
+description: "Initializes session with environment check and task status overview. Use when user mentions セッション開始, 作業開始, 状況確認, what should I work on, start session. Do NOT load for: 実装作業, レビュー, セッション途中の作業."
 allowed-tools: ["Read", "Write", "Bash"]
 metadata:
   skillport:

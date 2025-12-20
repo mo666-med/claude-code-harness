@@ -1,5 +1,5 @@
 ---
-name: ccp-auth
+name: auth
 description: "認証機能の実装（Clerk / Supabase Auth 等）。ログイン機能を追加したい場合に使用します。"
 allowed-tools: ["Read", "Write", "Edit", "Bash"]
 metadata:

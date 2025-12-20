@@ -7,7 +7,7 @@ description: "計画されたタスクを実行し、動くコードを生成す
 steps:
   # Step 1: 現在のタスク状況を確認
   - id: read-context
-    skill: ccp-core-read-repo-context
+    skill: core-read-repo-context
     input:
       files:
         - Plans.md
@@ -19,7 +19,7 @@ steps:
 
   # Step 2: 実行対象タスクの特定
   - id: identify-tasks
-    skill: ccp-plans-management
+    skill: plans-management
     input:
       files:
         - Plans.md
@@ -34,7 +34,7 @@ steps:
   # Step 2.5: タスク開始時のマーカー更新（/start-task 相当の機能を吸収）
   # pm:依頼中 / cursor:依頼中 / cc:TODO → cc:WIP に自動遷移
   - id: update-marker-to-wip
-    skill: ccp-plans-management
+    skill: plans-management
     input:
       files:
         - Plans.md
@@ -49,7 +49,7 @@ steps:
 
   # Step 3: タスクの実行（ループ）
   - id: execute-task
-    skill: ccp-work-impl-feature
+    skill: work-impl-feature
     input:
       variables:
         - target_tasks
@@ -65,7 +65,7 @@ steps:
 
   # Step 4: 動作確認
   - id: verify-build
-    skill: ccp-verify-build
+    skill: verify-build
     input:
       commands:
         - npm run build
@@ -74,7 +74,7 @@ steps:
 
   # Step 5: セルフレビュー（オプション）
   - id: self-review
-    skill: ccp-review-changes
+    skill: review-changes
     input:
       context_from:
         - git_diff
@@ -98,7 +98,7 @@ on_success:
 
 # エラー時の出力
 on_error:
-  skill: ccp-error-recovery
+  skill: error-recovery
   max_retries: 3
   message: |
     ⚠️ 実行中にエラーが発生しました。

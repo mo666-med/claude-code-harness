@@ -97,6 +97,7 @@ Claude Code へのタスク依頼。
 ### /review-cc-work
 
 Claude Code の完了報告をレビュー。
+承認できない場合（request_changes）は Plans.md を更新し、**`/claude-code-harness/handoff-to-claude` で修正依頼文を生成してそのまま渡す**。
 
 ---
 

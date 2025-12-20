@@ -17,18 +17,18 @@ metadata:
 
 | スキル | 用途 |
 |--------|------|
-| ccp-work-impl-feature | 機能の実装 |
-| ccp-work-write-tests | テストコードの作成 |
+| work-impl-feature | 機能の実装 |
+| work-write-tests | テストコードの作成 |
 
 ## ルーティング
 
 ### 機能実装
 
-ccp-work-impl-feature/doc.md を参照
+work-impl-feature/doc.md を参照
 
 ### テスト作成
 
-ccp-work-write-tests/doc.md を参照
+work-write-tests/doc.md を参照
 
 ## 実行手順
 

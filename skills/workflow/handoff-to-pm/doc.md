@@ -1,5 +1,5 @@
 ---
-name: ccp-handoff-to-pm
+name: handoff-to-pm
 description: "Impl Claude → PM Claude への完了報告を生成。2-Agent運用で実装完了を報告したい場合に使用します。"
 allowed-tools: ["Read", "Write", "Edit", "Bash"]
 metadata:

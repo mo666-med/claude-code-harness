@@ -1,5 +1,5 @@
 ---
-name: ccp-payments
+name: payments
 description: "決済機能の実装（Stripe）。サブスクや買い切り決済を追加したい場合に使用します。"
 allowed-tools: ["Read", "Write", "Edit", "Bash"]
 metadata:

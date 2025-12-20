@@ -7,7 +7,7 @@ description: "プロジェクトを初期化し、開発ワークフローをセ
 steps:
   # Step 1: リポジトリコンテキストの読み取り
   - id: read-context
-    skill: ccp-core-read-repo-context
+    skill: core-read-repo-context
     input:
       files:
         - README.md
@@ -25,7 +25,7 @@ steps:
 
   # Step 2: 要件のヒアリング（新規プロジェクトの場合）
   - id: init-requirements
-    skill: ccp-init-requirements
+    skill: init-requirements
     condition: "project_type == 'new'"
     input:
       context_from:
@@ -40,7 +40,7 @@ steps:
 
   # Step 3: プロジェクトの生成（新規の場合）
   - id: scaffold-project
-    skill: ccp-project-scaffolder
+    skill: project-scaffolder
     condition: "project_type == 'new'"
     input:
       variables:
@@ -56,7 +56,7 @@ steps:
 
   # Step 4: ワークフローファイルの生成
   - id: generate-workflow-files
-    skill: ccp-generate-workflow-files
+    skill: generate-workflow-files
     input:
       templates:
         - templates/AGENTS.md.template
@@ -73,7 +73,7 @@ steps:
 
   # Step 4.5: メモリ（SSOT）の初期化
   - id: init-memory-ssot
-    skill: ccp-init-memory-ssot
+    skill: init-memory-ssot
     input:
       templates:
         - templates/memory/decisions.md.template
@@ -88,7 +88,7 @@ steps:
 
   # Step 5: 計画のレビュー（オプション）
   - id: review-plan
-    skill: ccp-plan-review
+    skill: plan-review
     input:
       files:
         - Plans.md
@@ -96,7 +96,7 @@ steps:
 
   # Step 6: 次のアクション案内
   - id: next-action-guide
-    skill: ccp-vibecoder-guide
+    skill: vibecoder-guide
     input:
       context_from:
         - completed_steps

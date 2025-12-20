@@ -7,7 +7,7 @@ description: "コードの品質をチェックし、改善点を提案するフ
 steps:
   # Step 1: 変更ファイルの特定
   - id: identify-changes
-    skill: ccp-core-read-repo-context
+    skill: core-read-repo-context
     input:
       context_from:
         - git_diff
@@ -20,7 +20,7 @@ steps:
 
   # Step 2: セキュリティチェック
   - id: security-check
-    skill: ccp-review-security
+    skill: review-security
     input:
       files: "{{changed_files}}"
       context_from:
@@ -34,7 +34,7 @@ steps:
 
   # Step 3: パフォーマンスチェック
   - id: performance-check
-    skill: ccp-review-performance
+    skill: review-performance
     input:
       files: "{{changed_files}}"
       context_from:
@@ -48,7 +48,7 @@ steps:
 
   # Step 4: コード品質チェック
   - id: quality-check
-    skill: ccp-review-quality
+    skill: review-quality
     input:
       files: "{{changed_files}}"
       context_from:
@@ -63,7 +63,7 @@ steps:
 
   # Step 5: アクセシビリティチェック（Web の場合）
   - id: accessibility-check
-    skill: ccp-review-accessibility
+    skill: review-accessibility
     condition: "tech_stack.includes('react') || tech_stack.includes('vue')"
     input:
       files: "{{changed_files}}"
@@ -76,7 +76,7 @@ steps:
 
   # Step 6: レビュー結果の集約
   - id: aggregate-results
-    skill: ccp-review-aggregate
+    skill: review-aggregate
     input:
       variables:
         - security_issues
@@ -91,7 +91,7 @@ steps:
 
   # Step 7: 改善の適用（ユーザー承認後）
   - id: apply-improvements
-    skill: ccp-review-apply-fixes
+    skill: review-apply-fixes
     condition: "user_approved"
     input:
       variables:

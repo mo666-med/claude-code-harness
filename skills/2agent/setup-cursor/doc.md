@@ -1,5 +1,5 @@
 ---
-name: ccp-setup-cursor
+name: setup-cursor
 description: "Cursor連携のセットアップ（.cursor/commands 生成）。Cursor と Claude Code で役割分担したい場合に使用します。"
 allowed-tools: ["Read", "Write", "Bash"]
 metadata:

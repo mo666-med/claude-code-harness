@@ -1,0 +1,178 @@
+---
+name: generate-claude-settings
+description: "Claude Code の `.claude/settings.json` を安全ポリシー込みで作成/更新する（既存設定は非破壊マージ）。/harness-init や /setup-cursor から呼び出して、権限ガードをチーム運用できる形に整備する。"
+allowed-tools: ["Read", "Write", "Edit", "Bash"]
+metadata:
+  skillport:
+    category: core
+    tags: [settings, security, permissions, merge]
+    alwaysApply: false
+---
+
+# Generate Claude Settings (Security + Merge)
+
+## 目的
+
+プロジェクトの `.claude/settings.json` を作成または更新し、以下を満たす状態にします。
+
+- **既存設定は保持**（`hooks` / `env` / `model` / `enabledPlugins` 等を消さない）
+- `permissions.allow|ask|deny` は **配列マージ + 重複排除**
+- **bypassPermissions を前提とした運用**（危険操作のみ deny/ask で制御）
+- 既存ファイルが壊れている場合は **バックアップを残して再生成**
+
+## bypassPermissions 前提の運用ポリシー
+
+**重要**: Edit / Write を `permissions.ask` に入れると毎回確認が出て生産性が落ちます。
+代わりに、bypassPermissions を有効にして危険操作のみを制御する方針を推奨します。
+
+- `permissions.deny`: 機密ファイル読み取り（.env, secrets, SSH鍵）、危険なDB操作
+- `permissions.ask`: ファイル削除、git push/reset/rebase/merge
+- `permissions.allow`: MCP サーバーのワイルドカード許可（下記参照）
+- **Edit / Write は ask に入れない**（確認が毎回出るのを避ける）
+
+### MCP サーバーのワイルドカード許可
+
+MCP サーバーのツールを一括許可するには `mcp__<server>__*` パターンを使用します。
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "mcp__supabase__*",
+      "mcp__context7__*",
+      "mcp__serena__*"
+    ]
+  }
+}
+```
+
+| パターン | 許可される操作 |
+|---------|---------------|
+| `mcp__supabase__*` | Supabase MCP の全ツール（query, apply_migration 等） |
+| `mcp__context7__*` | Context7 ドキュメント検索ツール |
+| `mcp__serena__*` | Serena LSP 連携ツール |
+| `mcp__playwright__*` | Playwright ブラウザ操作ツール |
+
+**注意**: プロジェクトで使用する MCP サーバーに合わせて設定してください。
+
+初回 init 後は、以下どちらかで bypassPermissions を有効化する導線を案内します：
+
+- **推奨（プロジェクト限定・未コミット）**: `.claude/settings.local.json` に `permissions.defaultMode: "bypassPermissions"` を設定
+- **一時的（セッション限定）**: `claude --dangerously-skip-permissions`
+
+根拠（公式）: `settings.json` と `permissions`（ask/deny/disableBypassPermissionsMode）
+https://code.claude.com/docs/ja/settings
+
+---
+
+## 対象ファイル
+
+- 生成/更新先: `.claude/settings.json`
+- ポリシーテンプレ: `templates/claude/settings.security.json.template`
+
+---
+
+## 実行手順（安全・非破壊）
+
+### Step 0: 前提チェック
+
+以下を確認します。
+
+- `templates/claude/settings.security.json.template` が存在する
+- `.claude/` がなければ作成（ディレクトリのみ）
+
+### Step 1: 既存設定の有無を確認
+
+- `.claude/settings.json` が **ない** → Step 4 でテンプレから生成
+- `.claude/settings.json` が **ある** → Step 2 でパースできるか確認
+
+### Step 2: JSONパース可否の判定
+
+優先順で判定します。
+
+1. `jq` がある場合: `jq empty .claude/settings.json`
+2. `python3` がある場合: `python3 -m json.tool .claude/settings.json`
+
+パースに失敗したら:
+
+- `.claude/settings.json.bak`（またはタイムスタンプ付き）に退避
+- Step 4 でテンプレから再生成
+
+### Step 3: 既存設定とポリシーをマージ
+
+#### マージ方針
+
+- **top-level**: 既存を優先しつつ、ポリシー側の `permissions` を統合
+- `permissions.allow|ask|deny`: **ユニーク化して結合**（既存→ポリシーの順）
+- `permissions.disableBypassPermissionsMode`: **設定しない**（bypassPermissions を許可）
+
+#### 実装（推奨コマンド）
+
+`jq` がある場合:
+
+1. 既存とポリシーを読み込み
+2. `allow/ask/deny` を配列として結合 → `unique`（順序は多少変わってOK）
+3. `.claude/settings.json.tmp` に書き出し → 置換
+
+`jq` がない場合（python3）:
+
+1. `json.load` で既存/ポリシーを読み込み
+2. `permissions` を辞書としてマージ
+3. `allow/ask/deny` は list を `dict.fromkeys` 等で重複排除（順序維持）
+4. `indent=2, sort_keys=false` で出力
+
+**注意**: 既存の `hooks` は消さないこと。`permissions` 以外は原則、既存を尊重する。
+
+### Step 4: 新規生成（既存なし・退避後）
+
+- `templates/claude/settings.security.json.template` を `.claude/settings.json` にコピーして作成
+- 必要なら、将来の拡張（hooks追加等）は「既存マージ」ルート（Step 3）で行う
+
+---
+
+## 期待する出力
+
+- `.claude/settings.json` が存在し、JSONとしてパース可能
+- `permissions.deny` に `.env` / `secrets` / SSH鍵系の `Read(...)` が含まれる
+- `permissions.ask` に `Bash(rm:*)` / `Bash(git push:*)` 等が含まれる（**Edit / Write は含まない**）
+- `permissions.disableBypassPermissionsMode` が **設定されていない**（bypassPermissions 許可）
+
+---
+
+## 失敗時の扱い
+
+- パース不可の場合でも **必ずバックアップ**を残す
+- 生成後に `jq empty` または `python -m json.tool` で妥当性を確認
+
+---
+
+## bypassPermissions 有効化の導線
+
+### Step 5: ユーザーへの案内（生成後に表示）
+
+設定ファイル生成後、以下のメッセージを表示してユーザーに案内します:
+
+```
+✅ .claude/settings.json を生成しました
+
+📌 推奨（プロジェクト限定・未コミット）: `.claude/settings.local.json` で bypassPermissions を既定化できます。
+   cp templates/claude/settings.local.json.template .claude/settings.local.json
+
+一時的に試すだけなら:
+   claude --dangerously-skip-permissions
+
+⚠️ 注意: deny/ask に設定した危険操作（rm、git push等）は引き続き制御されます。
+```
+
+### オプション: settings.local.json の配置
+
+Claude Code の設定優先順位は `.claude/settings.local.json`（ローカル）→ `.claude/settings.json`（共有）→ `~/.claude/settings.json`（ユーザー）です。
+よって、bypassPermissions を「このプロジェクトだけ」有効にしたい場合は `.claude/settings.local.json` を推奨します。
+
+```bash
+# テンプレートをコピー
+cp templates/claude/settings.local.json.template .claude/settings.local.json
+
+# 必要に応じてカスタマイズ
+# settings.local.json は settings.json より優先されます
+```

@@ -1,6 +1,6 @@
 ---
-name: ccp-troubleshoot
-description: "問題発生時の診断と解決をガイドするスキルエラーや問題が発生し、診断が必要な場合に使用します。エラーや問題が発生し、診断が必要な場合に使用します。"
+name: troubleshoot
+description: "Guides diagnosis and resolution when problems occur. Use when user mentions 動かない, エラーが出た, 壊れた, うまくいかない, broken, doesn't work, error. Do NOT load for: 正常なビルド, 新機能実装, レビュー."
 allowed-tools: ["Read", "Grep", "Bash"]
 metadata:
   skillport:

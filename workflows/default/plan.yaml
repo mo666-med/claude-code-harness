@@ -7,7 +7,7 @@ description: "Plans.md を更新し、タスクを分解するフェーズ"
 steps:
   # Step 1: リポジトリコンテキストの読み取り
   - id: read-context
-    skill: ccp-core-read-repo-context
+    skill: core-read-repo-context
     input:
       files:
         - README.md
@@ -20,7 +20,7 @@ steps:
 
   # Step 2: 要望のヒアリング（入力がない場合）
   - id: gather-requirements
-    skill: ccp-init-requirements
+    skill: init-requirements
     condition: "!user_prompt"
     input:
       context_from:
@@ -32,7 +32,7 @@ steps:
 
   # Step 3: 機能の計画
   - id: plan-feature
-    skill: ccp-plan-feature
+    skill: plan-feature
     input:
       files:
         - Plans.md
@@ -52,7 +52,7 @@ steps:
 
   # Step 4: 計画のレビュー（オプション）
   - id: review-plan
-    skill: ccp-plan-review
+    skill: plan-review
     input:
       files:
         - Plans.md

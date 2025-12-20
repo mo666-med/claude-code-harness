@@ -1,6 +1,6 @@
 ---
 name: verify
-description: "Verifies builds, recovers from errors, and applies review fixes. Use when user mentions ビルド, build, 検証, verify, エラー復旧, error recovery, 指摘を適用, apply fixes, テスト実行."
+description: "Verifies builds, recovers from errors, and applies review fixes. Use when user mentions ビルド, build, 検証, verify, エラー復旧, error recovery, 指摘を適用, apply fixes, テスト実行. Do NOT load for: 実装作業, レビュー, セットアップ, 新機能開発."
 allowed-tools: ["Read", "Write", "Edit", "Grep", "Glob", "Bash"]
 metadata:
   skillport:
@@ -17,17 +17,17 @@ metadata:
 
 | スキル | 用途 |
 |--------|------|
-| ccp-verify-build | ビルド検証 |
-| ccp-error-recovery | エラー復旧 |
-| ccp-review-aggregate | レビュー結果の集約 |
-| ccp-review-apply-fixes | レビュー指摘の適用 |
+| verify-build | ビルド検証 |
+| error-recovery | エラー復旧 |
+| review-aggregate | レビュー結果の集約 |
+| review-apply-fixes | レビュー指摘の適用 |
 
 ## ルーティング
 
-- ビルド検証: ccp-verify-build/doc.md
-- エラー復旧: ccp-error-recovery/doc.md
-- レビュー集約: ccp-review-aggregate/doc.md
-- 指摘適用: ccp-review-apply-fixes/doc.md
+- ビルド検証: verify-build/doc.md
+- エラー復旧: error-recovery/doc.md
+- レビュー集約: review-aggregate/doc.md
+- 指摘適用: review-apply-fixes/doc.md
 
 ## 実行手順
 

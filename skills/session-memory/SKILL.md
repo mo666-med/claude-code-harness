@@ -1,6 +1,6 @@
 ---
-name: ccp-session-memory
-description: "セッション間の学習と記憶を管理するスキルセッション間で情報を永続化する必要がある場合に使用します。セッション間で情報を永続化する必要がある場合に使用します。"
+name: session-memory
+description: "Manages cross-session learning and memory persistence. Use when user mentions 前回何をした, 履歴, 過去の作業, セッション記録, continue from before, session history. Do NOT load for: 実装作業, レビュー, 一時的な情報."
 allowed-tools: ["Read", "Write", "Append"]
 metadata:
   skillport:

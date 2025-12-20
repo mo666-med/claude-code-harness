@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "../../claude-plugins-official"
+		},
+		{
+			"path": "../../awesome-claude-skills"
 		}
 	],
 	"settings": {}

@@ -1,6 +1,6 @@
 ---
 name: setup
-description: "Sets up new projects and generates workflow files like CLAUDE.md, AGENTS.md, Plans.md. Use when user mentions セットアップ, setup, 初期化, initialize, 新規プロジェクト, ワークフローファイル生成."
+description: "Sets up new projects and generates workflow files like CLAUDE.md, AGENTS.md, Plans.md. Use when user mentions セットアップ, setup, 初期化, initialize, 新規プロジェクト, ワークフローファイル生成. Do NOT load for: 実装作業, レビュー, ビルド検証, デプロイ."
 allowed-tools: ["Read", "Write", "Edit", "Grep", "Glob", "Bash"]
 metadata:
   skillport:
@@ -17,17 +17,17 @@ metadata:
 
 | スキル | 用途 |
 |--------|------|
-| ccp-adaptive-setup | プロジェクト状況に応じた適応的セットアップ |
-| ccp-project-scaffolder | 新規プロジェクトのスキャフォールディング |
-| ccp-generate-workflow-files | CLAUDE.md, AGENTS.md, Plans.md 生成 |
-| ccp-generate-claude-settings | .claude/settings.json 生成 |
+| adaptive-setup | プロジェクト状況に応じた適応的セットアップ |
+| project-scaffolder | 新規プロジェクトのスキャフォールディング |
+| generate-workflow-files | CLAUDE.md, AGENTS.md, Plans.md 生成 |
+| generate-claude-settings | .claude/settings.json 生成 |
 
 ## ルーティング
 
-- 適応的セットアップ: ccp-adaptive-setup/doc.md
-- スキャフォールディング: ccp-project-scaffolder/doc.md
-- ワークフローファイル: ccp-generate-workflow-files/doc.md
-- 設定ファイル: ccp-generate-claude-settings/doc.md
+- 適応的セットアップ: adaptive-setup/doc.md
+- スキャフォールディング: project-scaffolder/doc.md
+- ワークフローファイル: generate-workflow-files/doc.md
+- 設定ファイル: generate-claude-settings/doc.md
 
 ## 実行手順
 

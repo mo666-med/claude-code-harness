@@ -10,6 +10,58 @@ claude-code-harness の変更履歴です。
 
 ---
 
+## [2.5.3] - 2025-12-20
+
+### 🎯 あなたにとって何が変わるか
+
+**スキル命名の統一：全 47 スキルから `ccp-` プレフィックスを削除し、シンプルで覚えやすい名前に。**
+
+#### Before
+- スキル名が `ccp-work-impl-feature`, `ccp-review-security` のように長かった
+- `ccp-` プレフィックスの由来（Claude Code Plugin）が分かりにくく、意味がなかった
+- 28 個のスキルディレクトリが `ccp-*` 形式で統一感がなかった
+
+#### After
+- **シンプルな命名**: `work-impl-feature`, `review-security` など直感的な名前に
+- **47 件のスキル名を統一**: frontmatter `name:` から `ccp-` を削除
+- **28 ディレクトリをリネーム**: `ccp-work-impl-feature/` → `work-impl-feature/`
+- **回帰防止**: CI で `ccp-` 参照が戻らないことをチェック（9/9）
+
+### 変更内容
+- `skills/**/SKILL.md` の `name:` から `ccp-` プレフィックスを削除（7件）
+- `skills/**/doc.md` の `name:` から `ccp-` プレフィックスを削除（40件）
+- 28 個のスキルディレクトリをリネーム
+- `workflows/default/*.yaml` の `skill:` 参照を新名称へ更新（4ファイル）
+- `commands/**/*.md` のスキル参照を更新（7ファイル）
+- `scripts/ci/check-consistency.sh` に ccp-* 廃止チェックを追加（9/9）
+- `docs/design/adaptive-setup.md` の参照を更新
+
+---
+
+## [2.5.2] - 2025-12-19
+
+### 🎯 あなたにとって何が変わるか
+
+**スキルの自動起動精度が向上：21個のスキルが「WHEN + WHEN NOT」パターンに対応し、誤起動が減少。MCP ワイルドカード許可の設定例もドキュメント化。**
+
+#### Before
+- スキルの description が「何をするか」のみで、「何をしないか」が不明確だった
+- MCP サーバーのツールを一括許可する方法がドキュメントになかった
+
+#### After
+- **全 21 スキルの description を統一**: `Use when...` + `Do NOT load for:...` パターンで誤起動を防止
+- **MCP ワイルドカード例を追加**: `mcp__supabase__*` のような一括許可の設定方法をドキュメント化
+
+### 変更内容
+- `skills/*/SKILL.md` の description を「WHEN + WHEN NOT」パターンに更新（21ファイル）
+- `skills/setup/ccp-generate-claude-settings/doc.md` に MCP ワイルドカード許可の説明を追加
+
+### 参照元（Based on）
+- [Young Leaders in Tech - Claude Code Skills](https://www.youngleadersintech.com/blog/claude-code-with-agent-skills) - "WHEN + WHEN NOT" description engineering パターン
+- [Claude Code CLI v2.0.64](https://docs.anthropic.com/en/docs/claude-code) - `.claude/rules/` ディレクトリサポート
+
+---
+
 ## [2.5.1] - 2025-12-19
 
 ### 🎯 あなたにとって何が変わるか

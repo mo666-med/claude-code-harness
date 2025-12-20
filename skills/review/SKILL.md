@@ -1,6 +1,6 @@
 ---
 name: review
-description: "Reviews code for quality, security, performance, and accessibility issues. Use when user mentions レビュー, review, コードレビュー, セキュリティ, パフォーマンス, 品質チェック, セルフレビュー, PR, diff, 変更確認. Spawns parallel subagents for multi-perspective reviews."
+description: "Reviews code for quality, security, performance, and accessibility issues. Use when user mentions レビュー, review, コードレビュー, セキュリティ, パフォーマンス, 品質チェック, セルフレビュー, PR, diff, 変更確認. Do NOT load for: 実装作業, 新機能開発, バグ修正, セットアップ."
 allowed-tools: ["Read", "Grep", "Glob", "Bash", "Task"]
 metadata:
   skillport:
@@ -17,21 +17,21 @@ metadata:
 
 | スキル | 用途 |
 |--------|------|
-| ccp-review-changes | 変更内容のレビュー |
-| ccp-review-quality | コード品質チェック |
-| ccp-review-security | セキュリティレビュー |
-| ccp-review-performance | パフォーマンスレビュー |
-| ccp-review-accessibility | アクセシビリティチェック |
+| review-changes | 変更内容のレビュー |
+| review-quality | コード品質チェック |
+| review-security | セキュリティレビュー |
+| review-performance | パフォーマンスレビュー |
+| review-accessibility | アクセシビリティチェック |
 
 ## ルーティング
 
 ユーザーの意図に応じて適切な小スキルを選択:
 
-- 一般的なレビュー: ccp-review-changes/doc.md
-- 品質重視: ccp-review-quality/doc.md
-- セキュリティ重視: ccp-review-security/doc.md
-- パフォーマンス重視: ccp-review-performance/doc.md
-- アクセシビリティ重視: ccp-review-accessibility/doc.md
+- 一般的なレビュー: review-changes/doc.md
+- 品質重視: review-quality/doc.md
+- セキュリティ重視: review-security/doc.md
+- パフォーマンス重視: review-performance/doc.md
+- アクセシビリティ重視: review-accessibility/doc.md
 
 ## 実行手順
 

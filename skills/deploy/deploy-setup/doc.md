@@ -1,5 +1,5 @@
 ---
-name: ccp-deploy-setup
+name: deploy-setup
 description: "デプロイ自動化設定（Vercel/Netlify 等）。プロジェクトを公開したい場合に使用します。"
 allowed-tools: ["Read", "Write", "Edit", "Bash"]
 metadata:

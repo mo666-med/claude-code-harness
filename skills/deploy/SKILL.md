@@ -1,6 +1,6 @@
 ---
 name: deploy
-description: "Sets up deployment, analytics, and health monitoring for projects. Use when user mentions デプロイ, deploy, Vercel, Netlify, 公開, アナリティクス, analytics, GA, Google Analytics, 環境診断, health check."
+description: "Sets up deployment, analytics, and health monitoring for projects. Use when user mentions デプロイ, deploy, Vercel, Netlify, 公開, アナリティクス, analytics, GA, Google Analytics, 環境診断, health check. Do NOT load for: 実装作業, ローカル開発, レビュー, セットアップ."
 allowed-tools: ["Read", "Write", "Edit", "Bash"]
 metadata:
   skillport:

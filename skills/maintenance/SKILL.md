@@ -1,6 +1,6 @@
 ---
 name: maintenance
-description: "Cleans up and organizes project files. Use when user mentions '整理', 'cleanup', 'アーカイブ', 'archive', '肥大化', 'Plans.md', 'session-log', or asks to clean up old tasks, archive completed items, or organize files."
+description: "Cleans up and organizes project files. Use when user mentions '整理', 'cleanup', 'アーカイブ', 'archive', '肥大化', 'Plans.md', 'session-log', or asks to clean up old tasks, archive completed items, or organize files. Do NOT load for: 実装作業, レビュー, 新機能開発, デプロイ."
 allowed-tools: ["Read", "Write", "Edit", "Bash"]
 metadata:
   skillport:
@@ -28,7 +28,7 @@ metadata:
 
 | スキル | 用途 |
 |--------|------|
-| ccp-auto-cleanup | Plans.md, session-log 等の自動整理 |
+| auto-cleanup | Plans.md, session-log 等の自動整理 |
 
 ---
 
@@ -36,12 +36,12 @@ metadata:
 
 ### ファイル整理が必要な場合
 
-→ `ccp-auto-cleanup/doc.md` を参照
+→ `auto-cleanup/doc.md` を参照
 
 ---
 
 ## 実行手順
 
 1. ユーザーのリクエストを確認
-2. `ccp-auto-cleanup/doc.md` を読む
+2. `auto-cleanup/doc.md` を読む
 3. その内容に従って実行

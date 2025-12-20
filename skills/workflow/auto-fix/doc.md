@@ -1,5 +1,5 @@
 ---
-name: ccp-auto-fix
+name: auto-fix
 description: "レビュー指摘事項の自動修正。コードレビューで検出された問題を自動修正したい場合に使用します。"
 allowed-tools: ["Read", "Write", "Edit", "Bash"]
 metadata:

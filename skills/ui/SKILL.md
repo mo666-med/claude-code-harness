@@ -1,6 +1,6 @@
 ---
 name: ui
-description: "Generates UI components and feedback forms. Use when user mentions コンポーネント, component, UI, ヒーロー, hero, フォーム, form, フィードバック, feedback, 問い合わせ."
+description: "Generates UI components and feedback forms. Use when user mentions コンポーネント, component, UI, ヒーロー, hero, フォーム, form, フィードバック, feedback, 問い合わせ. Do NOT load for: 認証機能, バックエンド実装, データベース操作, ビジネスロジック."
 allowed-tools: ["Read", "Write", "Edit", "Bash"]
 metadata:
   skillport:

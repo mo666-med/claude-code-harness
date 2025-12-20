@@ -1,6 +1,6 @@
 ---
 name: ci
-description: "Diagnoses and fixes CI/CD pipeline failures. Use when user mentions 'CI', 'GitHub Actions', 'GitLab CI', 'ビルドエラー', 'テスト失敗', 'パイプライン', 'CIが落ちた', or asks to analyze build/test failures."
+description: "Diagnoses and fixes CI/CD pipeline failures. Use when user mentions 'CI', 'GitHub Actions', 'GitLab CI', 'ビルドエラー', 'テスト失敗', 'パイプライン', 'CIが落ちた', or asks to analyze build/test failures. Do NOT load for: ローカルビルド, 通常の実装作業, レビュー, セットアップ."
 allowed-tools: ["Read", "Grep", "Bash", "Task"]
 metadata:
   skillport:
@@ -27,8 +27,8 @@ CI/CD パイプラインに関する問題を解決するスキル群です。
 
 | スキル | 用途 | トリガー |
 |--------|------|----------|
-| ccp-ci-analyze-failures | 失敗原因の分析 | 「ログを見て」「原因を調べて」 |
-| ccp-ci-fix-failing-tests | テスト修正の提案 | 「テストを直して」「修正案を出して」 |
+| ci-analyze-failures | 失敗原因の分析 | 「ログを見て」「原因を調べて」 |
+| ci-fix-failing-tests | テスト修正の提案 | 「テストを直して」「修正案を出して」 |
 
 ---
 
@@ -38,7 +38,7 @@ CI/CD パイプラインに関する問題を解決するスキル群です。
 
 ### 分析・調査が必要な場合
 
-→ `ccp-ci-analyze-failures/doc.md` を参照
+→ `ci-analyze-failures/doc.md` を参照
 
 例:
 - 「CIが落ちた原因を教えて」
@@ -47,7 +47,7 @@ CI/CD パイプラインに関する問題を解決するスキル群です。
 
 ### 修正・対応が必要な場合
 
-→ `ccp-ci-fix-failing-tests/doc.md` を参照
+→ `ci-fix-failing-tests/doc.md` を参照
 
 例:
 - 「テストを直して」

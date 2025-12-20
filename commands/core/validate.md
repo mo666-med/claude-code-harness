@@ -20,10 +20,10 @@ description-en: "[Optional] Project validation (env/deps/build/test/deploy)"
 
 このコマンドは以下のスキルを活用します：
 
-- `ccp-review-security` - セキュリティ検証
-- `ccp-review-performance` - パフォーマンス検証
-- `ccp-review-quality` - 品質検証
-- `ccp-verify-build` - ビルド検証
+- `review-security` - セキュリティ検証
+- `review-performance` - パフォーマンス検証
+- `review-quality` - 品質検証
+- `verify-build` - ビルド検証
 
 ---
 

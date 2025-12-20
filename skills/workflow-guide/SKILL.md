@@ -1,6 +1,6 @@
 ---
-name: ccp-workflow-guide
-description: "Cursor ↔ Claude Code 2エージェントワークフローのガイダンスを提供するスキルワークフローの説明やガイダンスが必要な場合に使用します。ワークフローの説明やガイダンスが必要な場合に使用します。ワークフローの説明やガイダンスが必要な場合に使用します。"
+name: workflow-guide
+description: "Provides guidance on Cursor ↔ Claude Code 2-agent workflow. Use when user mentions ワークフローについて, Cursorとの連携, 作業の流れ, 2-agent workflow, collaboration. Do NOT load for: 実装作業, ワークフロー設定, ハンドオフ実行."
 allowed-tools: ["Read"]
 metadata:
   skillport:

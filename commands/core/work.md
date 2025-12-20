@@ -94,10 +94,10 @@ pm:依頼中 / cursor:依頼中 / cc:TODO → cc:WIP（着手時に自動更新�
 
 このコマンドは以下のスキルを活用します：
 
-- `ccp-work-impl-feature` - 機能実装
-- `ccp-work-write-tests` - テスト作成
-- `ccp-verify-build` - ビルド検証
-- `ccp-error-recovery` - エラー復旧
+- `work-impl-feature` - 機能実装
+- `work-write-tests` - テスト作成
+- `verify-build` - ビルド検証
+- `error-recovery` - エラー復旧
 
 ---
 
@@ -238,7 +238,7 @@ Claude Code の Task ツールを使用して**バックグラウンドで並列
 **対応**:
 1. 成功したタスクの結果は保持
 2. 失敗タスクのエラー詳細を表示
-3. `ccp-error-recovery` スキルで自動修正を試行（最大3回）
+3. `error-recovery` スキルで自動修正を試行（最大3回）
 
 ### 全タスク失敗時
 

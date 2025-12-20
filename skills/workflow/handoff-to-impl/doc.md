@@ -1,5 +1,5 @@
 ---
-name: ccp-handoff-to-impl
+name: handoff-to-impl
 description: "PM Claude → Impl Claude への依頼文を生成。2-Agent運用で実装役にタスクを渡したい場合に使用します。"
 allowed-tools: ["Read", "Write", "Edit", "Bash"]
 metadata:

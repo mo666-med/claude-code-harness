@@ -228,9 +228,9 @@ paths: "**/*.{ts,tsx}"
 
 ### v0.5.0 での実装範囲
 
-1. **skills/core/ccp-project-analyzer/** - プロジェクト分析スキル
+1. **skills/setup/project-scaffolder/** - プロジェクト分析・生成スキル
 2. **scripts/analyze-project.sh** - 分析データ収集スクリプト
-3. **skills/core/ccp-rule-generator/** - ルール生成スキル
+3. **skills/setup/adaptive-setup/** - 適応型セットアップスキル
 4. **/setup-2agent コマンド更新** - 3フェーズフローに変更
 
 ### 優先度
@@ -250,7 +250,7 @@ paths: "**/*.{ts,tsx}"
 
 - `/setup-2agent` コマンド
 - `scripts/setup-2agent.sh`
-- `skills/core/ccp-setup-2agent-files/SKILL.md`
+- `skills/2agent/setup-2agent-files/doc.md`
 - `templates/rules/` - 基本テンプレート
 
 ---

@@ -1,6 +1,6 @@
 ---
 name: memory
-description: "Manages memory, SSOT files, and Plans.md operations. Use when user mentions メモリ, memory, SSOT, decisions.md, patterns.md, マージ, merge, Plans.md, 移行, migrate."
+description: "Manages memory, SSOT files, and Plans.md operations. Use when user mentions メモリ, memory, SSOT, decisions.md, patterns.md, マージ, merge, Plans.md, 移行, migrate. Do NOT load for: 実装作業, レビュー, 一時的なメモ, セッション中の作業記録."
 allowed-tools: ["Read", "Write", "Edit", "Bash"]
 metadata:
   skillport:
@@ -17,15 +17,15 @@ metadata:
 
 | スキル | 用途 |
 |--------|------|
-| ccp-init-memory-ssot | decisions.md, patterns.md 初期化 |
-| ccp-merge-plans | Plans.md のマージ処理 |
-| ccp-migrate-workflow-files | 旧形式からの移行 |
+| init-memory-ssot | decisions.md, patterns.md 初期化 |
+| merge-plans | Plans.md のマージ処理 |
+| migrate-workflow-files | 旧形式からの移行 |
 
 ## ルーティング
 
-- SSOT初期化: ccp-init-memory-ssot/doc.md
-- Plans.mdマージ: ccp-merge-plans/doc.md
-- 移行処理: ccp-migrate-workflow-files/doc.md
+- SSOT初期化: init-memory-ssot/doc.md
+- Plans.mdマージ: merge-plans/doc.md
+- 移行処理: migrate-workflow-files/doc.md
 
 ## 実行手順
 

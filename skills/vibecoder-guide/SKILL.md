@@ -1,6 +1,6 @@
 ---
-name: ccp-vibecoder-guide-legacy
-description: "VibeCoder（非技術者）が自然言語だけで開発を進められるようガイドするスキル（レガシー版）非技術者向けのガイダンスを提供する場合に使用します。非技術者向けのガイダンスを提供する場合に使用します。非技術者向けのガイダンスを提供する場合に使用します。"
+name: vibecoder-guide-legacy
+description: "Guides VibeCoder (non-technical users) through natural language development (legacy). Use when user mentions どうすればいい, 次は何, 使い方, 困った, help, what should I do. Do NOT load for: 技術者向け作業, 直接的な実装指示, レビュー."
 allowed-tools: ["Read"]
 metadata:
   skillport:
@@ -8,7 +8,7 @@ metadata:
     tags: [vibecoder, guide, natural-language, help]
     alwaysApply: false
     deprecated: true
-    supersededBy: ccp-vibecoder-guide
+    supersededBy: vibecoder-guide
 ---
 
 # VibeCoder Guide Skill

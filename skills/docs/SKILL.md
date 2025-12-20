@@ -1,6 +1,6 @@
 ---
 name: docs
-description: "Generates documentation files including NotebookLM YAML and slide content. Use when user mentions ドキュメント, document, YAML, NotebookLM, スライド, slide, プレゼン."
+description: "Generates documentation files including NotebookLM YAML and slide content. Use when user mentions ドキュメント, document, YAML, NotebookLM, スライド, slide, プレゼン. Do NOT load for: 実装作業, コード修正, レビュー, デプロイ."
 allowed-tools: ["Read", "Write", "Edit"]
 metadata:
   skillport:
@@ -18,12 +18,12 @@ metadata:
 | スキル | 用途 |
 |--------|------|
 | notebooklm-yaml | NotebookLM 用 YAML 生成 |
-| ccp-docs-notebooklm-slide-yaml | スライド用 YAML 生成 |
+| docs-notebooklm-slide-yaml | スライド用 YAML 生成 |
 
 ## ルーティング
 
 - NotebookLM YAML: notebooklm-yaml/doc.md
-- スライド YAML: ccp-docs-notebooklm-slide-yaml/doc.md
+- スライド YAML: docs-notebooklm-slide-yaml/doc.md
 
 ## 実行手順
 

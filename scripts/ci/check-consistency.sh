@@ -104,15 +104,15 @@ fi
 echo ""
 echo "📋 [4/5] スキル定義の期待ファイル構成..."
 
-# ccp-update-2agent-files の REQUIRED_FILES とテンプレートの同期
-UPDATE_SKILL="$PLUGIN_ROOT/skills/core/ccp-update-2agent-files/SKILL.md"
+# update-2agent-files の REQUIRED_FILES とテンプレートの同期
+UPDATE_SKILL="$PLUGIN_ROOT/skills/2agent/update-2agent-files/doc.md"
 if [ -f "$UPDATE_SKILL" ]; then
   # スキル内の .claude/rules/ 参照を確認
   if ! grep -q "\.claude/rules" "$UPDATE_SKILL"; then
-    echo "  ❌ ccp-update-2agent-files に .claude/rules/ の参照がありません"
+    echo "  ❌ update-2agent-files に .claude/rules/ の参照がありません"
     ERRORS=$((ERRORS + 1))
   else
-    echo "  ✅ ccp-update-2agent-files に rules 参照あり"
+    echo "  ✅ update-2agent-files に rules 参照あり"
   fi
 fi
 
@@ -142,7 +142,7 @@ fi
 # 6. /start-task 廃止の回帰チェック
 # ================================
 echo ""
-echo "🚫 [6/8] /start-task 廃止の回帰チェック..."
+echo "🚫 [6/9] /start-task 廃止の回帰チェック..."
 
 # 運用導線ファイル（CHANGELOG等の履歴は除外）
 START_TASK_TARGETS=(
@@ -186,7 +186,7 @@ fi
 # 7. docs/ 正規化の回帰チェック
 # ================================
 echo ""
-echo "📁 [7/8] docs/ 正規化の回帰チェック..."
+echo "📁 [7/9] docs/ 正規化の回帰チェック..."
 
 # proposal.md / priority_matrix.md のルート参照をチェック
 DOCS_TARGETS=(
@@ -218,7 +218,7 @@ fi
 # 8. bypassPermissions 前提運用の回帰チェック
 # ================================
 echo ""
-echo "🔓 [8/8] bypassPermissions 前提運用の回帰チェック..."
+echo "🔓 [8/9] bypassPermissions 前提運用の回帰チェック..."
 
 BYPASS_ISSUES=0
 
@@ -263,6 +263,50 @@ if [ $BYPASS_ISSUES -eq 0 ]; then
   echo "  ✅ bypassPermissions 前提運用OK"
 else
   ERRORS=$((ERRORS + BYPASS_ISSUES))
+fi
+
+# ================================
+# 9. ccp-* スキル廃止の回帰チェック
+# ================================
+echo ""
+echo "🚫 [9/9] ccp-* スキル廃止の回帰チェック..."
+
+CCP_ISSUES=0
+
+# Check 1: skills の name: に ccp- が含まれていないこと
+CCP_NAMES=$(grep -rn "^name: ccp-" "$PLUGIN_ROOT/skills/" 2>/dev/null || true)
+if [ -n "$CCP_NAMES" ]; then
+  echo "  ❌ skills に name: ccp-* が残存"
+  echo "$CCP_NAMES" | head -3 | sed 's/^/      /'
+  CCP_ISSUES=$((CCP_ISSUES + 1))
+else
+  echo "  ✅ skills に name: ccp-* なし"
+fi
+
+# Check 2: workflows の skill: に ccp- が含まれていないこと
+CCP_WORKFLOWS=$(grep -rn "skill: ccp-" "$PLUGIN_ROOT/workflows/" 2>/dev/null || true)
+if [ -n "$CCP_WORKFLOWS" ]; then
+  echo "  ❌ workflows に skill: ccp-* が残存"
+  echo "$CCP_WORKFLOWS" | head -3 | sed 's/^/      /'
+  CCP_ISSUES=$((CCP_ISSUES + 1))
+else
+  echo "  ✅ workflows に skill: ccp-* なし"
+fi
+
+# Check 3: ccp-* ディレクトリが残っていないこと
+CCP_DIRS=$(find "$PLUGIN_ROOT/skills" -type d -name "ccp-*" 2>/dev/null || true)
+if [ -n "$CCP_DIRS" ]; then
+  echo "  ❌ ccp-* ディレクトリが残存"
+  echo "$CCP_DIRS" | head -3 | sed 's/^/      /'
+  CCP_ISSUES=$((CCP_ISSUES + 1))
+else
+  echo "  ✅ ccp-* ディレクトリなし"
+fi
+
+if [ $CCP_ISSUES -eq 0 ]; then
+  echo "  ✅ ccp-* スキル廃止OK"
+else
+  ERRORS=$((ERRORS + CCP_ISSUES))
 fi
 
 # ================================

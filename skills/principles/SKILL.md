@@ -17,17 +17,17 @@ metadata:
 
 | スキル | 用途 |
 |--------|------|
-| ccp-core-general-principles | 開発の基本原則 |
-| ccp-core-diff-aware-editing | 差分認識編集のガイド |
-| ccp-core-read-repo-context | リポジトリコンテキスト読み取り |
-| ccp-vibecoder-guide | VibeCoder 向けガイド |
+| core-general-principles | 開発の基本原則 |
+| core-diff-aware-editing | 差分認識編集のガイド |
+| core-read-repo-context | リポジトリコンテキスト読み取り |
+| vibecoder-guide | VibeCoder 向けガイド |
 
 ## ルーティング
 
-- 基本原則: ccp-core-general-principles/doc.md
-- 差分編集: ccp-core-diff-aware-editing/doc.md
-- コンテキスト読み取り: ccp-core-read-repo-context/doc.md
-- VibeCoder: ccp-vibecoder-guide/doc.md
+- 基本原則: core-general-principles/doc.md
+- 差分編集: core-diff-aware-editing/doc.md
+- コンテキスト読み取り: core-read-repo-context/doc.md
+- VibeCoder: vibecoder-guide/doc.md
 
 ## 実行手順
 

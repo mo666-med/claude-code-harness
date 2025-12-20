@@ -263,7 +263,7 @@ npm install @supabase/supabase-js lucide-react
 - `permissions.disableBypassPermissionsMode` は **設定しない**（bypassPermissions を許可）
   - セキュリティ要件で bypass を禁止したい場合のみ `"disable"` を設定（例: managed-settings.json）
 
-**実行**: `ccp-generate-claude-settings` スキルを実行して作成/更新すること。
+**実行**: `generate-claude-settings` スキルを実行して作成/更新すること。
 
 ### Step 7: ワークフローファイル生成
 
@@ -341,10 +341,10 @@ cat package.json 2>/dev/null | head -10
 ### Step 3B: 新フォーマットへ移行（B を選択・推奨）
 
 1. まず `.claude/settings.json` を **安全ポリシー込みで作成/更新**（既存は非破壊マージ）
-   → `ccp-generate-claude-settings` を実行
+   → `generate-claude-settings` を実行
 2. 次に `AGENTS.md` / `CLAUDE.md` / `Plans.md` を **既存内容を引き継ぎつつ新フォーマットへ移行**（対話で引き継ぎ項目を確定）
-   → `ccp-migrate-workflow-files` を実行
-   - `Plans.md` はタスク保持マージ（`ccp-merge-plans` 方針）
+   → `migrate-workflow-files` を実行
+   - `Plans.md` はタスク保持マージ（`merge-plans` 方針）
    - `AGENTS.md` / `CLAUDE.md` はテンプレ骨格 + 「移行したプロジェクト固有ルール」を適切な場所に再配置
    - 変更前に `.claude-code-harness/backups/` にバックアップを残す
 

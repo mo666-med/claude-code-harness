@@ -37,9 +37,9 @@ description-en: Create development plan (requirements → implementation plan)
 
 このコマンドは以下のスキルを活用します：
 
-- `ccp-adaptive-setup` - プロジェクト構造の初期化
-- `ccp-vibecoder-guide` - VibeCoder向けガイダンス
-- `ccp-core-read-repo-context` - プロジェクト状態の把握
+- `adaptive-setup` - プロジェクト構造の初期化
+- `vibecoder-guide` - VibeCoder向けガイダンス
+- `core-read-repo-context` - プロジェクト状態の把握
 
 ---
 
