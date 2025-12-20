@@ -10,6 +10,60 @@ claude-code-harness の変更履歴です。
 
 ---
 
+## [2.5.10] - 2025-12-21
+
+### 🎯 あなたにとって何が変わるか
+
+**公式 LSP プラグインに対応。`/lsp-setup` がマーケットプレイスのプラグインを自動インストール。**
+
+#### Before
+- LSP の設定方法が複数あり、どれを使えばいいかわからなかった
+- 公式プラグインの存在を知らなかった
+- カスタム設定が必要だった
+
+#### After
+- **公式プラグイン**（`typescript-lsp`, `pyright-lsp`, `rust-lsp`）を `/lsp-setup` が自動インストール
+- **ゼロからのセットアップ**が 3 ステップで完了
+- **カスタム言語**（Go, C/C++ 等）も `.lsp.json` で対応可能
+
+### ゼロからの LSP セットアップ
+
+```bash
+# Step 1: 言語サーバーをインストール
+npm install -g typescript typescript-language-server
+
+# Step 2: 公式プラグインをインストール
+claude plugin install typescript-lsp
+
+# Step 3: Claude Code を起動
+claude
+```
+
+### VibeCoder 向けの使い方
+
+| やりたいこと | 言い方 |
+|-------------|--------|
+| LSP を使えるようにしたい | 「`/lsp-setup`」 |
+| 公式プラグインを入れたい | 「TypeScript の LSP プラグインを入れて」 |
+
+### 変更内容
+
+#### コマンド更新
+- `/lsp-setup` - 公式 LSP プラグイン対応:
+  - `claude plugin install typescript-lsp` 等を自動実行
+  - カスタム `.lsp.json` の作成ガイドを追加
+
+#### ドキュメント更新
+- `docs/LSP_INTEGRATION.md`:
+  - 「ゼロからのセットアップ（推奨）」セクションを刷新
+  - 公式 LSP プラグイン一覧を追加
+  - カスタム言語サポートのガイドを追加
+
+### 参照元（Based on）
+- [Claude Code Plugins Reference - LSP servers](https://code.claude.com/docs/en/plugins-reference) - 公式 LSP プラグイン仕様
+
+---
+
 ## [2.5.9] - 2025-12-20
 
 ### 🎯 あなたにとって何が変わるか

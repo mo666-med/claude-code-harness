@@ -33,64 +33,113 @@ Claude Code v2.0.74+ で利用可能な LSP 機能：
 
 ---
 
-## 言語サーバーのセットアップ（必須）
+## ゼロからのセットアップ（推奨）
 
-> ⚠️ **重要**: LSP を使うには、対象言語の **Language Server** が必要です。Claude Code の LSP 機能はプロトコルであり、実際の解析は言語サーバーが行います。
+LSP を使うには **2つのもの** が必要です:
 
-### 言語別インストールコマンド
+1. **言語サーバー** - 実際にコード解析を行うプログラム
+2. **LSP プラグイン** - Claude Code と言語サーバーを接続
+
+### Step 1: 言語サーバーをインストール
 
 | 言語 | Language Server | インストールコマンド |
 |------|-----------------|---------------------|
 | **TypeScript/JS** | typescript-language-server | `npm install -g typescript typescript-language-server` |
-| **Python** | pylsp | `pip install python-lsp-server` |
-| **Python** | pyright (より高速) | `pip install pyright` または `npm install -g pyright` |
-| **Rust** | rust-analyzer | `rustup component add rust-analyzer` |
+| **Python** | pyright | `pip install pyright` または `npm install -g pyright` |
+| **Rust** | rust-analyzer | [公式手順](https://rust-analyzer.github.io/manual.html#installation) |
 | **Go** | gopls | `go install golang.org/x/tools/gopls@latest` |
 | **C/C++** | clangd | macOS: `brew install llvm` / Ubuntu: `apt install clangd` |
-| **Ruby** | solargraph | `gem install solargraph` |
-| **PHP** | intelephense | `npm install -g intelephense` |
-| **Java** | Eclipse JDT LS | [手動セットアップが必要](https://github.com/eclipse/eclipse.jdt.ls) |
 
-### セットアップ手順
+### Step 2: 公式 LSP プラグインをインストール
+
+Claude Code マーケットプレイスから公式プラグインをインストール:
 
 ```bash
-# 1. 言語サーバーをインストール（例: TypeScript プロジェクト）
-npm install -g typescript typescript-language-server
+# TypeScript/JavaScript
+claude plugin install typescript-lsp
 
-# 2. インストール確認
-which typescript-language-server  # パスが表示されればOK
+# Python
+claude plugin install pyright-lsp
 
-# 3. Claude Code を LSP 有効で起動
-export ENABLE_LSP_TOOL=1
+# Rust
+claude plugin install rust-lsp
+```
+
+または `/plugin` コマンドで "lsp" を検索してインストール。
+
+### Step 3: Claude Code を起動
+
+```bash
 claude
 ```
 
-### 既存プロジェクトへの導入
+**これで完了！** Go-to-definition、Find-references、Diagnostics が使えるようになります。
 
-既存プロジェクトに LSP 設定を追加するには `/lsp-setup` コマンドを使用:
+---
+
+## 公式 LSP プラグイン一覧
+
+| プラグイン | 言語 | 必要な言語サーバー | インストール |
+|-----------|------|-------------------|-------------|
+| `typescript-lsp` | TypeScript/JS | typescript-language-server | `claude plugin install typescript-lsp` |
+| `pyright-lsp` | Python | pyright | `claude plugin install pyright-lsp` |
+| `rust-lsp` | Rust | rust-analyzer | `claude plugin install rust-lsp` |
+
+> **注意**: プラグインは言語サーバーのバイナリを**含みません**。
+> Step 1 で言語サーバーを別途インストールしてください。
+
+---
+
+## 既存プロジェクトへの導入
+
+既存プロジェクトに LSP を追加するには `/lsp-setup` コマンドを使用:
 
 ```
 /lsp-setup
 ```
 
 このコマンドは:
-1. プロジェクトの言語を検出
-2. 必要な言語サーバーのインストール状況を確認
-3. `.claude/settings.json` に LSP 設定を追加
+1. プロジェクトの言語を自動検出
+2. 必要な言語サーバーのインストール確認・実行
+3. 公式プラグインのインストール
 4. 動作確認
 
 ---
 
-## LSP の有効化
+## カスタム言語のサポート（Go, C/C++ 等）
 
-### 方法1: 環境変数（推奨）
+公式プラグインがない言語は、カスタム LSP プラグインを作成できます。
+
+### `.lsp.json` フォーマット
+
+```json
+{
+  "go": {
+    "command": "gopls",
+    "args": ["serve"],
+    "extensionToLanguage": {
+      ".go": "go"
+    }
+  }
+}
+```
+
+詳細は `/lsp-setup` コマンドの「カスタム LSP プラグインの作成」セクションを参照。
+
+---
+
+## LSP の有効化（レガシー方式）
+
+公式プラグインを使わない場合の代替方法:
+
+### 方法1: 環境変数
 
 ```bash
 export ENABLE_LSP_TOOL=1
 claude
 ```
 
-### 方法2: MCP サーバー経由（より安定）
+### 方法2: MCP サーバー経由
 
 `.claude/settings.json`:
 
