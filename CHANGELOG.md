@@ -12,6 +12,10 @@ claude-code-harness の変更履歴です。
 
 ## [Unreleased]
 
+---
+
+## [2.5.13] - 2025-12-21
+
 ### 🎯 あなたにとって何が変わるか
 
 **LSP/Skills の「必要時強制利用」ポリシーを Hooks で実装。公式LSP準拠に一本化し、コード変更前のLSP分析を必須化。**
@@ -43,6 +47,7 @@ claude-code-harness の変更履歴です。
 - **tool-events.jsonl**: 全ツール名を JSONL 形式で記録（256KB or 2000行でローテーション、最大5世代）
 - **ロック機構**: flock 優先、無ければ mkdir ロックで競合回避
 - **最小フィールドのみ記録**: `tool_name`, `ts`, `session_id`, `prompt_seq`（漏洩リスク回避）
+- **LSP追跡の一本化**: `posttooluse-log-toolname.sh` が `grep -iq "lsp"` でLSP関連ツールを検出（matcher依存を排除）
 
 #### 公式LSP準拠への一本化
 
@@ -51,7 +56,14 @@ claude-code-harness の変更履歴です。
   - `skills/setup/generate-claude-settings/doc.md` の CCLSP 説明を公式LSPプラグインへ置き換え
   - `commands/optional/ci-setup.md` の `npx @ktnyt/cclsp diagnose` を `npm run type-check/lint` へ置き換え
   - `docs/LSP_INTEGRATION.md` の ENABLE_LSP_TOOL / CCLSP セクションを公式LSPプラグイン説明へ置き換え
-- **公式LSPプラグインを推奨**: `claude plugin install typescript-lsp` 等
+- **公式LSPプラグイン全10種をサポート**:
+  - `typescript-lsp`, `pyright-lsp`, `rust-analyzer-lsp` (旧名 `rust-lsp` から修正)
+  - `gopls-lsp`, `clangd-lsp`, `jdtls-lsp`, `swift-lsp`, `lua-lsp`, `php-lsp`, `csharp-lsp`
+- **ドキュメントの整合性確保**:
+  - 「プロジェクトで使用する言語に必要なものだけインストール」を明記（全部入れない運用）
+  - Phase0手順を `posttooluse-log-toolname.sh` ベースに書き直し（matcher依存を排除）
+  - Go/C/C++ も公式プラグインあり扱いに修正
+- **session-monitor.sh の拡張子マッピング拡充**: 全10種のLSPプラグインに対応
 
 #### Skills decision の json 方式への置換
 
