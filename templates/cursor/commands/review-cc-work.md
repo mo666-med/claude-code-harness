@@ -12,8 +12,8 @@ description: Claude Codeの作業をレビューし、次アクションを決�
 2. 受入条件に照らしてOK/NGを判断
 3. **承認できない場合（request_changes）**:
    - Plans.md に「修正タスク」を追記/更新（何を直すか・どの受入条件に紐づくかが分かる粒度）
-   - 続けて **`/claude-code-harness/handoff-to-claude` を実行**し、Claude Code に渡す依頼文を生成
-   - 生成した依頼文を、あなたの返信の末尾に **そのまま貼り付け**（コピー&ペースト可能な形）
+   - **必ず** `/handoff-to-claude` を実行し、Claude Code に渡す修正依頼プロンプトを生成・発行する
+   - 生成したプロンプトは、そのまま Claude Code にコピー&ペースト可能な形で返信に含める
 
 ## 出力フォーマット
 
@@ -22,7 +22,7 @@ description: Claude Codeの作業をレビューし、次アクションを決�
 - **次アクション**:
   - approve の場合: マージ/デプロイ/次タスク
   - request_changes の場合: 具体的な修正依頼（箇条書き）
-- **`/claude-code-harness/handoff-to-claude` 出力**（request_changes の場合は必須）:
+- **`/handoff-to-claude` 実行結果**（request_changes の場合は必須）:
 
 ```markdown
 ## 依頼
@@ -41,6 +41,8 @@ description: Claude Codeの作業をレビューし、次アクションを決�
 
 ## 参考
 - 関連ファイル（あれば）
+
+**作業完了後**: `handofCursor` を実行して完了報告すること
 ```
 
 

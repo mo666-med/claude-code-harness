@@ -32,6 +32,8 @@ description: Claude Codeへの作業依頼プロンプトを生成
 
 ## 参考
 - 関連ファイル（あれば）
+
+**作業完了後**: `handofCursor` を実行して完了報告すること
 ```
 
 
