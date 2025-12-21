@@ -10,6 +10,68 @@ Change history for claude-code-harness.
 
 ---
 
+## [2.5.13] - 2025-12-21
+
+### What's Changed for You
+
+**LSP/Skills "mandatory when needed" policy implemented via Hooks. Unified to official LSP compliance, making LSP analysis mandatory before code changes.**
+
+#### Unified to Official LSP Compliance
+
+- **All 10 official LSP plugins supported**:
+  - `typescript-lsp`, `pyright-lsp`, `rust-analyzer-lsp` (fixed from old name `rust-lsp`)
+  - `gopls-lsp`, `clangd-lsp`, `jdtls-lsp`, `swift-lsp`, `lua-lsp`, `php-lsp`, `csharp-lsp`
+- **Documentation consistency ensured**:
+  - Clarified "install only what you need for your project" (not installing all)
+  - Rewrote Phase0 procedures based on `posttooluse-log-toolname.sh` (eliminated matcher dependency)
+  - Fixed Go/C/C++ to have official plugins
+- **session-monitor.sh extension mapping expanded**: Support for all 10 LSP plugins
+
+#### Phase0 Logging Implementation
+
+- **Unified LSP tracking**: `posttooluse-log-toolname.sh` detects LSP-related tools via `grep -iq "lsp"` (eliminated matcher dependency to prevent deadlocks)
+- **Environment-variable controlled**: Enable/disable detailed logging with `CC_HARNESS_PHASE0_LOG=1`
+- **JSONL format logs**: Outputs to `.claude/state/tool-events.jsonl` (rotates at 256KB or 2000 lines, max 5 generations)
+- **State synchronization**: Updates `.claude/state/tooling-policy.json` for LSP availability and skills index
+
+#### LSP Tracking Unification
+
+- **Removed duplicate implementation**: Deleted matcher:"LSP" entry from hooks.json
+- **Single tracking path**: PostToolUse matcher:"*" → posttooluse-log-toolname.sh integration
+- **Deleted unnecessary files**: Removed `posttooluse-lsp-track.sh` (became redundant)
+
+### Changes
+
+#### Documentation Fixes
+
+**Corrected plugin names** (5 files):
+- docs/LSP_INTEGRATION.md - Updated official plugin list and Phase0 procedures
+- commands/optional/lsp-setup.md - Added full 10-plugin table and fixed Go/C/C++ descriptions
+- skills/setup/generate-claude-settings/doc.md - Fixed rust-lsp references
+- scripts/session-monitor.sh - Updated OFFICIAL_LSP_PLUGINS list and comments
+- CHANGELOG.md - Fixed historical entries
+
+**Enhanced extension mappings**:
+- Added `available_by_ext` for all 10 plugins (ts, py, rs, go, c/cpp, java, swift, lua, php, cs)
+
+#### Implementation Cleanup
+
+**Eliminated duplicate tracking**:
+- Removed matcher:"LSP" entry from hooks/hooks.json
+- Deleted scripts/posttooluse-lsp-track.sh
+- Unified to matcher:"*" → posttooluse-log-toolname.sh path
+
+**Test results**:
+- All 37/37 plugin validation tests passed
+- All consistency checks passed
+
+### Based on
+
+- [Claude Code Official LSP Plugins](https://github.com/anthropics/claude-plugins-official) - Verified against local repository
+- [Claude Code Hooks System](https://code.claude.com/docs/en/hooks) - PostToolUse hook lifecycle
+
+---
+
 ## [2.5.1] - 2025-12-19
 
 ### What's Changed for You
