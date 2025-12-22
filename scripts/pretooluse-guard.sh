@@ -143,6 +143,7 @@ is_protected_path() {
   return 1
 }
 
+
 if [ "$TOOL_NAME" = "Write" ] || [ "$TOOL_NAME" = "Edit" ]; then
   [ -z "$FILE_PATH" ] && exit 0
 
@@ -169,12 +170,12 @@ if [ "$TOOL_NAME" = "Write" ] || [ "$TOOL_NAME" = "Edit" ]; then
   fi
 
   # ===== LSP/Skills ゲート (Phase0+) =====
-
   STATE_DIR=".claude/state"
   SESSION_FILE="$STATE_DIR/session.json"
   TOOLING_POLICY_FILE="$STATE_DIR/tooling-policy.json"
-  SKILLS_DECISION_FILE="$STATE_DIR/skills-decision.json"
   SKILLS_POLICY_FILE="$STATE_DIR/skills-policy.json"
+  SKILLS_CONFIG_FILE="$STATE_DIR/skills-config.json"
+  SESSION_SKILLS_USED_FILE="$STATE_DIR/session-skills-used.json"
 
   # デフォルト除外パターン（policy file がなくても適用）
   is_default_excluded() {
@@ -212,11 +213,9 @@ if [ "$TOOL_NAME" = "Write" ] || [ "$TOOL_NAME" = "Edit" ]; then
 
       while IFS= read -r pattern; do
         [ -z "$pattern" ] && continue
-        # パターンマッチ（前方一致 or ワイルドカード）
         case "$path" in
           $pattern*) return 0 ;;
         esac
-        # *.md のようなパターン
         case "$pattern" in
           \*.*)
             local ext="${pattern#\*}"
@@ -239,69 +238,68 @@ if [ "$TOOL_NAME" = "Write" ] || [ "$TOOL_NAME" = "Edit" ]; then
     return 1
   }
 
-  # stateファイルが存在する場合のみゲートを適用
+  # ===== Skills Gate: セッション単位でスキル使用をチェック =====
+  # skills-config.json が存在し、enabled=true の場合のみゲートを適用
+  if [ -f "$SKILLS_CONFIG_FILE" ]; then
+    if command -v jq >/dev/null 2>&1; then
+      SKILLS_GATE_ACTIVE=$(jq -r '.enabled // false' "$SKILLS_CONFIG_FILE" 2>/dev/null || echo "false")
+      
+      if [ "$SKILLS_GATE_ACTIVE" = "true" ]; then
+        # 除外パスチェック
+        if is_excluded_path "$REL_PATH" "$SKILLS_POLICY_FILE"; then
+          : # 除外パス → スキップ
+        else
+          # session-skills-used.json をチェック
+          SKILL_USED_THIS_SESSION="false"
+          if [ -f "$SESSION_SKILLS_USED_FILE" ]; then
+            USED_COUNT=$(jq -r '.used | length' "$SESSION_SKILLS_USED_FILE" 2>/dev/null || echo "0")
+            if [ "$USED_COUNT" -gt 0 ]; then
+              SKILL_USED_THIS_SESSION="true"
+            fi
+          fi
+          
+          if [ "$SKILL_USED_THIS_SESSION" = "false" ]; then
+            # スキル未使用 → ブロック
+            AVAILABLE_SKILLS=$(jq -r '.skills // [] | join(", ")' "$SKILLS_CONFIG_FILE" 2>/dev/null || echo "impl, review")
+            DENY_MSG="[Skills Gate] コード編集前にスキルを使用してください。
+
+このプロジェクトでは Skills Gate が有効です。
+コード変更前に Skill ツールで適切なスキルを呼び出してください。
+
+利用可能なスキル: ${AVAILABLE_SKILLS}
+
+例: Skill ツールで 'impl' や 'review' を呼び出す
+
+スキルを使用後、再度 Write/Edit を実行してください。"
+            emit_deny "$DENY_MSG"
+            exit 0
+          fi
+        fi
+      fi
+    fi
+  fi
+
+  # ===== LSP Gate: セマンティック変更時にLSP使用を推奨 =====
   if [ -f "$SESSION_FILE" ] && [ -f "$TOOLING_POLICY_FILE" ]; then
-    # JSONから値を抽出（jq優先）
     if command -v jq >/dev/null 2>&1; then
       CURRENT_PROMPT_SEQ=$(jq -r '.prompt_seq // 0' "$SESSION_FILE" 2>/dev/null || echo 0)
       INTENT=$(jq -r '.intent // "literal"' "$SESSION_FILE" 2>/dev/null || echo "literal")
       LSP_AVAILABLE=$(jq -r '.lsp.available // false' "$TOOLING_POLICY_FILE" 2>/dev/null || echo false)
       LSP_LAST_USED_SEQ=$(jq -r '.lsp.last_used_prompt_seq // 0' "$TOOLING_POLICY_FILE" 2>/dev/null || echo 0)
 
-      # ファイル拡張子を取得
       FILE_EXT="${FILE_PATH##*.}"
       LSP_AVAILABLE_FOR_EXT=$(jq -r ".lsp.available_by_ext[\"$FILE_EXT\"] // false" "$TOOLING_POLICY_FILE" 2>/dev/null || echo false)
 
-      # Skills decision required チェック
-      SKILLS_DECISION_REQUIRED=$(jq -r '.skills.decision_required // false' "$TOOLING_POLICY_FILE" 2>/dev/null || echo false)
-      SKILLS_DECISION_SEQ=0
-      if [ -f "$SKILLS_DECISION_FILE" ]; then
-        SKILLS_DECISION_SEQ=$(jq -r '.prompt_seq // 0' "$SKILLS_DECISION_FILE" 2>/dev/null || echo 0)
-      fi
-
-      # LSPゲート: semantic かつ LSP利用可能 かつ LSP未実行
       if [ "$INTENT" = "semantic" ] && [ "$LSP_AVAILABLE" = "true" ] && [ "$LSP_AVAILABLE_FOR_EXT" = "true" ]; then
         if [ "$LSP_LAST_USED_SEQ" != "$CURRENT_PROMPT_SEQ" ]; then
-          # LSP未実行のまま Write/Edit に入ろうとしている → deny
           DENY_MSG="[LSP Policy] コード変更前にLSPツールを使って影響範囲を分析してください。
 
-推奨LSPツール（tool_name確定後に更新）:
-- LSP tool: definition, references, rename, diagnostics のいずれか
-- 例: Go-to-definition でシンボルの定義を確認
-- 例: Find-references で使用箇所を確認
-- 例: Diagnostics で型エラーを検出
+推奨LSPツール:
+- Go-to-definition でシンボルの定義を確認
+- Find-references で使用箇所を確認
+- Diagnostics で型エラーを検出
 
-LSPツールを使って変更の影響範囲を把握してから、再度 Write/Edit を実行してください。
-
-注: Phase0ログで実際の tool_name を確認し、このメッセージを更新することを推奨します。"
-          emit_deny "$DENY_MSG"
-          exit 0
-        fi
-      elif [ "$INTENT" = "semantic" ] && [ "$LSP_AVAILABLE" = "false" ]; then
-        # LSP未導入だが semantic → 推奨メッセージのみ（allow）
-        # ここではdenyしないが、UserPromptSubmitで既に推奨メッセージを出しているので、追加アクションは不要
-        : # no-op
-      fi
-
-      # Skillsゲート: skills-decision.json が必要なのに更新されていない
-      # ただし以下は常に許可（詰ませない）:
-      # - skills-decision.json 自体
-      # - skills-policy.json で除外されたパス
-      if [ "$SKILLS_DECISION_REQUIRED" = "true" ] && [[ "$REL_PATH" != *"skills-decision.json"* ]]; then
-        # 除外パスチェック
-        if is_excluded_path "$REL_PATH" "$SKILLS_POLICY_FILE"; then
-          : # 除外パス → スキップ
-        elif [ "$SKILLS_DECISION_SEQ" != "$CURRENT_PROMPT_SEQ" ]; then
-          DENY_MSG="[Skills Policy] Skillsの宣言が必要です。
-
-先に \`.claude/state/skills-decision.json\` を更新してから、再度 Write/Edit を実行してください。
-
-例:
-{
-  \"prompt_seq\": $CURRENT_PROMPT_SEQ,
-  \"selected\": [\"skill_name_1\", \"skill_name_2\"],
-  \"mode\": \"declared\"
-}"
+LSPツールを使って変更の影響範囲を把握してから、再度 Write/Edit を実行してください。"
           emit_deny "$DENY_MSG"
           exit 0
         fi
@@ -311,6 +309,7 @@ LSPツールを使って変更の影響範囲を把握してから、再度 Writ
 
   exit 0
 fi
+
 
 if [ "$TOOL_NAME" = "Bash" ]; then
   [ -z "$COMMAND" ] && exit 0

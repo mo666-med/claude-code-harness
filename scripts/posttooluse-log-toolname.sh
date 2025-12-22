@@ -216,4 +216,32 @@ EOF
   release_lock "$LOCK_FILE"
 fi
 
+
+# ===== Skill追跡（セッション単位でスキル使用を記録） =====
+SESSION_SKILLS_USED_FILE="${STATE_DIR}/session-skills-used.json"
+
+if [ "$TOOL_NAME" = "Skill" ]; then
+  mkdir -p "$STATE_DIR"
+  
+  # ファイルが存在しない場合は初期化
+  if [ ! -f "$SESSION_SKILLS_USED_FILE" ]; then
+    echo '{"used": [], "session_start": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}' > "$SESSION_SKILLS_USED_FILE"
+  fi
+  
+  if command -v jq >/dev/null 2>&1; then
+    # スキル名を tool_input から取得
+    SKILL_NAME=""
+    if [ -n "$INPUT" ]; then
+      SKILL_NAME=$(echo "$INPUT" | jq -r '.tool_input.skill // "unknown"' 2>/dev/null)
+    fi
+    
+    # used 配列に追加
+    temp_file=$(mktemp)
+    jq --arg skill "$SKILL_NAME" \
+       --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+       '.used += [$skill] | .last_used = $ts' \
+       "$SESSION_SKILLS_USED_FILE" > "$temp_file" && mv "$temp_file" "$SESSION_SKILLS_USED_FILE"
+  fi
+fi
+
 exit 0

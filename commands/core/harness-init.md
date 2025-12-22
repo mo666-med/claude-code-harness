@@ -520,6 +520,48 @@ fi
 >
 > 設定は `.claude/state/skills-policy.json` で管理され、後から変更可能です。
 
+
+#### Skills Gate の設定（skills-config.json）
+
+プロジェクトで利用するスキルを設定し、Skills Gate を有効化：
+
+```bash
+# プロジェクトタイプに基づいてデフォルトスキルを決定
+DEFAULT_SKILLS='["impl", "review"]'
+
+# フロントエンドプロジェクトの場合
+if [ -f "package.json" ]; then
+  if grep -q "react\|vue\|angular\|svelte" package.json 2>/dev/null; then
+    DEFAULT_SKILLS='["impl", "review", "ui"]'
+  fi
+fi
+
+# バックエンドプロジェクトの場合（CI/deploy が有用）
+if [ -f "Dockerfile" ] || [ -d ".github/workflows" ]; then
+  DEFAULT_SKILLS='["impl", "review", "ci", "deploy"]'
+fi
+
+# skills-config.json を生成
+mkdir -p .claude/state
+cat > .claude/state/skills-config.json << SKILLSEOF
+{
+  "version": "1.0",
+  "enabled": true,
+  "skills": $DEFAULT_SKILLS,
+  "updated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+}
+SKILLSEOF
+
+echo "✅ Skills Gate 設定完了: $DEFAULT_SKILLS"
+```
+
+> 💡 **Skills Gate とは？**
+>
+> コード編集前に Skill ツールの使用を促すゲートです。
+> セッション開始時にリセットされ、1回でもスキルを使えば以降は通過します。
+>
+> スキルの追加/削除は `/skills-update` コマンドで行えます。
+
 ### Step 5: 最終検証
 
 プラグイン/プロジェクト構造の検証：

@@ -357,6 +357,40 @@ for template in "$PLUGIN_PATH/templates/rules"/*.template; do
 done
 ```
 
+
+
+### Step 4.5: Skills Gate 設定の更新
+
+既存の skills-config.json が無い場合は新規作成、ある場合はマージ：
+
+```bash
+SKILLS_CONFIG=".claude/state/skills-config.json"
+mkdir -p .claude/state
+
+if [ -f "$SKILLS_CONFIG" ]; then
+  # 既存設定を保持しつつ、バージョンを更新
+  if command -v jq >/dev/null 2>&1; then
+    jq '.version = "1.0" | .updated_at = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' "$SKILLS_CONFIG" > tmp.json
+    mv tmp.json "$SKILLS_CONFIG"
+    echo "✅ skills-config.json: 更新"
+  fi
+else
+  # 新規作成
+  cat > "$SKILLS_CONFIG" << SKILLSEOF
+{
+  "version": "1.0",
+  "enabled": true,
+  "skills": ["impl", "review"],
+  "updated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+}
+SKILLSEOF
+  echo "✅ skills-config.json: 新規作成"
+fi
+```
+
+> 💡 既存のスキル設定は保持されます。
+> スキルの追加/削除は `/skills-update` コマンドで行えます。
+
 ### Step 5: Cursor コマンドの更新（2-Agent モードの場合）
 
 `.cursor/commands/` が存在する場合のみ更新:

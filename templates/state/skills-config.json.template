@@ -1,0 +1,6 @@
+{
+  "version": "1.0",
+  "enabled": true,
+  "skills": ["impl", "review"],
+  "description": "Skills Gate configuration - controls which skills are available and whether the gate is active"
+}
