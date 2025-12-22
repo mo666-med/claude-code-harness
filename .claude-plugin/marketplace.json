@@ -8,7 +8,7 @@
   },
   "plugins": [
     {
-      "name": "claude-harness",
+      "name": "claude-code-harness",
       "source": "./",
       "description": "A harness for solo developers (Vibecoders) to handle full-cycle contract development.",
       "author": {
