@@ -437,7 +437,7 @@ done
 `Plans.md` / `AGENTS.md` / `CLAUDE.md` が最新の運用形式（PM↔Impl マーカー等）に沿っているか確認。
 古い形式の場合は更新を提案（`/sync-project-specs` 相当）。
 
-### Step 4: ルールのローカライズ
+### Step 4: ルールのローカライズと品質保護ルールの展開
 
 プロジェクト構造を分析し、`.claude/rules/` のルールファイルをプロジェクトに最適化（`/localize-rules` 相当）。
 
@@ -447,6 +447,39 @@ done
 - テストディレクトリ（`tests/`, `__tests__/`, `spec/` など）
 
 **実行**: `scripts/localize-rules.sh` を実行してルールを最適化。
+
+#### 品質保護ルールの自動展開
+
+テスト改ざん防止の3層防御戦略（[D9](.claude/memory/decisions.md#d9-テスト改ざん防止の3層防御戦略)）に基づき、以下のルールを自動展開：
+
+| ルール | 内容 |
+|--------|------|
+| `test-quality.md` | テスト改ざん禁止（skip化、アサーション削除、lint設定緩和） |
+| `implementation-quality.md` | 形骸化実装禁止（ハードコード、スタブ、テスト期待値のコピペ） |
+
+```bash
+PLUGIN_PATH="${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/plugins/claude-code-harness}"
+mkdir -p .claude/rules
+
+# 品質保護ルールを展開
+for template in test-quality implementation-quality; do
+  if [ -f "$PLUGIN_PATH/templates/rules/${template}.md.template" ]; then
+    cp "$PLUGIN_PATH/templates/rules/${template}.md.template" ".claude/rules/${template}.md"
+    # {{VERSION}} をプラグインバージョンに置換
+    sed -i '' "s/{{VERSION}}/$PLUGIN_VERSION/g" ".claude/rules/${template}.md" 2>/dev/null || \
+    sed -i "s/{{VERSION}}/$PLUGIN_VERSION/g" ".claude/rules/${template}.md"
+    echo "✅ 作成: .claude/rules/${template}.md"
+  fi
+done
+```
+
+> 💡 **品質保護ルールとは？**
+>
+> Coding Agent がテスト失敗時に「テストを改ざん」したり、「形骸化した実装」を書いたりすることを防ぐルールです。
+> - **test-quality.md**: テスト/lint/CI設定の改ざんを禁止
+> - **implementation-quality.md**: ハードコードや空実装を禁止し、正しい実装を促す
+>
+> 詳細: [びーぐる氏「Claude Codeにテストで楽をさせない技術」](https://speakerdeck.com/)
 
 ### Step 4.5: Skills Policy の設定
 
@@ -608,6 +641,8 @@ REQUIRED_FILES=(
   ".claude/settings.json"
   ".claude/memory/decisions.md"
   ".claude/memory/patterns.md"
+  ".claude/rules/test-quality.md"
+  ".claude/rules/implementation-quality.md"
   ".claude-code-harness-version"
 )
 
@@ -631,6 +666,8 @@ REQUIRED_FILES=(
   ".claude/settings.json"
   ".claude/memory/decisions.md"
   ".claude/memory/patterns.md"
+  ".claude/rules/test-quality.md"
+  ".claude/rules/implementation-quality.md"
   ".claude-code-harness-version"
   # 2-Agent モード追加ファイル
   ".cursor/commands/start-session.md"
