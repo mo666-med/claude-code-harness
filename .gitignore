@@ -39,6 +39,9 @@ Thumbs.db
 # Test sandbox (for plugin development)
 /test-sandbox/
 
+# Developer-only commands (not for distribution)
+/dev/
+
 # Benchmarks (local testing only, not for distribution)
 /benchmarks/
 
