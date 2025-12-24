@@ -2,10 +2,13 @@
 
 ![Claude harness](docs/images/claude-harness-logo-with-text.png)
 
-**思考の流れを妨げない開発体験**
-Claude Code を「Plan → Work → Review」の型で自律運用し、個人開発を“もう1段”プロ品質へ引き上げる **開発ハーネス（Claude Code プラグイン）** です。
+**思考の流れを妨げない開発体験 | Development experience that doesn't interrupt your flow**
 
-[![Version: 2.5.37](https://img.shields.io/badge/version-2.5.37-blue.svg)](VERSION)
+Claude Code を「Plan → Work → Review」の型で自律運用し、個人開発を"もう1段"プロ品質へ引き上げる **開発ハーネス（Claude Code プラグイン）** です。
+
+A **development harness (Claude Code plugin)** that autonomously operates Claude Code in a "Plan → Work → Review" cycle, elevating solo development to professional quality.
+
+[![Version: 2.5.38](https://img.shields.io/badge/version-2.5.38-blue.svg)](VERSION)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE.md)
 
 **現在のハーネススコア**: **92 / 100（S）**（→ [採点基準](#個人開発ハーネスの採点基準--スコア)）
@@ -34,47 +37,49 @@ Claude Code を「Plan → Work → Review」の型で自律運用し、個人�
 
 ---
 
-## 3行でわかる
+## 3行でわかる | In 3 Lines
 
-- **`/plan-with-agent`**: 「次に何をするか」を **Plans.md** に落として迷いを消す
-- **`/work`**: Plans.md を実行して"動くコード"を積み上げる（並列実行対応）
-- **`/harness-review` + Hooks**: 品質・安全・継続性を自動化して"雑にならない"状態を作る
+- **`/plan-with-agent`**: 壁打ちの内容 or 新規ヒアリングから **Plans.md** を作成 | Create **Plans.md** from brainstorming or fresh interviews
+- **`/work`**: Plans.md を実行して"動くコード"を積み上げる（並列実行対応） | Execute Plans.md to build working code (parallel execution)
+- **`/harness-review` + Hooks**: 品質・安全・継続性を自動化して"雑にならない"状態を作る | Automate quality, safety, and continuity to prevent sloppiness
 
 ![3行でわかる](docs/images/quick-overview.png)
 
-## これは何？
+## これは何？ | What is this?
 
 Claude Code の強み（実装スピード）を活かしつつ、個人開発で起きがちな問題をハーネスで解決します。
 
-- **迷う（何をすべきか分からない）** → `/plan-with-agent` で「次の一手」をタスクリスト化
-- **雑になる（品質が落ちる）** → `/harness-review` で多観点レビュー（並列）
-- **事故る（危険な操作）** → Hooks でガードレール（保護パス・危険コマンド）
-- **忘れる（前提が抜ける）** → SSOT（decisions/patterns）で意思決定を蓄積
+Leverages Claude Code's strength (implementation speed) while solving common solo development problems with the harness.
+
+- **迷う（何をすべきか分からない）** → `/plan-with-agent` で会話や要望を Plans.md に整理 | **Lost** (don't know what to do) → Organize conversations and requests into Plans.md
+- **雑になる（品質が落ちる）** → `/harness-review` で多観点レビュー（並列） | **Sloppy** (quality drops) → Multi-perspective review (parallel)
+- **事故る（危険な操作）** → Hooks でガードレール（保護パス・危険コマンド） | **Accidents** (dangerous operations) → Guardrails via Hooks
+- **忘れる（前提が抜ける）** → SSOT（decisions/patterns）で意思決定を蓄積 | **Forget** (lose context) → Accumulate decisions in SSOT
 
 ![個人開発を蝕む4つの見えない壁](docs/images/four-walls.png)
 
 ---
 
-## 対象ユーザー
+## 対象ユーザー | Target Users
 
-- **個人開発者 / Indie Hacker**: 速さと品質を両立したい
-- **フリーランス/受託**: レビュー結果を“提出できる形”にしたい
-- **VibeCoder（技術理解ありの非エンジニア）**: 自然言語で開発を回したい
-- **Cursor 併用派**: （任意）2-agent運用で役割分担したい
+- **個人開発者 / Indie Hacker**: 速さと品質を両立したい | Balance speed and quality
+- **フリーランス/受託 | Freelancers**: レビュー結果を"提出できる形"にしたい | Get review results in deliverable format
+- **VibeCoder（技術理解ありの非エンジニア）**: 自然言語で開発を回したい | Develop using natural language
+- **Cursor 併用派**: （任意）2-agent運用で役割分担したい | (Optional) Role separation with 2-agent workflow
 
 ---
 
-## できること（要点）
+## できること（要点） | What You Can Do
 
-### Plan → Work → Review を"自律ループ"にする
+### Plan → Work → Review を"自律ループ"にする | Create an Autonomous Loop
 
 ![思考と作業を分離する自律サイクル](docs/images/autonomous-cycle.png)
 
-- `/plan-with-agent`: 要望を **Plans.md** に落としてタスク分解
-- `/work`: Plans.md を読み、タスクを並列実行で効率的に実装
-- `/harness-review`: セキュリティ/性能/品質/アクセシビリティを多観点レビュー（並列）
+- `/plan-with-agent`: 会話の内容 or 新規ヒアリングから **Plans.md** を作成 | Create **Plans.md** from conversations or interviews
+- `/work`: Plans.md を読み、タスクを並列実行で効率的に実装 | Read Plans.md and implement tasks efficiently (parallel execution)
+- `/harness-review`: セキュリティ/性能/品質/アクセシビリティを多観点レビュー（並列） | Multi-perspective review: security, performance, quality, accessibility (parallel)
 
-### 安全に任せられる（Hooks）
+### 安全に任せられる（Hooks） | Safe Delegation via Hooks
 
 ![安全に任せられる自律型ガードレール](docs/images/hooks-guard.png)
 
@@ -91,9 +96,11 @@ Claude Code の強み（実装スピード）を活かしつつ、個人開発�
 - **使い方（プロジェクト限定・未コミット推奨）**: `.claude/settings.local.json` で `permissions.defaultMode: "bypassPermissions"` を設定
   - テンプレ: `templates/claude/settings.local.json.template`
 
-### テスト改ざん防止（品質保証）
+### テスト改ざん防止（品質保証） | Test Tampering Prevention (Quality Assurance)
 
 Coding Agent がテスト失敗時に「楽をする」傾向（テスト改ざん、形骸化実装）を防ぐ **3層防御戦略** を実装しています。
+
+Implements a **3-layer defense strategy** to prevent the Coding Agent from taking shortcuts when tests fail (test tampering, hollow implementations).
 
 ![テスト改ざん防止の3層防御](docs/images/quality-guard.png)
 
@@ -110,7 +117,7 @@ Coding Agent がテスト失敗時に「楽をする」傾向（テスト改ざ�
 
 **出典**: びーぐる氏「Claude Codeにテストで楽をさせない技術」（Claude Code Meetup Tokyo 2025.12.22）
 
-### "続きから自然に"再開できる（継続性）
+### "続きから自然に"再開できる（継続性） | Resume Naturally (Continuity)
 
 ![続きから自然に再開できるSSOTメモリ](docs/images/ssot-memory.png)
 
@@ -126,9 +133,9 @@ Coding Agent がテスト失敗時に「楽をする」傾向（テスト改ざ�
 
 ---
 
-## 5分で体験（最短）
+## 5分で体験（最短） | 5-Minute Quick Start
 
-### 前提
+### 前提 | Prerequisites
 
 - Claude Code が動くこと
 - `git` / `node` / `npm`（プロジェクトにより）
@@ -217,7 +224,7 @@ claude --plugin-dir ~/claude-plugins/claude-code-harness
 
 ---
 
-## ユースケース（こう使うと刺さる）
+## ユースケース（こう使うと刺さる） | Use Cases
 
 ### 1) 既存プロジェクトで「迷い」と「品質低下」を同時に潰す
 
@@ -276,10 +283,12 @@ claude --plugin-dir ~/claude-plugins/claude-code-harness
 
 ---
 
-## Hooks が自動でやってくれること
+## Hooks が自動でやってくれること | What Hooks Do Automatically
 
 このハーネスの体験価値の大半は **Hooks** です。
 「安全」「継続」「気づき（テスト/整理/通知）」が、会話の邪魔をせずに差し込まれます。
+
+Most of the harness's value comes from **Hooks**. They inject "safety", "continuity", and "awareness" (tests/cleanup/notifications) without interrupting your workflow.
 
 ### Hooks 一覧（何がいつ起きるか）
 
@@ -315,9 +324,9 @@ export CLAUDE_MD_MAX_LINES=150
 
 ---
 
-## 使い方（おすすめパターン）
+## 使い方（おすすめパターン） | How to Use (Recommended Patterns)
 
-### まずは Solo モード（Claude Code 単独）
+### まずは Solo モード（Claude Code 単独） | Solo Mode (Claude Code Only)
 
 個人開発なら、まずはこれで十分です。
 
@@ -347,21 +356,23 @@ export CLAUDE_MD_MAX_LINES=150
 
 ---
 
-## コマンド（わかりやすいリファレンス）
+## コマンド（わかりやすいリファレンス） | Commands Reference
 
 > 迷ったら：まず **`/harness-init` → `/plan-with-agent` → `/work` → `/harness-review`**。
+>
+> When in doubt: Start with **`/harness-init` → `/plan-with-agent` → `/work` → `/harness-review`**.
 
-### コア（Plan → Work → Review）
+### コア（Plan → Work → Review） | Core Commands
 
 | コマンド             | 目的                 | いつ使う                       | 主な成果物                                              |
 | -------------------- | -------------------- | ------------------------------ | ------------------------------------------------------- |
 | `/harness-init`    | 初期化・導線づくり   | 最初に1回（新規/既存どちらも） | `Plans.md`/`AGENTS.md`/`CLAUDE.md`（+任意でSSOT） |
-| `/plan-with-agent` | 計画・合意形成       | 何を作るか決める/詰まった時    | `Plans.md` 更新                                       |
+| `/plan-with-agent` | 計画作成             | 壁打ち後の整理/何を作るか決める | `Plans.md` 更新                                       |
 | `/work`            | 実装（並列実行対応） | Plans のタスクを進める         | コード変更 +`Plans.md` 更新                           |
 | `/harness-review`  | レビュー             | 実装後/PR前/納品前             | 多観点レビュー結果（必要なら修正へ）                    |
 | `/skill-list`      | スキル一覧           | 使える機能を確認したい         | スキル一覧表示                                          |
 
-### 品質/運用（信頼性を上げる）
+### 品質/運用（信頼性を上げる） | Quality/Operations
 
 | コマンド            | いつ・なぜ使うか（When/Why）                                       | 主な成果物                      |
 | ------------------- | ------------------------------------------------------------------ | ------------------------------- |
@@ -371,14 +382,14 @@ export CLAUDE_MD_MAX_LINES=150
 | `/sync-status`    | 「今どこまで進んだか」「次に何をすべきか」を確認したいとき         | Plans.md更新 + 次アクション提案 |
 | `/refactor`       | 既存コードを安全に改善したいが、テストを壊したくないとき           | リファクタリング済みコード      |
 
-### 実装支援
+### 実装支援 | Implementation Support
 
 | コマンド      | いつ・なぜ使うか（When/Why）                       | 主な成果物                       |
 | ------------- | -------------------------------------------------- | -------------------------------- |
 | `/crud`     | データベース操作の定型コードを素早く生成したいとき | CRUD操作コード（検証・認可付き） |
 | `/ci-setup` | GitHub Actionsで自動テスト・ビルドを回したいとき   | `.github/workflows/*.yml`      |
 
-### Cursor連携 / ナレッジ
+### Cursor連携 / ナレッジ | Cursor Integration / Knowledge
 
 | コマンド                   | いつ・なぜ使うか（When/Why）                                     | 主な成果物                     |
 | -------------------------- | ---------------------------------------------------------------- | ------------------------------ |
@@ -388,9 +399,11 @@ export CLAUDE_MD_MAX_LINES=150
 | `/sync-ssot-from-serena` | Serenaで記録した知識をプロジェクトのSSOTに反映したいとき         | 更新された decisions/patterns  |
 | `/sync-project-specs`    | 作業後にPlans.mdやドキュメントが最新か確認したいとき             | 同期されたプロジェクトファイル |
 
-### スキル（会話の中で自動呼び出し）
+### スキル（会話の中で自動呼び出し） | Skills (Auto-invoked in Conversation)
 
 多くの機能はスキルに移行しました。`/skill-list` で一覧を確認できます。
+
+Many features have been moved to skills. Use `/skill-list` to see all available skills.
 
 | スキル              | 目的               | トリガー例                       |
 | ------------------- | ------------------ | -------------------------------- |

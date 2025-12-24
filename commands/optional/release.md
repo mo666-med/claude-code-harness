@@ -156,8 +156,27 @@ cat ~/.claude/plugins/cache/claude-code-harness-marketplace/claude-code-harness/
 4. **日付は ISO 8601** - YYYY-MM-DD 形式
 5. **Unreleased を活用** - 次リリースまでの変更を蓄積
 
+### Step 3.5: README.md 更新（機能変更時）
+
+新機能追加、コマンド変更、ワークフロー変更がある場合のみ実施：
+
+1. 該当するコマンド/スキルの説明を更新
+2. 日本語・英語両方を更新（バイリンガル対応）
+3. バージョンバッジを新バージョンに更新
+
+```markdown
+# バージョンバッジの更新
+[![Version: X.Y.Z](https://img.shields.io/badge/version-X.Y.Z-blue.svg)](VERSION)
+```
+
+**更新対象セクション例**:
+- 「3行でわかる」 / "In 3 Lines"
+- 「これは何？」 / "What is this?"
+- 「できること（要点）」 / "What You Can Do"
+- 「コマンド」 / "Commands"
+
 ## 注意事項
 
-- README.md は新機能追加時のみ更新（バグ修正では不要）
+- README.md は機能変更時に更新（バグ修正では不要）
 - `skills/test-*` などのテストディレクトリは含めない
 - コミットメッセージは Conventional Commits に従う
