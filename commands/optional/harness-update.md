@@ -666,6 +666,9 @@ if [ -f "$SKILLS_CONFIG" ]; then
     jq '.version = "1.0" | .updated_at = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' "$SKILLS_CONFIG" > tmp.json
     mv tmp.json "$SKILLS_CONFIG"
     echo "✅ skills-config.json: 更新"
+  else
+    echo "⚠️ jq が見つかりません。Skills 設定の自動更新はスキップされます"
+    echo "   手動で /skills-update を実行するか、jq をインストールしてください"
   fi
 else
   # 新規作成（デフォルトスキル + 承認された新スキル）
