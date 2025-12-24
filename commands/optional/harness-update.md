@@ -208,15 +208,21 @@ fi
 #### 🔴 問題3: 古いフック設定（プラグインとの重複）
 
 ```bash
-# .hooks セクションの存在確認
-# プラグイン側の hooks.json と重複するため、プロジェクト側の hooks は不要
-if command -v jq >/dev/null 2>&1; then
-  if jq -e '.hooks' "$SETTINGS_FILE" >/dev/null 2>&1; then
-    FOUND_ISSUES+=("legacy_hooks_in_settings")
+# プラグインが使用するイベントタイプのみをチェック
+# ユーザー独自のカスタムフック（例: PostToolUse）は対象外
+PLUGIN_EVENTS=("PreToolUse" "SessionStart" "UserPromptSubmit" "PermissionRequest")
+DUPLICATE_EVENTS=()
 
-    # フック数をカウント
-    HOOKS_COUNT=$(jq '.hooks | to_entries | length' "$SETTINGS_FILE" 2>/dev/null || echo "0")
-    echo "検出されたフック設定: $HOOKS_COUNT 件"
+if command -v jq >/dev/null 2>&1; then
+  for event in "${PLUGIN_EVENTS[@]}"; do
+    if jq -e ".hooks.${event}" "$SETTINGS_FILE" >/dev/null 2>&1; then
+      DUPLICATE_EVENTS+=("$event")
+    fi
+  done
+
+  if [ ${#DUPLICATE_EVENTS[@]} -gt 0 ]; then
+    FOUND_ISSUES+=("legacy_hooks_in_settings")
+    echo "重複するフック設定: ${DUPLICATE_EVENTS[*]}"
   fi
 fi
 ```
@@ -389,14 +395,29 @@ with open('$SETTINGS_FILE', 'w') as f:
   fi
 fi
 
-# 問題3: 古いフック設定の削除
+# 問題3: プラグインと重複するフック設定のみ削除
+# ユーザー独自のカスタムフックは保持
 if [ -f "$SETTINGS_FILE" ]; then
+  PLUGIN_EVENTS=("PreToolUse" "SessionStart" "UserPromptSubmit" "PermissionRequest")
+  DELETED_EVENTS=()
+
   if command -v jq >/dev/null 2>&1; then
-    # .hooks セクションが存在する場合は削除
-    if jq -e '.hooks' "$SETTINGS_FILE" >/dev/null 2>&1; then
+    for event in "${PLUGIN_EVENTS[@]}"; do
+      if jq -e ".hooks.${event}" "$SETTINGS_FILE" >/dev/null 2>&1; then
+        jq "del(.hooks.${event})" "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp"
+        mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
+        DELETED_EVENTS+=("$event")
+      fi
+    done
+
+    # .hooks が空になった場合は .hooks 自体を削除
+    if jq -e '.hooks | length == 0' "$SETTINGS_FILE" >/dev/null 2>&1; then
       jq 'del(.hooks)' "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp"
       mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
-      echo "✅ 古いフック設定を削除しました（プラグイン側 hooks.json を使用）"
+    fi
+
+    if [ ${#DELETED_EVENTS[@]} -gt 0 ]; then
+      echo "✅ 重複フック設定を削除: ${DELETED_EVENTS[*]}（プラグイン側 hooks.json を使用）"
     fi
   else
     # jq がない場合は Python で削除
@@ -405,10 +426,17 @@ import json
 with open('$SETTINGS_FILE', 'r') as f:
     data = json.load(f)
 if 'hooks' in data:
-    del data['hooks']
+    plugin_events = ['PreToolUse', 'SessionStart', 'UserPromptSubmit', 'PermissionRequest']
+    deleted = [e for e in plugin_events if e in data['hooks']]
+    for event in deleted:
+        del data['hooks'][event]
+    if not data['hooks']:
+        del data['hooks']
+    if deleted:
+        print(f'✅ 重複フック設定を削除: {\" \".join(deleted)}')
 with open('$SETTINGS_FILE', 'w') as f:
     json.dump(data, f, indent=2)
-" && echo "✅ 古いフック設定を削除しました"
+"
   fi
 fi
 ```
