@@ -56,6 +56,12 @@ docs/notebooklm-*.yaml
 # LSP (Language Server Protocol) configuration
 .lsp.json
 *lsp*config*.json
+
+# 開発用テストスキル
+skills/test-*/
+
+# スライド中間ファイル
+docs/images/slides/
 docs/presentation/1.png
 docs/presentation/2.png
 docs/presentation/3.png
