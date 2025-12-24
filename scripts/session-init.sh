@@ -136,7 +136,7 @@ elif [ -f ".claude-code-harness-version" ]; then
 fi
 
 # ===== Step 6: 古いフック設定の検出 =====
-# プラグイン側フックと重複する可能性があるイベントタイプのみ検出
+# コマンドパスに "claude-code-harness" を含むフックのみ検出（ユーザー独自フックは除外）
 OLD_HOOKS_INFO=""
 SETTINGS_FILE=".claude/settings.json"
 
@@ -144,16 +144,20 @@ if [ -f "$SETTINGS_FILE" ]; then
   if command -v jq >/dev/null 2>&1; then
     # プラグインが使用しているイベントタイプ
     PLUGIN_EVENTS=("PreToolUse" "SessionStart" "UserPromptSubmit" "PermissionRequest")
-    DUPLICATE_EVENTS=()
+    OLD_HARNESS_EVENTS=()
 
     for event in "${PLUGIN_EVENTS[@]}"; do
+      # イベントが存在し、かつコマンドに "claude-code-harness" が含まれる場合のみ
       if jq -e ".hooks.${event}" "$SETTINGS_FILE" >/dev/null 2>&1; then
-        DUPLICATE_EVENTS+=("$event")
+        COMMANDS=$(jq -r ".hooks.${event}[]?.hooks[]?.command // .hooks.${event}[]?.command // empty" "$SETTINGS_FILE" 2>/dev/null)
+        if echo "$COMMANDS" | grep -q "claude-code-harness"; then
+          OLD_HARNESS_EVENTS+=("$event")
+        fi
       fi
     done
 
-    if [ ${#DUPLICATE_EVENTS[@]} -gt 0 ]; then
-      OLD_HOOKS_INFO="⚠️ プラグインと重複するフック設定を検出: ${DUPLICATE_EVENTS[*]} → \`/harness-update\` で確認・削除を推奨"
+    if [ ${#OLD_HARNESS_EVENTS[@]} -gt 0 ]; then
+      OLD_HOOKS_INFO="⚠️ 古いハーネスフック設定を検出: ${OLD_HARNESS_EVENTS[*]} → \`/harness-update\` で削除を推奨"
     fi
   fi
 fi

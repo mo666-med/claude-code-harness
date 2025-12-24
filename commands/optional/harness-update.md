@@ -205,24 +205,28 @@ if echo "$SETTINGS_CONTENT" | grep -q '"disableBypassPermissionsMode"'; then
 fi
 ```
 
-#### 🔴 問題3: 古いフック設定（プラグインとの重複）
+#### 🔴 問題3: 古いフック設定（ハーネス由来のもののみ）
 
 ```bash
-# プラグインが使用するイベントタイプのみをチェック
-# ユーザー独自のカスタムフック（例: PostToolUse）は対象外
+# コマンドパスに "claude-code-harness" を含むフックのみを検出
+# ユーザー独自のカスタムフック（パスが異なる）は対象外
 PLUGIN_EVENTS=("PreToolUse" "SessionStart" "UserPromptSubmit" "PermissionRequest")
-DUPLICATE_EVENTS=()
+OLD_HARNESS_EVENTS=()
 
 if command -v jq >/dev/null 2>&1; then
   for event in "${PLUGIN_EVENTS[@]}"; do
     if jq -e ".hooks.${event}" "$SETTINGS_FILE" >/dev/null 2>&1; then
-      DUPLICATE_EVENTS+=("$event")
+      # コマンドパスを抽出して "claude-code-harness" を含むかチェック
+      COMMANDS=$(jq -r ".hooks.${event}[]?.hooks[]?.command // .hooks.${event}[]?.command // empty" "$SETTINGS_FILE" 2>/dev/null)
+      if echo "$COMMANDS" | grep -q "claude-code-harness"; then
+        OLD_HARNESS_EVENTS+=("$event")
+      fi
     fi
   done
 
-  if [ ${#DUPLICATE_EVENTS[@]} -gt 0 ]; then
+  if [ ${#OLD_HARNESS_EVENTS[@]} -gt 0 ]; then
     FOUND_ISSUES+=("legacy_hooks_in_settings")
-    echo "重複するフック設定: ${DUPLICATE_EVENTS[*]}"
+    echo "古いハーネスフック設定: ${OLD_HARNESS_EVENTS[*]}"
   fi
 fi
 ```
@@ -395,7 +399,7 @@ with open('$SETTINGS_FILE', 'w') as f:
   fi
 fi
 
-# 問題3: プラグインと重複するフック設定のみ削除
+# 問題3: ハーネス由来のフック設定のみ削除（パスで判別）
 # ユーザー独自のカスタムフックは保持
 if [ -f "$SETTINGS_FILE" ]; then
   PLUGIN_EVENTS=("PreToolUse" "SessionStart" "UserPromptSubmit" "PermissionRequest")
@@ -404,9 +408,13 @@ if [ -f "$SETTINGS_FILE" ]; then
   if command -v jq >/dev/null 2>&1; then
     for event in "${PLUGIN_EVENTS[@]}"; do
       if jq -e ".hooks.${event}" "$SETTINGS_FILE" >/dev/null 2>&1; then
-        jq "del(.hooks.${event})" "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp"
-        mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
-        DELETED_EVENTS+=("$event")
+        # コマンドパスに "claude-code-harness" が含まれる場合のみ削除
+        COMMANDS=$(jq -r ".hooks.${event}[]?.hooks[]?.command // .hooks.${event}[]?.command // empty" "$SETTINGS_FILE" 2>/dev/null)
+        if echo "$COMMANDS" | grep -q "claude-code-harness"; then
+          jq "del(.hooks.${event})" "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp"
+          mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
+          DELETED_EVENTS+=("$event")
+        fi
       fi
     done
 
@@ -417,7 +425,7 @@ if [ -f "$SETTINGS_FILE" ]; then
     fi
 
     if [ ${#DELETED_EVENTS[@]} -gt 0 ]; then
-      echo "✅ 重複フック設定を削除: ${DELETED_EVENTS[*]}（プラグイン側 hooks.json を使用）"
+      echo "✅ 古いハーネスフック設定を削除: ${DELETED_EVENTS[*]}（プラグイン側 hooks.json を使用）"
     fi
   else
     # jq がない場合は Python で削除
@@ -427,13 +435,19 @@ with open('$SETTINGS_FILE', 'r') as f:
     data = json.load(f)
 if 'hooks' in data:
     plugin_events = ['PreToolUse', 'SessionStart', 'UserPromptSubmit', 'PermissionRequest']
-    deleted = [e for e in plugin_events if e in data['hooks']]
-    for event in deleted:
-        del data['hooks'][event]
+    deleted = []
+    for event in plugin_events:
+        if event in data['hooks']:
+            # コマンドパスに 'claude-code-harness' が含まれるかチェック
+            hooks_list = data['hooks'][event]
+            is_harness = any('claude-code-harness' in str(h) for h in hooks_list)
+            if is_harness:
+                del data['hooks'][event]
+                deleted.append(event)
     if not data['hooks']:
         del data['hooks']
     if deleted:
-        print(f'✅ 重複フック設定を削除: {\" \".join(deleted)}')
+        print(f'✅ 古いハーネスフック設定を削除: {\" \".join(deleted)}')
 with open('$SETTINGS_FILE', 'w') as f:
     json.dump(data, f, indent=2)
 "
