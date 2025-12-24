@@ -24,6 +24,7 @@ description-en: Safely update harness-enabled projects to latest version (versio
 - 自動バックアップ作成
 - 非破壊で設定・ワークフローファイルを更新
 - **ローカライズなし → 上書き / ローカライズあり → マージ支援**
+- **Skills 差分検出** - 新しいスキルの自動検出・追加提案
 - アップデート後の検証
 
 ---
@@ -543,28 +544,137 @@ done
 
 
 
-### Step 4.5: Skills Gate 設定の更新
+### Step 4.5: Skills 設定の差分検出と更新
 
-既存の skills-config.json が無い場合は新規作成、ある場合はマージ：
+プラグイン側のスキルと、プロジェクト側の設定を比較して差分を検出・提案します。
+
+#### Step 4.5.1: プラグイン側のスキル一覧を取得
 
 ```bash
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/plugins/claude-code-harness}"
 SKILLS_CONFIG=".claude/state/skills-config.json"
 mkdir -p .claude/state
 
+# プラグイン側の利用可能スキル一覧を取得
+AVAILABLE_SKILLS=()
+if [ -d "$PLUGIN_ROOT/skills" ]; then
+  for skill_dir in "$PLUGIN_ROOT/skills"/*/; do
+    if [ -d "$skill_dir" ]; then
+      skill_name=$(basename "$skill_dir")
+      AVAILABLE_SKILLS+=("$skill_name")
+    fi
+  done
+fi
+
+echo "📦 プラグイン側の利用可能スキル: ${AVAILABLE_SKILLS[*]}"
+```
+
+#### Step 4.5.2: プロジェクト側の設定を取得
+
+```bash
 if [ -f "$SKILLS_CONFIG" ]; then
-  # 既存設定を保持しつつ、バージョンを更新
+  # 既存設定からスキル一覧を取得
   if command -v jq >/dev/null 2>&1; then
+    CURRENT_SKILLS=$(jq -r '.skills[]?' "$SKILLS_CONFIG" 2>/dev/null | tr '\n' ' ')
+  else
+    CURRENT_SKILLS=""
+  fi
+  echo "📋 プロジェクト側の登録スキル: $CURRENT_SKILLS"
+else
+  CURRENT_SKILLS=""
+  echo "📋 プロジェクト側の登録スキル: (未設定)"
+fi
+```
+
+#### Step 4.5.3: 差分を検出
+
+```bash
+NEW_SKILLS=()
+REMOVED_SKILLS=()
+
+# プラグインにあってプロジェクトにないスキル（新規追加候補）
+for skill in "${AVAILABLE_SKILLS[@]}"; do
+  if ! echo "$CURRENT_SKILLS" | grep -qw "$skill"; then
+    NEW_SKILLS+=("$skill")
+  fi
+done
+
+# プロジェクトにあってプラグインにないスキル（削除候補）
+for skill in $CURRENT_SKILLS; do
+  found=false
+  for avail in "${AVAILABLE_SKILLS[@]}"; do
+    if [ "$skill" = "$avail" ]; then
+      found=true
+      break
+    fi
+  done
+  if [ "$found" = false ]; then
+    REMOVED_SKILLS+=("$skill")
+  fi
+done
+```
+
+#### Step 4.5.4: 差分があれば提案
+
+**新しいスキルが検出された場合:**
+
+> 🆕 **新しいスキルが利用可能です**
+>
+> 以下のスキルが追加されました：
+> {{NEW_SKILLS のリストと説明}}
+>
+> **追加しますか？**
+> - **yes** - すべて追加
+> - **選択** - 個別に選択
+> - **スキップ** - 今回は追加しない
+
+**回答を待つ**
+
+- **yes** → すべての新スキルを skills-config.json に追加
+- **選択** → 各スキルを個別に確認
+- **スキップ** → skills-config.json は更新しない
+
+**削除されたスキルが検出された場合:**
+
+> ⚠️ **以下のスキルはプラグインから削除されました**
+>
+> {{REMOVED_SKILLS のリスト}}
+>
+> 設定から削除しますか？ (yes / no)
+
+**回答を待つ**
+
+#### Step 4.5.5: skills-config.json を更新
+
+```bash
+if [ -f "$SKILLS_CONFIG" ]; then
+  # 既存設定を保持しつつ、新スキルを追加
+  if command -v jq >/dev/null 2>&1; then
+    # 承認された新スキルを追加
+    for skill in "${APPROVED_NEW_SKILLS[@]}"; do
+      jq --arg s "$skill" '.skills += [$s] | .skills |= unique' "$SKILLS_CONFIG" > tmp.json
+      mv tmp.json "$SKILLS_CONFIG"
+    done
+
+    # 削除されたスキルを除去
+    for skill in "${APPROVED_REMOVED_SKILLS[@]}"; do
+      jq --arg s "$skill" '.skills -= [$s]' "$SKILLS_CONFIG" > tmp.json
+      mv tmp.json "$SKILLS_CONFIG"
+    done
+
+    # バージョンとタイムスタンプを更新
     jq '.version = "1.0" | .updated_at = "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"' "$SKILLS_CONFIG" > tmp.json
     mv tmp.json "$SKILLS_CONFIG"
     echo "✅ skills-config.json: 更新"
   fi
 else
-  # 新規作成
+  # 新規作成（デフォルトスキル + 承認された新スキル）
+  DEFAULT_SKILLS='["impl", "review"]'
   cat > "$SKILLS_CONFIG" << SKILLSEOF
 {
   "version": "1.0",
   "enabled": true,
-  "skills": ["impl", "review"],
+  "skills": $DEFAULT_SKILLS,
   "updated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 }
 SKILLSEOF
@@ -572,8 +682,10 @@ SKILLSEOF
 fi
 ```
 
-> 💡 既存のスキル設定は保持されます。
-> スキルの追加/削除は `/skills-update` コマンドで行えます。
+> 💡 **Skills 差分検出について**
+> - プラグイン更新で新しいスキルが追加された場合、自動的に検出・提案されます
+> - 既存のスキル設定は保持されます
+> - 個別のスキル追加/削除は `/skills-update` コマンドでも行えます
 
 ### Step 5: Cursor コマンドの更新（2-Agent モードの場合）
 
@@ -653,6 +765,7 @@ fi
 > **更新内容:**
 > - バージョン: v{{CURRENT}} → v{{LATEST}}
 > - 更新ファイル: {{更新されたファイルリスト}}
+> - Skills 設定: {{追加されたスキル / 変更なし}}
 > - バックアップ: `.claude-code-harness/backups/{{TIMESTAMP}}/`
 >
 > **次のステップ:**
