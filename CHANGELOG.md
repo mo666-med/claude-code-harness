@@ -7,6 +7,22 @@
 
 ## [Unreleased]
 
+## [2.6.1] - 2025-12-25
+
+### Added
+
+- Skill 階層構造の自動リマインダー機能
+  - `skill-child-reminder.sh` PostToolUse Hook
+    - Skill ツール使用後に子スキル一覧を自動表示
+    - 該当する doc.md の読み込みを促進
+  - `skill-hierarchy.md` Rules テンプレート
+    - セッション開始時に階層構造のガイドラインを提供
+    - 親スキル → 子スキルの読み込みルールを明文化
+
+### Changed
+
+- `.claude-plugin/hooks.json` に Skill 用 PostToolUse Hook を追加
+
 ## [2.6.0] - 2025-12-25
 
 ### 🎯 あなたにとって何が変わるか
@@ -453,5 +469,6 @@
 [2.2.0]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.1.2...v2.2.0
 [2.1.2]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.0.0...v2.1.1
+[2.6.1]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.6.0...v2.6.1
 [2.6.0]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.5.41...v2.6.0
 [2.0.0]: https://github.com/Chachamaru127/claude-code-harness/releases/tag/v2.0.0
