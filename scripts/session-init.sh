@@ -82,21 +82,69 @@ if [ -f "$TEMPLATE_TRACKER" ] && [ -f "$SCRIPT_DIR/../templates/template-registr
     if command -v jq >/dev/null 2>&1; then
       NEEDS_CHECK=$(echo "$CHECK_RESULT" | jq -r '.needsCheck // false')
       UPDATES_COUNT=$(echo "$CHECK_RESULT" | jq -r '.updatesCount // 0')
+      INSTALLS_COUNT=$(echo "$CHECK_RESULT" | jq -r '.installsCount // 0')
 
-      if [ "$NEEDS_CHECK" = "true" ] && [ "$UPDATES_COUNT" -gt 0 ]; then
-        # 更新が必要なファイルの詳細を取得
-        LOCALIZED_COUNT=$(echo "$CHECK_RESULT" | jq '[.updates[] | select(.localized == true)] | length')
-        OVERWRITE_COUNT=$((UPDATES_COUNT - LOCALIZED_COUNT))
+      if [ "$NEEDS_CHECK" = "true" ]; then
+        local parts=()
 
-        TEMPLATE_INFO="⚠️ テンプレート更新: ${UPDATES_COUNT}件"
-        if [ "$OVERWRITE_COUNT" -gt 0 ]; then
-          TEMPLATE_INFO="${TEMPLATE_INFO} (上書き可: ${OVERWRITE_COUNT})"
+        # 更新が必要なファイル
+        if [ "$UPDATES_COUNT" -gt 0 ]; then
+          LOCALIZED_COUNT=$(echo "$CHECK_RESULT" | jq '[.updates[] | select(.localized == true)] | length')
+          OVERWRITE_COUNT=$((UPDATES_COUNT - LOCALIZED_COUNT))
+
+          if [ "$OVERWRITE_COUNT" -gt 0 ]; then
+            parts+=("更新可: ${OVERWRITE_COUNT}")
+          fi
+          if [ "$LOCALIZED_COUNT" -gt 0 ]; then
+            parts+=("マージ要: ${LOCALIZED_COUNT}")
+          fi
         fi
-        if [ "$LOCALIZED_COUNT" -gt 0 ]; then
-          TEMPLATE_INFO="${TEMPLATE_INFO} (マージ要: ${LOCALIZED_COUNT})"
+
+        # 新規インストールが必要なファイル
+        if [ "$INSTALLS_COUNT" -gt 0 ]; then
+          parts+=("新規追加: ${INSTALLS_COUNT}")
         fi
-        TEMPLATE_INFO="${TEMPLATE_INFO} → \`/harness-update\` で確認"
+
+        if [ ${#parts[@]} -gt 0 ]; then
+          TEMPLATE_INFO="⚠️ テンプレート更新: $(IFS=', '; echo "${parts[*]}") → \`/harness-update\` で確認"
+        fi
       fi
+    fi
+  fi
+fi
+
+# ===== Step 5: 新規追加ルールファイルのチェック =====
+# 品質保護ルール（v2.5.30+）が未導入の場合に通知
+MISSING_RULES_INFO=""
+RULES_DIR=".claude/rules"
+QUALITY_RULES=("test-quality.md" "implementation-quality.md")
+MISSING_RULES=()
+
+if [ -d "$RULES_DIR" ]; then
+  for rule in "${QUALITY_RULES[@]}"; do
+    if [ ! -f "$RULES_DIR/$rule" ]; then
+      MISSING_RULES+=("$rule")
+    fi
+  done
+
+  if [ ${#MISSING_RULES[@]} -gt 0 ]; then
+    MISSING_RULES_INFO="⚠️ 品質保護ルール未導入: ${MISSING_RULES[*]} → \`/harness-update\` で追加可能"
+  fi
+elif [ -f ".claude-code-harness-version" ]; then
+  # ハーネス導入済みだが rules ディレクトリがない場合
+  MISSING_RULES_INFO="⚠️ 品質保護ルール未導入 → \`/harness-update\` で追加可能"
+fi
+
+# ===== Step 6: 古いフック設定の検出 =====
+OLD_HOOKS_INFO=""
+SETTINGS_FILE=".claude/settings.json"
+
+if [ -f "$SETTINGS_FILE" ]; then
+  if command -v jq >/dev/null 2>&1; then
+    # .hooks セクションが存在するかチェック
+    HAS_HOOKS=$(jq -e '.hooks' "$SETTINGS_FILE" >/dev/null 2>&1 && echo "true" || echo "false")
+    if [ "$HAS_HOOKS" = "true" ]; then
+      OLD_HOOKS_INFO="⚠️ 古いフック設定を検出 → プラグイン側フックと重複の可能性。\`/harness-update\` で確認・削除を推奨"
     fi
   fi
 fi
@@ -112,6 +160,14 @@ fi
 
 if [ -n "$TEMPLATE_INFO" ]; then
   add_line "${TEMPLATE_INFO}"
+fi
+
+if [ -n "$MISSING_RULES_INFO" ]; then
+  add_line "${MISSING_RULES_INFO}"
+fi
+
+if [ -n "$OLD_HOOKS_INFO" ]; then
+  add_line "${OLD_HOOKS_INFO}"
 fi
 
 add_line ""

@@ -7,6 +7,54 @@
 
 ## [Unreleased]
 
+## [2.5.33] - 2025-12-24
+
+### Added
+
+- **既存ユーザー向けアップデート通知の強化**
+  - セッション開始時に未導入の品質保護ルールを通知
+  - 古いフック設定（`.claude/settings.json` の `hooks`）を検出・警告
+  - `template-tracker.sh` が新規追加ファイルも `installsCount` として報告
+
+### Fixed
+
+- 新規追加されたルールファイルが既存ユーザーに通知されない問題を修正
+- `/harness-update` で古いフック設定が検出・削除されない問題を修正
+
+## [2.5.32] - 2025-12-24
+
+### Added
+
+- **テスト改ざん防止機能（3層防御戦略）**の統合
+  - 第1層: Rules テンプレート（`test-quality.md`, `implementation-quality.md`）
+  - 第2層: Skills 品質ガードレール（`impl`, `verify` スキルに統合）
+  - 第3層: Hooks 設計書（オプション機能として文書化）
+- `/harness-init` に品質保護ルール自動展開機能
+- 品質ガードレール検証テスト（`test-quality-guardrails.sh`）
+
+### Changed
+
+- README.md に品質保証セクションを追加
+- CLAUDE.md にテスト改ざん防止戦略を追加
+
+## [2.5.30] - 2025-12-23
+
+### Added
+
+- フロントマターベースのメタデータ統合システム
+  - テンプレートファイルに `_harness_template` と `_harness_version` を追加
+  - `/harness-update` でバージョン差分検出が可能に
+
+## [2.5.28] - 2025-12-23
+
+### Added
+
+- `handoff-to-claude` コマンドに `/work` と `ultrathink` オプションを追加
+
+### Changed
+
+- CHANGELOG を [Keep a Changelog](https://keepachangelog.com/) フォーマットに統一
+
 ## [2.5.27] - 2025-12-23
 
 ### Fixed

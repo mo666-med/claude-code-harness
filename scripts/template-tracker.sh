@@ -167,6 +167,7 @@ cmd_check() {
 
   local updates_needed=()
   local updates_details='[]'
+  local installs_details='[]'
 
   while IFS= read -r template; do
     [ -z "$template" ] && continue
@@ -174,10 +175,19 @@ cmd_check() {
     local output_path
     output_path=$(get_output_path "$template")
     [ -z "$output_path" ] && continue
-    [ ! -f "$output_path" ] && continue
 
     local template_version
     template_version=$(get_template_version "$template")
+
+    # ファイルが存在しない場合は needsInstall として報告
+    if [ ! -f "$output_path" ]; then
+      if command -v jq >/dev/null 2>&1; then
+        installs_details=$(echo "$installs_details" | jq --arg path "$output_path" \
+          --arg version "$template_version" \
+          '. + [{"path": $path, "version": $version}]')
+      fi
+      continue
+    fi
 
     local recorded_version="unknown"
     local recorded_hash=""
@@ -222,11 +232,11 @@ cmd_check() {
     fi
   done < <(get_tracked_templates)
 
-  local count
+  local updates_count=0
+  local installs_count=0
   if command -v jq >/dev/null 2>&1; then
-    count=$(echo "$updates_details" | jq 'length')
-  else
-    count=0
+    updates_count=$(echo "$updates_details" | jq 'length')
+    installs_count=$(echo "$installs_details" | jq 'length')
   fi
 
   # lastCheckedPluginVersion を更新
@@ -235,8 +245,14 @@ cmd_check() {
     save_generated_files "$generated"
   fi
 
-  if [ "$count" -gt 0 ]; then
-    echo "{\"needsCheck\": true, \"updatesCount\": $count, \"updates\": $updates_details}"
+  local total_count=$((updates_count + installs_count))
+
+  if [ "$total_count" -gt 0 ]; then
+    if command -v jq >/dev/null 2>&1; then
+      echo "{\"needsCheck\": true, \"updatesCount\": $updates_count, \"installsCount\": $installs_count, \"updates\": $updates_details, \"installs\": $installs_details}"
+    else
+      echo "{\"needsCheck\": true, \"updatesCount\": $updates_count, \"installsCount\": $installs_count}"
+    fi
   else
     echo '{"needsCheck": false, "reason": "All files up to date"}'
   fi

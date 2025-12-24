@@ -205,6 +205,22 @@ if echo "$SETTINGS_CONTENT" | grep -q '"disableBypassPermissionsMode"'; then
 fi
 ```
 
+#### 🔴 問題3: 古いフック設定（プラグインとの重複）
+
+```bash
+# .hooks セクションの存在確認
+# プラグイン側の hooks.json と重複するため、プロジェクト側の hooks は不要
+if command -v jq >/dev/null 2>&1; then
+  if jq -e '.hooks' "$SETTINGS_FILE" >/dev/null 2>&1; then
+    FOUND_ISSUES+=("legacy_hooks_in_settings")
+
+    # フック数をカウント
+    HOOKS_COUNT=$(jq '.hooks | to_entries | length' "$SETTINGS_FILE" 2>/dev/null || echo "0")
+    echo "検出されたフック設定: $HOOKS_COUNT 件"
+  fi
+fi
+```
+
 ### Step 3: 検出結果の表示
 
 問題が見つかった場合、ユーザーに詳細を表示：
@@ -240,6 +256,20 @@ fi
 > 危険な操作のみを `permissions.deny` / `permissions.ask` で制御します。
 >
 > **影響**: 現在の設定では、Edit/Write の度に確認が出て生産性が低下します。
+>
+> ---
+>
+> **🔴 問題3: 古いフック設定 (N件)**
+>
+> ```diff
+> - "hooks": { ... }   ❌ プラグイン側 hooks.json と重複
+> （この設定を削除）
+> ```
+>
+> **理由**: claude-code-harness プラグインは `hooks/hooks.json` でフックを管理します。
+> プロジェクト側の `.claude/settings.json` に `hooks` があると、意図しない重複動作が発生する可能性があります。
+>
+> **推奨**: プロジェクト側の `hooks` セクションを削除し、プラグイン側のフックのみを使用してください。
 >
 > ---
 >
@@ -358,11 +388,34 @@ with open('$SETTINGS_FILE', 'w') as f:
 " && echo "✅ disableBypassPermissionsMode を削除しました"
   fi
 fi
+
+# 問題3: 古いフック設定の削除
+if [ -f "$SETTINGS_FILE" ]; then
+  if command -v jq >/dev/null 2>&1; then
+    # .hooks セクションが存在する場合は削除
+    if jq -e '.hooks' "$SETTINGS_FILE" >/dev/null 2>&1; then
+      jq 'del(.hooks)' "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp"
+      mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
+      echo "✅ 古いフック設定を削除しました（プラグイン側 hooks.json を使用）"
+    fi
+  else
+    # jq がない場合は Python で削除
+    python3 -c "
+import json
+with open('$SETTINGS_FILE', 'r') as f:
+    data = json.load(f)
+if 'hooks' in data:
+    del data['hooks']
+with open('$SETTINGS_FILE', 'w') as f:
+    json.dump(data, f, indent=2)
+" && echo "✅ 古いフック設定を削除しました"
+  fi
+fi
 ```
 
 #### Step 2.2: generate-claude-settings スキルの実行
 
-- 既存の `hooks`, `env`, `model`, `enabledPlugins` は保持
+- `env`, `model`, `enabledPlugins` は保持（`hooks` は削除済み）
 - `permissions.allow|ask|deny` は最新ポリシーとマージ + 重複排除
 - Phase 1.5 で修正済みの正しい構文を保持
 - 新しい推奨設定を追加
