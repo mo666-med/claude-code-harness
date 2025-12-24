@@ -85,7 +85,7 @@ if [ -f "$TEMPLATE_TRACKER" ] && [ -f "$SCRIPT_DIR/../templates/template-registr
       INSTALLS_COUNT=$(echo "$CHECK_RESULT" | jq -r '.installsCount // 0')
 
       if [ "$NEEDS_CHECK" = "true" ]; then
-        local parts=()
+        parts=()
 
         # 更新が必要なファイル
         if [ "$UPDATES_COUNT" -gt 0 ]; then

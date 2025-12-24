@@ -25,6 +25,10 @@ PLUGIN_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # フロントマターユーティリティを読み込み
 # shellcheck source=frontmatter-utils.sh
+if [ ! -f "$SCRIPT_DIR/frontmatter-utils.sh" ]; then
+  echo "Error: frontmatter-utils.sh not found. Please reinstall the plugin." >&2
+  exit 1
+fi
 source "$SCRIPT_DIR/frontmatter-utils.sh"
 
 # 定数
