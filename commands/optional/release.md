@@ -140,11 +140,53 @@ git push origin main && git push origin vX.Y.Z
 bash scripts/sync-plugin-cache.sh
 ```
 
-### Step 7: 確認
+### Step 7: GitHub Releases 作成
+
+タグだけでなく、GitHub Releases にリリースノートを作成します。
+
+```bash
+gh release create vX.Y.Z \
+  --title "vX.Y.Z - 一言説明" \
+  --notes "$(cat <<'EOF'
+## 🎯 あなたにとって何が変わるか
+
+**主な変更点の説明**
+
+### Before
+- 変更前の状態
+
+### After
+- 変更後の状態
+
+---
+
+## Added
+- 新機能
+
+## Changed
+- 変更点
+
+## Fixed
+- バグ修正
+
+---
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+EOF
+)"
+```
+
+**リリースノートの内容**:
+- CHANGELOG.md の該当バージョンのエントリをベースに作成
+- Before/After セクションは大きな変更時のみ
+- `🤖 Generated with [Claude Code]` フッターを追加
+
+### Step 8: 確認
 
 ```bash
 git log --oneline -3
 git tag | tail -5
+gh release list --limit 5
 cat ~/.claude/plugins/cache/claude-code-harness-marketplace/claude-code-harness/*/VERSION | sort -u
 ```
 
