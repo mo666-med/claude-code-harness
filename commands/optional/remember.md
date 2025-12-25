@@ -42,7 +42,7 @@ description-en: "[Optional] Save learnings as Rules/Commands/Skills"
 
 1. **何を記録するか**: 具体的な内容を明確化
 2. **なぜ重要か**: 背景・理由を理解
-3. **どこに記録するか**: Rules/Commands/Skills/Memory のいずれか
+3. **どこに記録するか**: Rules/Commands/Skills のいずれか
 
 ### Step 2: 最適な記録先の選択
 
@@ -51,9 +51,9 @@ description-en: "[Optional] Save learnings as Rules/Commands/Skills"
 | **Rules** | 常に守るべき制約・禁止事項・規約 | 「any型禁止」「日本語コメント必須」「console.log残さない」 |
 | **Commands** | 繰り返し実行する操作・手順 | 「デプロイ前チェック」「PR作成手順」「環境構築」 |
 | **Skills** | 複雑なタスクの実装パターン・戦略 | 「認証機能の実装方法」「エラーハンドリング戦略」 |
-| **Memory** | プロジェクト固有の決定事項・一時的な情報 | 「APIキーの場所」「担当者の連絡先」 |
 
-> 重要: **決定（Why）/パターン（How）**は SSOT として `.claude/memory/decisions.md` / `.claude/memory/patterns.md` に集約する運用を推奨します（詳細: `docs/MEMORY_POLICY.md`）。
+> 💡 **決定事項（Why）やパターン（How）を SSOT に正式記録したい場合**は
+> `/sync-ssot-from-memory` を使用してください。Claude-mem の観測から選別して昇格できます。
 
 ### Step 3: 判断基準フローチャート
 
@@ -69,8 +69,8 @@ description-en: "[Optional] Save learnings as Rules/Commands/Skills"
     ├─「〜の実装方法」「〜のパターン」「〜の戦略」
     │   → Skills（実装知識）
     │
-    └─「〜と決めた」「〜という情報」「〜を覚えておいて」
-        → Memory（決定事項・情報）
+    └─「〜と決めた」「〜という理由で」「正式に残して」
+        → /sync-ssot-from-memory を案内
 ```
 
 ### Step 4: ファイル作成・更新
@@ -165,12 +165,6 @@ paths: "[適用対象のglobパターン]"  # または alwaysApply: true
 - [注意点2]
 ```
 
-#### Memory の場合
-
-```bash
-# .claude/memory/decisions.md または patterns.md に追記
-```
-
 ### Step 5: 確認と報告
 
 作成・更新したファイルをユーザーに報告：
@@ -233,19 +227,11 @@ paths: "[適用対象のglobパターン]"  # または alwaysApply: true
 - 複数のパターン・選択肢を提示
 - プロジェクト固有のノウハウ蓄積
 
-### Memory（.claude/memory/）
+### SSOT への正式記録
 
-**用途**: プロジェクト固有の決定事項・情報
+決定事項（Why）やパターン（How）を `.claude/memory/decisions.md` / `patterns.md` に正式記録したい場合は、**`/sync-ssot-from-memory`** を使用してください。
 
-**例**:
-- 設計決定の記録
-- 発見したパターン
-- セッションログ
-
-**特徴**:
-- **SSOT推奨**: `decisions.md` / `patterns.md` は Git で共有する前提の単一の正にする
-- **ローカル推奨**: `session-log.md` / `context.json` / `.claude/state/` はノイズになりやすいため Git 管理しない運用を推奨（詳細: `docs/MEMORY_POLICY.md`）
-- **検索性**: 先頭に Index を置き、各エントリのタイトル行にタグ（例: `#decision #db`）を付ける
+Claude-mem に蓄積された観測から、重要なものを選別して SSOT に昇格できます。
 
 ---
 

@@ -7,6 +7,51 @@
 
 ## [Unreleased]
 
+## [2.6.2] - 2025-12-26
+
+### 🎯 あなたにとって何が変わるか
+
+**品質判定ゲートシステムが導入され、適切な場面で適切な品質基準（TDD/Security/a11y）が自動提案されるようになりました**
+
+#### Before
+- テスト改ざん防止（守り）のみ
+- TDD/セキュリティ/a11y の提案がなかった
+- 全タスクに同じ基準を適用
+
+#### After
+- タスク種別・ファイルパスに応じて品質基準を自動提案
+- 強制ではなく提案（VibeCoder にも優しい）
+- TDD/Security/a11y/Performance の4軸で判定
+
+### Added
+
+- 品質判定ゲートシステム（Phase 10）
+  - `tdd-guidelines.md.template` - TDD 適用基準ルール
+  - `security-guidelines.md.template` - セキュリティ注意パターン（OWASP Top 10 対応）
+  - `quality-gates.md.template` - 総合判定マトリクス
+- スキルに Step 0（品質判定ゲート）を追加
+  - `impl`: TDD 推奨判定 + セキュリティチェック
+  - `review`: カバレッジ/セキュリティ/a11y/パフォーマンス重点領域判定
+  - `verify`: 再現テスト提案 + テスト vs 実装判定
+  - `auth`: セキュリティチェックリスト自動表示
+  - `ui`: a11y チェックリスト自動表示
+  - `ci`: テスト改ざん防止（禁止パターン明示）
+- `/plan-with-agent` に品質マーカー自動付与機能
+  - 認証関連 → `[feature:security]`
+  - UI → `[feature:a11y]`
+  - ビジネスロジック → `[feature:tdd]`
+  - バグ修正 → `[bugfix:reproduce-first]`
+- `tdd-order-check.sh` PostToolUse Hook
+  - TDD 推奨タスクで本体ファイルを先に編集 → 警告表示
+  - ブロックはせず提案のみ
+- VibeCoder 向け説明セクションを追加
+  - `auth`, `review`, `ci` スキルに平易な説明を追加
+
+### Changed
+
+- スキルの Step 0 タイトルを「品質判定ゲート（〜）」形式に統一
+- `tdd-order-check.sh` を macOS/Linux 両対応（jq 優先、sed フォールバック）
+
 ## [2.6.1] - 2025-12-25
 
 ### Added
@@ -435,7 +480,11 @@
 - **v0.4.0**: Claude Rules、Plugin Hooks、Named Sessions 対応
 - **v0.3.0**: 初期リリース（Plan → Work → Review サイクル）
 
-[Unreleased]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.5.37...HEAD
+[Unreleased]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.6.2...HEAD
+[2.6.2]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.6.1...v2.6.2
+[2.6.1]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.6.0...v2.6.1
+[2.6.0]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.5.41...v2.6.0
+[2.5.41]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.5.37...v2.5.41
 [2.5.37]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.5.35...v2.5.37
 [2.5.35]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.5.33...v2.5.35
 [2.5.33]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.5.32...v2.5.33

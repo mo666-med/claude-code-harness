@@ -61,6 +61,9 @@ docs/x-posts-*.md
 # 開発用テストスキル
 skills/test-*/
 
+# 開発用スキル（非公開）
+skills/x-promo/
+
 # スライド中間ファイル
 docs/images/slides/
 docs/presentation/1.png
