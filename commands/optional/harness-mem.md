@@ -186,6 +186,106 @@ WSL 環境で Claude Code を実行している場合は、Unix 設定がその�
 
 ---
 
+### Step 3.6: WSL 環境セットアップ（Windows + WSL の場合）
+
+Windows ネイティブではなく WSL で Claude Code を実行する場合の詳細設定です。
+
+#### 前提条件の確認
+
+```bash
+# 1. WSL2 がインストールされているか確認（PowerShell で実行）
+wsl --version
+
+# 2. WSL 内で Node.js が Linux 版か確認
+wsl -e bash -c "which node && which npm"
+# 正しい例: /usr/bin/node, /usr/bin/npm
+# 問題あり: /mnt/c/Program Files/nodejs/node（Windows 版を参照している）
+```
+
+#### /bin/bash が見つからない問題の解決
+
+**症状**:
+```
+/bin/bash: line 1: sh: command not found
+```
+
+**原因**: WSL の PATH に Windows の Node.js/npm が優先されている
+
+**解決策**:
+
+```bash
+# 1. WSL 内で実行 - Windows PATH を無効化
+echo '[interop]
+appendWindowsPath = false' | sudo tee -a /etc/wsl.conf
+
+# 2. WSL を再起動（PowerShell で実行）
+wsl --shutdown
+
+# 3. WSL 内で Node.js をインストール（nvm 推奨）
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+source ~/.bashrc
+nvm install --lts
+nvm use --lts
+
+# 4. 確認
+which node  # → /home/user/.nvm/versions/node/v20.x.x/bin/node
+which npm   # → /home/user/.nvm/versions/node/v20.x.x/bin/npm
+```
+
+#### ワーカーが port 37777 で起動しない問題の解決
+
+**症状**:
+```
+Worker service failed to start on port 37777
+Worker failed to start (readiness check timed out after 20000ms)
+```
+
+**原因**: ゾンビプロセスがポートを占有、または前回のワーカーが正常終了しなかった
+
+**解決策**:
+
+```bash
+# 1. ポート 37777 の使用状況を確認
+# WSL 内
+lsof -i :37777
+# または Windows（PowerShell）
+netstat -ano | findstr 37777
+
+# 2. ゾンビプロセスを終了
+# WSL 内
+pkill -f "claude-mem"
+pkill -f "bun"
+
+# Windows（PowerShell - 管理者権限）
+taskkill /F /IM bun.exe
+taskkill /F /IM node.exe
+
+# 3. ワーカーログを確認
+cat ~/.claude-mem/logs/worker.log
+
+# 4. ワーカーを手動で再起動
+cd ~/.claude/plugins/marketplaces/thedotmack
+npm run worker:restart
+
+# 5. Claude Code を再起動
+```
+
+#### WSL でのファイルパフォーマンス最適化
+
+```bash
+# プロジェクトは WSL ファイルシステム内に配置（推奨）
+# ✅ 良い例
+cd ~/projects/my-app
+
+# ❌ 悪い例（遅い）
+cd /mnt/c/Users/username/projects/my-app
+```
+
+> ⚠️ `/mnt/c/` 配下はパフォーマンスが大幅に低下します。
+> プロジェクトは `~/` 配下に配置してください。
+
+---
+
 ### Step 4: settings.json の更新
 
 Claude-mem の設定ファイルを更新します。
@@ -300,6 +400,51 @@ mem-search: 過去の解決策をヒット
 ---
 
 ## トラブルシューティング
+
+### WSL: /bin/bash が見つからない
+
+```
+/bin/bash: line 1: sh: command not found
+```
+
+**原因**: WSL が Windows の PATH を継承し、Windows 版の Node.js を参照している
+
+**解決策**: Step 3.6 の「/bin/bash が見つからない問題の解決」を参照
+
+**関連 Issue**: [GitHub Issue #210](https://github.com/thedotmack/claude-mem/issues/210)
+
+---
+
+### WSL/Windows: ワーカーが port 37777 で起動しない
+
+```
+Worker service failed to start on port 37777
+Worker failed to start (readiness check timed out after 20000ms)
+```
+
+**原因**: ゾンビプロセス（bun.exe, node.exe）がポートを占有
+
+**解決策**:
+
+```bash
+# 1. ポートの使用状況を確認
+netstat -ano | findstr 37777  # Windows
+lsof -i :37777                 # WSL/Linux
+
+# 2. ゾンビプロセスを終了
+taskkill /F /IM bun.exe       # Windows
+pkill -f "claude-mem"          # WSL/Linux
+
+# 3. ワーカーを再起動
+cd ~/.claude/plugins/marketplaces/thedotmack
+npm run worker:restart
+```
+
+**関連 Issue**:
+- [Issue #380](https://github.com/thedotmack/claude-mem/issues/380) - Windows 11 port 37777 エラー
+- [Issue #209](https://github.com/thedotmack/claude-mem/issues/209) - Windows でワーカーが起動しない
+
+---
 
 ### Windows: ENOENT エラーが発生する
 
