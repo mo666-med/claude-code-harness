@@ -6,7 +6,7 @@
 #   ./scripts/sync-version.sh sync     # plugin.json を VERSION に合わせる
 #   ./scripts/sync-version.sh bump     # パッチバージョンを上げる
 
-set -e
+set -euo pipefail
 
 VERSION_FILE="VERSION"
 PLUGIN_JSON=".claude-plugin/plugin.json"

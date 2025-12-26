@@ -8,7 +8,7 @@
 #
 # このスクリプトは CI 失敗時に Claude が実行し、修正案を得るために使用します。
 
-set -e
+set -euo pipefail
 
 PLUGIN_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$PLUGIN_ROOT"

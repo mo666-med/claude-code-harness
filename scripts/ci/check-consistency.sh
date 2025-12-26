@@ -7,7 +7,7 @@
 #   0 - All checks passed
 #   1 - Inconsistencies found
 
-set -e
+set -euo pipefail
 
 PLUGIN_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 ERRORS=0

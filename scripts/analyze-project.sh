@@ -5,7 +5,7 @@
 # Usage: ./scripts/analyze-project.sh [project_path]
 # Output: JSON形式のプロジェクト分析結果
 
-set -e
+set -euo pipefail
 
 PROJECT_PATH="${1:-.}"
 cd "$PROJECT_PATH"

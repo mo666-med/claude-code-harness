@@ -10,7 +10,7 @@
 # 出力: JSON形式で hookSpecificOutput.additionalContext に情報を出力
 #       → Claude Code が system-reminder として表示
 
-set -e
+set -euo pipefail
 
 # スクリプトディレクトリを取得
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

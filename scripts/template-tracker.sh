@@ -17,7 +17,7 @@
 # - generated-files.json はフォールバック用です（将来的に非推奨）
 # - 新規生成ファイルはフロントマターでバージョン管理されます
 
-set -e
+set -euo pipefail
 
 # スクリプトディレクトリとプラグインルートを取得
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

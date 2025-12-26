@@ -7,7 +7,7 @@
 #   commands/setup-2agent.md のチェックリストが一致しているか確認
 # - scripts/update-2agent.sh と commands/update-2agent.md も同様
 
-set -e
+set -euo pipefail
 
 PLUGIN_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 ERRORS=0

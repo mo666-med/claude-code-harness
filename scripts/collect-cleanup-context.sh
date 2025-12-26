@@ -4,7 +4,7 @@
 #
 # 出力: JSON 形式でファイル状態・タスク統計を出力
 
-set -e
+set -euo pipefail
 
 # JSON出力用の変数
 PLANS_EXISTS="false"

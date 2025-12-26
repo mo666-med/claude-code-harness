@@ -4,7 +4,7 @@
 #
 # Usage: ./scripts/setup-existing-project.sh [project_path]
 
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 HARNESS_ROOT="$(dirname "$SCRIPT_DIR")"

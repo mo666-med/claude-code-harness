@@ -9,7 +9,7 @@
 # - 言語固有のルールを追加
 # - 既存のカスタマイズを保持
 
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEFAULT_PLUGIN_PATH="$(cd "${SCRIPT_DIR}/.." && pwd)"

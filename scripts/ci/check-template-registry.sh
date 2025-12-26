@@ -7,7 +7,7 @@
 # 2. registry 内のファイルが templates/ に存在するか
 # 3. templateVersion が有効な形式か
 
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"

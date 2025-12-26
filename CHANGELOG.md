@@ -7,6 +7,31 @@
 
 ## [Unreleased]
 
+## [2.6.5] - 2025-12-26
+
+### Added
+
+- 英語版 README.en.md の追加
+  - 日本語 README.md との言語切り替えナビゲーション
+
+### Changed
+
+- `/release` コマンドの改善
+  - README.md の更新確認を必須化
+  - GitHub Releases 作成ステップを追加
+
+## [2.6.4] - 2025-12-26
+
+### Changed
+
+- README.md に品質判定ゲートシステム（v2.6.2）のドキュメントを追加
+
+## [2.6.3] - 2025-12-26
+
+### Changed
+
+- `/release` コマンドに GitHub Releases 作成ステップを追加
+
 ## [2.6.2] - 2025-12-26
 
 ### 🎯 あなたにとって何が変わるか
@@ -480,7 +505,10 @@
 - **v0.4.0**: Claude Rules、Plugin Hooks、Named Sessions 対応
 - **v0.3.0**: 初期リリース（Plan → Work → Review サイクル）
 
-[Unreleased]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.6.2...HEAD
+[Unreleased]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.6.5...HEAD
+[2.6.5]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.6.4...v2.6.5
+[2.6.4]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.6.3...v2.6.4
+[2.6.3]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.6.2...v2.6.3
 [2.6.2]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.6.1...v2.6.2
 [2.6.1]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.6.0...v2.6.1
 [2.6.0]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.5.41...v2.6.0
