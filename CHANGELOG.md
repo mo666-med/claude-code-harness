@@ -7,6 +7,35 @@
 
 ## [Unreleased]
 
+## [2.6.12] - 2025-12-27
+
+### Added
+
+- **Cursor × Claude-mem MCP統合**: CursorからClaude-memにアクセス可能に
+  - MCPラッパースクリプト (`scripts/claude-mem-mcp`)
+    - ワーカー自動起動・ヘルスチェック
+    - 最新バージョン動的検出
+    - stdio モードでMCPサーバー実行
+  - `cursor-mem` スキル追加 (`skills/cursor-mem/`)
+    - Cursor Composerからclaude-memツールにアクセス
+    - 検索・書き込み両対応
+    - 日英トリガーワード対応
+  - 統合ガイド (`docs/guides/cursor-mem-integration.md`)
+  - 使用例集 (`skills/cursor-mem/examples.md`)
+  - テスト手順書 (`TEST_CURSOR_INTEGRATION.md`)
+  - `.cursor/mcp.json.example` サンプル提供
+
+### Changed
+
+- `commands/optional/harness-mem.md` にCursor統合セクション追加
+- `.gitignore` に `.cursor/mcp.json` を追加
+
+### Benefits
+
+- **PM（Cursor）と実装（Claude Code）の役割分担**: 設計判断はCursorで記録、実装はClaude Codeが過去の判断を参照
+- **双方向のデータ共有**: 同じメモリデータベースを共有（WALモードで並行書き込み対応）
+- **クロスツール検索**: Cursorで記録した内容をClaude Codeで検索、その逆も可能
+
 ## [2.6.5] - 2025-12-26
 
 ### Added
