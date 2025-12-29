@@ -185,21 +185,58 @@ fi
 echo ""
 
 # ========================================
-# Phase 5: .cursorrules 確認
+# Phase 5: Cursor Rules 確認（新フォーマット）
 # ========================================
-echo -e "${BLUE}【Phase 5】.cursorrules 確認${NC}"
+echo -e "${BLUE}【Phase 5】Cursor Rules 確認（新フォーマット: .cursor/rules/）${NC}"
 
+# テンプレートファイルの存在確認（ハーネスリポジトリ内）
+TEMPLATE_PATH="${BASH_SOURCE%/*}/../.cursor/rules/claude-mem.md.template"
+if [ -f "$TEMPLATE_PATH" ]; then
+  check_result pass "テンプレートファイルが存在します"
+else
+  check_result warn "テンプレートファイルが見つかりません（ハーネスリポジトリ外の可能性）"
+fi
+
+# .cursor/rules/ ディレクトリ
+if [ -d ".cursor/rules" ]; then
+  check_result pass ".cursor/rules/ ディレクトリが存在します"
+else
+  check_result warn ".cursor/rules/ ディレクトリが存在しません（オプション）"
+fi
+
+# claude-mem.md ファイル（ユーザー生成版）
+if [ -f ".cursor/rules/claude-mem.md" ]; then
+  check_result pass ".cursor/rules/claude-mem.md が存在します"
+
+  # YAML frontmatter の存在確認
+  if head -n 1 .cursor/rules/claude-mem.md | grep -q "^---$"; then
+    check_result pass "YAML frontmatter が存在します"
+
+    # description フィールドの確認
+    if grep -q "^description:" .cursor/rules/claude-mem.md; then
+      check_result pass "description フィールドが定義されています"
+    else
+      check_result warn "description フィールドが見つかりません"
+    fi
+
+    # alwaysApply フィールドの確認
+    if grep -q "^alwaysApply:" .cursor/rules/claude-mem.md; then
+      check_result pass "alwaysApply フィールドが定義されています"
+    else
+      check_result warn "alwaysApply フィールドが見つかりません"
+    fi
+  else
+    check_result warn "YAML frontmatter が見つかりません（推奨）"
+  fi
+else
+  check_result warn ".cursor/rules/claude-mem.md が存在しません（オプション）"
+fi
+
+# レガシーファイルの警告
 if [ -f ".cursorrules" ]; then
-  check_result pass ".cursorrules が存在します"
-else
-  check_result warn ".cursorrules が存在しません（オプション）"
+  check_result warn ".cursorrules（レガシー形式）が存在します - 削除を推奨"
 fi
 
-if [ -f ".cursorrules.example" ]; then
-  check_result pass ".cursorrules.example が存在します"
-else
-  check_result warn ".cursorrules.example が存在しません"
-fi
 echo ""
 
 # ========================================
@@ -291,7 +328,8 @@ elif [ "$WARNING_CHECKS" -gt 0 ]; then
   echo -e "${YELLOW}⚠️  セットアップは動作しますが、いくつか警告があります${NC}"
   echo ""
   echo "推奨事項:"
-  echo "  - .cursorrules を作成すると、セッション開始時に自動でメモリを検索します"
+  echo "  - .cursor/rules/claude-mem.md を作成すると、セッション開始時に自動でメモリを検索します"
+  echo "  - レガシーファイル (.cursorrules) が存在する場合は削除してください"
   echo "  - Cursor でプロンプトを送信して、記録が保存されるか確認してください"
   echo ""
   exit 0

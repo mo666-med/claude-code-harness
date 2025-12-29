@@ -7,6 +7,42 @@
 
 ## [Unreleased]
 
+## [2.6.17] - 2025-12-30
+
+### 🎯 あなたにとって何が変わるか
+
+**Cursor Rules サポートを追加。Cursor 公式推奨の `.cursor/rules/` フォーマットで claude-mem 統合ルールを自動セットアップできます**
+
+### Added
+
+- **Cursor Rules 対応**: `/cursor-mem` コマンドで Cursor Rules を自動生成
+  - **公式フォーマット**: `.cursor/rules/claude-mem.md` ([Cursor 公式ドキュメント](https://cursor.com/ja/docs/context/rules) 準拠)
+  - **YAML frontmatter**: `description`, `alwaysApply` フィールドでメタデータ管理
+  - **テンプレート方式**: `.cursor/rules/claude-mem.md.template` から自動コピー
+  - **複数ルール対応**: 他の Rules ファイルと組み合わせ可能
+
+- **セットアップスクリプト強化**: `scripts/setup-cursor-mem.sh`
+  - Step 4 で Cursor Rules を自動生成
+  - `.cursor/rules/` ディレクトリを自動作成
+  - テンプレートからコピー処理を実装
+
+- **検証スクリプト強化**: `scripts/validate-cursor-mem.sh`
+  - Phase 5 で Cursor Rules を検証
+  - テンプレートファイル存在確認
+  - YAML frontmatter 構造チェック
+  - `description`, `alwaysApply` フィールド検証
+
+- **ドキュメント**: `commands/optional/cursor-mem.md`
+  - Cursor Rules フォーマット説明セクション
+  - 新フォーマットの特徴とメリット
+  - バージョン管理ポリシー（テンプレート方式）
+
+### Changed
+
+- **.gitignore**: `.cursor/rules/` の管理方針を明確化
+  - `.cursor/rules/claude-mem.md` を除外（ユーザー固有）
+  - `.cursor/rules/*.template` を追跡（テンプレート）
+
 ## [2.6.16] - 2025-12-30
 
 ### 🎯 あなたにとって何が変わるか

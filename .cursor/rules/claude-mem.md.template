@@ -1,3 +1,8 @@
+---
+description: "Cursor × Claude-mem integration: Session start protocol and task-level context search"
+alwaysApply: true
+---
+
 # Cursor × Claude-mem Integration Rules
 
 ## Session Start Protocol

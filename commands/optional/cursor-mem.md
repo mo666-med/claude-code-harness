@@ -24,6 +24,20 @@ Claude Code ⇄ claude-mem ⇄ Cursor
 自動記録      WAL モード    手動検索
 ```
 
+### Cursor Rules フォーマット
+
+このコマンドは **Cursor 公式推奨の新フォーマット** (`.cursor/rules/`) を使用します：
+
+| フォーマット | ファイル | 状態 | 備考 |
+|------------|---------|------|------|
+| **新フォーマット** | `.cursor/rules/claude-mem.md` | ✅ 推奨 | YAML frontmatter 付き |
+| レガシー | `.cursorrules` | ⚠️ 非推奨 | [公式で廃止予定](https://cursor.com/ja/docs/context/rules) |
+
+新フォーマットの特徴：
+- YAML frontmatter (`description`, `alwaysApply`) によるメタデータ管理
+- 複数ルールファイルの組み合わせ可能
+- Cursor 公式の長期サポート保証
+
 ## 実行内容
 
 このコマンドは以下を自動実行します：
@@ -33,7 +47,7 @@ Claude Code ⇄ claude-mem ⇄ Cursor
 3. ✅ MCP 設定の追加（必要に応じて）
 4. ✅ フックスクリプト配置確認
 5. ✅ hooks.json 生成
-6. ✅ .cursorrules 生成
+6. ✅ Cursor Rules 生成（.cursor/rules/claude-mem.md）
 7. ✅ 簡易テスト実行
 8. ✅ セットアップ成功確認
 
@@ -337,7 +351,9 @@ claude-mem に自動記録
 
 | ファイル | Git 管理 | 理由 |
 |---------|---------|------|
-| `.cursor/hooks.json.example` | ✅ Yes | テンプレート |
+| `.cursor/rules/claude-mem.md.template` | ✅ Yes | ルールテンプレート |
+| `.cursor/rules/claude-mem.md` | ❌ No | ユーザー固有（テンプレートからコピー） |
+| `.cursor/hooks.json.example` | ✅ Yes | フックテンプレート |
 | `.cursor/hooks.json` | ❌ No | ユーザー固有 |
 | `scripts/cursor-hooks/*.js` | ✅ Yes | 共有ロジック |
 | `.cursor/mcp.json` | ❌ No | ユーザー固有 |

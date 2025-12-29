@@ -213,18 +213,30 @@ else
 fi
 echo ""
 
-# Step 4: .cursorrules 生成
-echo -e "${BLUE}4️⃣ .cursorrules 生成...${NC}"
-if [ ! -f ".cursorrules" ] || [ "$FORCE" = true ]; then
-  if [ ! -f ".cursorrules.example" ]; then
-    echo -e "${RED}❌ .cursorrules.example が見つかりません${NC}"
+# Step 4: Cursor Rules 生成（新フォーマット: .cursor/rules/）
+echo -e "${BLUE}4️⃣ Cursor Rules 生成...${NC}"
+
+# .cursor/rules/ ディレクトリを作成
+if [ ! -d ".cursor/rules" ]; then
+  mkdir -p .cursor/rules
+  echo -e "${GREEN}✅ .cursor/rules/ ディレクトリを作成しました${NC}"
+fi
+
+# claude-mem.md が既に存在するかチェック
+if [ ! -f ".cursor/rules/claude-mem.md" ] || [ "$FORCE" = true ]; then
+  # ハーネスリポジトリからテンプレートをコピー
+  TEMPLATE_PATH="${BASH_SOURCE%/*}/../.cursor/rules/claude-mem.md.template"
+
+  if [ ! -f "$TEMPLATE_PATH" ]; then
+    echo -e "${RED}❌ テンプレート ${TEMPLATE_PATH} が見つかりません${NC}"
+    echo -e "${YELLOW}⚠️  ハーネスリポジトリから実行してください${NC}"
     exit 1
   fi
 
-  cp .cursorrules.example .cursorrules
-  echo -e "${GREEN}✅ .cursorrules を生成しました${NC}"
+  cp "$TEMPLATE_PATH" .cursor/rules/claude-mem.md
+  echo -e "${GREEN}✅ .cursor/rules/claude-mem.md を生成しました（テンプレートからコピー）${NC}"
 else
-  echo -e "${YELLOW}⚠️  .cursorrules は既に存在します（スキップ）${NC}"
+  echo -e "${YELLOW}⚠️  .cursor/rules/claude-mem.md は既に存在します（スキップ）${NC}"
   echo "   上書きする場合は --force オプションを使用してください"
 fi
 echo ""
