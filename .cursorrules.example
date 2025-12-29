@@ -67,3 +67,64 @@ Use get_observations tool: ids=[123, 456, 789]
 ```
 
 For complete documentation, see: docs/guides/cursor-mem-integration.md
+
+## Task-Level Context Search (Conditional - Level 2)
+
+Before starting complex tasks, search claude-mem for relevant context. This helps maintain consistency and leverage past learnings.
+
+### When to Search
+
+**🟢 Implementation Tasks** - Always search before implementing features:
+- Search for similar implementations, architectural decisions, and established patterns
+- Example queries:
+  - `query="[feature name] implementation", obs_type="feature"`
+  - `query="[technology] pattern", obs_type="decision"`
+  - `query="architecture", obs_type="decision"`
+
+**🟢 Bug Fixing** - Search before fixing bugs:
+- Look for related bugs, previous fixes, and root cause analyses
+- Example queries:
+  - `query="[component] bug", obs_type="bugfix"`
+  - `query="[error message]", limit=5`
+  - `query="[technology] error", obs_type="bugfix"`
+
+**🟢 Code Review** - Search before reviewing code:
+- Find coding standards, past review comments, and quality guidelines
+- Example queries:
+  - `query="code review", obs_type="decision"`
+  - `query="[technology] best practices", obs_type="pattern"`
+  - `query="security", obs_type="guard"`
+
+**🔴 Simple Edits** - Skip search for trivial changes:
+- Typo fixes, formatting adjustments, comment updates
+- Minor refactoring within a single function
+- Documentation updates (unless structural changes)
+
+### Search Strategy
+
+1. **Check recency first**: Use `get_recent_context` to see if relevant work was done recently
+2. **Keyword search**: Use specific keywords related to the task
+3. **Type filtering**: Use `obs_type` to filter by observation type (feature, bugfix, decision, pattern)
+4. **Limit results**: Start with `limit=5-10` to avoid overwhelming context
+
+### Example Workflow
+
+```
+User: "Implement user authentication with JWT"
+    ↓
+Search: query="authentication", obs_type="decision", limit=5
+Search: query="JWT", obs_type="feature", limit=5
+    ↓
+Review past decisions on auth approach
+    ↓
+Implement following established patterns
+    ↓
+Record implementation as new observation
+```
+
+### Performance Considerations
+
+- **Balance**: Search adds context but costs time - use judgment
+- **Skip for obvious tasks**: Don't search if you're confident about the approach
+- **Batch searches**: If doing multiple related tasks, search once upfront
+- **Cache insights**: Remember key findings to avoid repeated searches
