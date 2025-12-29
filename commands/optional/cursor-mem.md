@@ -90,23 +90,48 @@ Claude Code ⇄ claude-mem ⇄ Cursor
 
 ## セットアップ後の確認
 
-### 1. Worker の起動確認
+### 自動検証（推奨）
+
+すべての設定が正しいか一括でチェック:
+
+```bash
+./scripts/validate-cursor-mem.sh
+```
+
+このスクリプトは以下を検証します:
+- ✅ Worker 起動状態
+- ✅ MCP 設定の存在と構造
+- ✅ フックスクリプトの存在と実行権限
+- ✅ hooks.json の設定内容
+- ✅ データベースとテーブル構造
+- ✅ ドキュメントの存在
+
+**SSOT (Single Source of Truth)**: この検証スクリプトがセットアップ検証の唯一の信頼できる情報源です。
+
+### 手動確認（参考）
+
+個別に確認したい場合:
+
+#### 1. Worker の起動確認
 
 ```bash
 curl http://127.0.0.1:37777/health
 # 期待される出力: {"status":"ok"}
 ```
 
-### 2. Cursor での動作確認
+#### 2. Cursor での動作確認
 
 1. Cursor を再起動
 2. プロンプトを送信: "動作テスト"
 3. ファイルを編集してみる
 
-### 3. 記録の確認
+#### 3. 記録の確認
 
 ```bash
 # 最新の記録を確認
+./tests/cursor-mem/verify-records.sh --recent
+
+# または SQLite で直接確認
 sqlite3 ~/.claude-mem/claude-mem.db \
   "SELECT tool_name, title FROM observations
    ORDER BY created_at DESC LIMIT 5;"
@@ -244,11 +269,105 @@ Cursor Composer で:
 | ファイル編集 | ✅ 完全 | ✅ 完全 |
 | セッション完了 | ✅ 完全 | ✅ 完全 |
 
+## ハーネスワークフローとの統合
+
+Cursor × Claude-mem は、ハーネスの他のコマンドと連携して使用できます:
+
+### セットアップフロー
+
+```
+/cursor-mem                   # Cursor 統合をセットアップ
+  ↓
+./scripts/validate-cursor-mem.sh  # 設定を検証
+  ↓
+/validate                     # プロジェクト全体を検証
+```
+
+### 開発フロー
+
+```
+[Cursor] プロンプト送信
+  ↓
+claude-mem に自動記録
+  ↓
+[Claude Code] /work で実装
+  ↓
+[Claude Code] /harness-review でレビュー
+  ↓
+[Cursor] claude-mem MCP で記録を検索
+```
+
+### メモリ管理
+
+- **claude-mem**: すべてのセッション記録を自動保存
+- **SSOT (.claude/memory/)**: 重要な決定事項を手動でキュレーション
+- **統合**: `/sync-ssot-from-memory` で claude-mem から SSOT へ昇格
+
+## 再現性の保証
+
+このコマンドは以下の方法で再現性を保証します:
+
+### 冪等性（Idempotency）
+
+同じコマンドを複数回実行しても安全:
+
+```bash
+# 初回実行
+/cursor-mem --local
+# → ファイルを生成
+
+# 2回目実行
+/cursor-mem --local
+# → 既存ファイルをスキップ（--force で上書き可能）
+```
+
+### 検証メカニズム
+
+セットアップの正確性を保証:
+
+| スクリプト | 検証内容 | 実行タイミング |
+|----------|---------|---------------|
+| `scripts/setup-cursor-mem.sh` | セットアップ実行 + 簡易テスト | セットアップ時 |
+| `scripts/validate-cursor-mem.sh` | 全項目の包括的検証 | セットアップ後 |
+| `tests/cursor-mem/verify-records.sh` | 記録の実際の動作確認 | 動作確認時 |
+
+### バージョン管理
+
+設定ファイルはバージョン管理下にありますが、ユーザー固有のファイルは除外:
+
+| ファイル | Git 管理 | 理由 |
+|---------|---------|------|
+| `.cursor/hooks.json.example` | ✅ Yes | テンプレート |
+| `.cursor/hooks.json` | ❌ No | ユーザー固有 |
+| `scripts/cursor-hooks/*.js` | ✅ Yes | 共有ロジック |
+| `.cursor/mcp.json` | ❌ No | ユーザー固有 |
+| `~/.cursor/mcp.json` | ❌ No | グローバル設定 |
+
+### 依存関係の明確化
+
+必須条件:
+
+1. **Worker**: `claude-mem` がインストール済み（`claude-mem --version`）
+2. **データベース**: `~/.claude-mem/claude-mem.db` が存在
+3. **Node.js**: v18.0.0 以上（フックスクリプト実行用）
+4. **Bash**: v4.0 以上（セットアップスクリプト実行用）
+
+これらは `./scripts/validate-cursor-mem.sh` で自動チェックされます。
+
 ## 関連ドキュメント
 
 - [統合ガイド](../../docs/guides/cursor-mem-integration.md) - 詳細なセットアップ手順
 - [テスト計画](../../tests/cursor-mem/test-plan.md) - テストケースと検証方法
 - [cursor-mem スキル](../../skills/cursor-mem/SKILL.md) - MCP ツールの使い方
+
+## ハーネスコマンド
+
+関連するハーネスコマンド:
+
+- `/validate` - プロジェクト全体の検証（cursor-mem 設定を含む）
+- `/sync-status` - 現在の状態確認
+- `/sync-ssot-from-memory` - claude-mem から SSOT へデータ移行
+- `/harness-mem` - Claude Code × claude-mem 統合（別コマンド）
 
 ## サポート
 
