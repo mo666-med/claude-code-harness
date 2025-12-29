@@ -1,6 +1,6 @@
 ---
-name: cursor-mem
 description: Cursor × Claude-mem 統合の完全セットアップ
+description-en: Complete Cursor × Claude-mem integration setup
 ---
 
 # Cursor × Claude-mem Integration Setup
