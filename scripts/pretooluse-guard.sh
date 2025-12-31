@@ -120,7 +120,14 @@ PY
   printf '%s' "{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"${decision}\"}}"
 }
 
-emit_deny() { emit_decision "deny" "$1"; }
+emit_deny() {
+  # Record hook blocking event (non-blocking, fire-and-forget)
+  local SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  if [ -x "$SCRIPT_DIR/record-usage.js" ] && command -v node >/dev/null 2>&1; then
+    node "$SCRIPT_DIR/record-usage.js" hook pretooluse-guard --blocked 2>/dev/null &
+  fi
+  emit_decision "deny" "$1"
+}
 emit_ask() { emit_decision "ask" "$1"; }
 
 is_path_traversal() {

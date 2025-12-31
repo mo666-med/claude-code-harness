@@ -19,6 +19,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VERSION=$(cat "$SCRIPT_DIR/../VERSION" 2>/dev/null || echo "unknown")
 echo -e "\033[0;36m[claude-code-harness v${VERSION}]\033[0m Session initialized" >&2
 
+# ===== Hook 使用状況記録 =====
+if [ -x "$SCRIPT_DIR/record-usage.js" ] && command -v node >/dev/null 2>&1; then
+  node "$SCRIPT_DIR/record-usage.js" hook session-init 2>/dev/null &
+fi
+
 # 出力メッセージを蓄積する変数
 OUTPUT=""
 
