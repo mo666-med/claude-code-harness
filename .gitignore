@@ -19,7 +19,7 @@ docs/design/
 .claude/*
 !.claude/rules/
 .serena/
-.mcp.json
+# .mcp.json はプラグイン MCP 設定として配布に含める
 .github/mlc_config.json
 
 # 2-Agent setup files (auto-generated)

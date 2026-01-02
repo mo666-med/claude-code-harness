@@ -29,7 +29,7 @@ harness-ui（ブラウザベースのダッシュボード）を有効化しま�
 /harness-ui-setup YOUR-LICENSE-KEY
 ```
 
-→ ライセンスキーを自動設定
+→ ライセンスキーを環境変数に自動設定
 
 ### 引数なし
 
@@ -83,27 +83,15 @@ Polar API でキーを検証:
 
 **処理終了**
 
-### Step 3: プラグインの .mcp.json を更新
+### Step 3: 環境変数の設定
 
-プラグインディレクトリの `.mcp.json` を更新:
+ユーザーのシェル設定ファイル（`~/.zshrc` または `~/.bashrc`）に環境変数を追加:
 
-```json
-{
-  "mcpServers": {
-    "harness-ui": {
-      "type": "stdio",
-      "command": "bun",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/harness-ui/src/mcp/server.ts"],
-      "env": {
-        "PROJECT_ROOT": "${CLAUDE_PLUGIN_ROOT}",
-        "HARNESS_BETA_CODE": "ユーザーのライセンスキー"
-      }
-    }
-  }
-}
+```bash
+export HARNESS_BETA_CODE="ユーザーのライセンスキー"
 ```
 
-**注意**: `HARNESS_UI_DEV` は削除し、`HARNESS_BETA_CODE` を設定
+**注意**: プラグインの `.mcp.json` は編集不要（環境変数から自動取得）
 
 ### Step 4: 完了メッセージ
 
@@ -112,10 +100,12 @@ Polar API でキーを検証:
 > 📋 **設定内容**:
 > - ライセンスキー: {キーの先頭8文字}...
 > - Customer ID: {顧客ID}
+> - 環境変数: `HARNESS_BETA_CODE` を ~/.zshrc に追加
 >
 > **次にやること:**
-> 1. Claude Code を再起動
-> 2. ブラウザで http://localhost:37778 にアクセス
+> 1. `source ~/.zshrc` を実行（または新しいターミナルを開く）
+> 2. Claude Code を再起動
+> 3. ブラウザで http://localhost:37778 にアクセス
 >
 > 💡 **ヒント**: MCP 一覧で `harness-ui` が表示されていれば成功です。
 
@@ -133,10 +123,17 @@ Polar API でキーを検証:
 
 ### エラー: harness-ui が起動しない
 
-**原因**: Claude Code を再起動していない
+**原因**: 環境変数が設定されていない、または Claude Code を再起動していない
 
 **解決策**:
-```
+```bash
+# 環境変数を確認
+echo $HARNESS_BETA_CODE
+
+# 設定されていない場合
+source ~/.zshrc
+
+# Claude Code を再起動
 Ctrl+C で終了 → claude で再起動
 ```
 
@@ -165,20 +162,10 @@ kill -9 {PID}
 - 無効なキーでは harness-ui は起動しません
 - 開発者は `HARNESS_UI_DEV=true` でバイパス可能
 
-## ⚠️ セキュリティ警告
+## セキュリティ
 
-**`.mcp.json` にはライセンスキーが平文で保存されます。**
+ライセンスキーは環境変数（`HARNESS_BETA_CODE`）で管理されます。
 
-以下の点に注意してください：
-
-1. **Git に絶対コミットしない**
-   - `.gitignore` に `.mcp.json` が含まれていることを確認
-   - `git status` で `.mcp.json` が追跡されていないことを確認
-
-2. **公開リポジトリに注意**
-   - 誤ってプッシュした場合、ライセンスキーを即座に失効させてください
-   - Polar ダッシュボードから新しいキーを発行できます
-
-3. **チーム開発時**
-   - 各メンバーが個別のライセンスキーを取得することを推奨
-   - 共有キーは使用回数制限に注意
+- **リポジトリに含めない**: `.env` ファイルは `.gitignore` に追加
+- **シェル設定ファイル**: `~/.zshrc` は通常 Git 管理外なので安全
+- **チーム開発時**: 各メンバーが個別のライセンスキーを取得することを推奨
