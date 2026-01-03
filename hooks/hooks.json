@@ -38,6 +38,11 @@
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/session-monitor.sh",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/harness-ui-register.sh",
+            "timeout": 10
           }
         ]
       }
