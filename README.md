@@ -9,7 +9,7 @@
 Claude Code を「Plan → Work → Review」の自律サイクルで運用し、
 **迷い・雑さ・事故・忘却** を仕組みで防ぐ開発ハーネスです。
 
-[![Version: 2.6.26](https://img.shields.io/badge/version-2.6.26-blue.svg)](VERSION)
+[![Version: 2.6.27](https://img.shields.io/badge/version-2.6.27-blue.svg)](VERSION)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE.md)
 [![Harness Score](https://img.shields.io/badge/harness_score-92%2F100-brightgreen.svg)](#採点基準)
 
@@ -98,39 +98,69 @@ Claude Code を「Plan → Work → Review」の自律サイクルで運用し�
 
 ## 5分で始める
 
-### 1. インストール
+### Step 1: インストール（コピペでOK）
 
 ```bash
+# 1. プロジェクトで Claude Code を起動
 cd /path/to/your-project
 claude
 
-# マーケットプレイスを追加 → インストール
+# 2. マーケットプレイスからインストール（2行）
 /plugin marketplace add Chachamaru127/claude-code-harness
 /plugin install claude-code-harness@claude-code-harness-marketplace
 ```
 
-### 2. 初期化
+### Step 2: 初期化
 
 ```bash
 /harness-init
 ```
 
-### 3. 開発ループ
+→ CLAUDE.md、Plans.md、.claude/rules/ が自動生成されます。
 
-```bash
-/plan-with-agent  # 計画
-/work             # 実装
-/harness-review   # レビュー
+### Step 3: 開発ループ（これだけ覚えればOK）
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  /plan-with-agent  →  /work  →  /harness-review        │
+│      計画作成          実装        品質チェック          │
+└─────────────────────────────────────────────────────────┘
 ```
 
+**具体的な使い方：**
+
+```bash
+# 「○○機能を追加したい」と言って計画を作る
+/plan-with-agent
+
+# Plans.md のタスクを実行する
+/work
+
+# 変更内容をレビューする
+/harness-review
+
+# （任意）ビルド・テストを一括検証
+/validate
+```
+
+### 困ったときは
+
+| 状況 | 言えばOK |
+|------|----------|
+| 何ができるか知りたい | `/skill-list` |
+| 進捗を確認したい | `/sync-status` |
+| Plans.md が長くなった | `/cleanup` |
+
 <details>
-<summary>ローカルクローン（開発者向け）</summary>
+<summary>ローカルクローン（開発者・コントリビューター向け）</summary>
 
 ```bash
 git clone https://github.com/Chachamaru127/claude-code-harness.git ~/claude-plugins/claude-code-harness
 cd /path/to/your-project
 claude --plugin-dir ~/claude-plugins/claude-code-harness
 ```
+
+**注意**: このリポジトリ自体で `/work` を実行すると、ハーネス自身のコードを編集することになります（自己参照）。
 
 </details>
 
@@ -323,5 +353,3 @@ claude-code-harness/
 **MIT License** - 使用・改変・配布・商用利用が自由です。
 
 - [English](LICENSE.md) | [日本語](LICENSE.ja.md)
-
-テスト3

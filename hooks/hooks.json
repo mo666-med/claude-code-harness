@@ -55,6 +55,11 @@
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/userprompt-inject-policy.sh",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/userprompt-track-command.sh",
+            "timeout": 10
           }
         ]
       }
@@ -77,6 +82,16 @@
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/usage-tracker.sh",
             "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/posttooluse-clear-pending.sh",
+            "timeout": 5
           }
         ]
       },
@@ -123,6 +138,11 @@
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/collect-cleanup-context.sh",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/stop-check-pending.sh",
+            "timeout": 10
           },
           {
             "type": "prompt",

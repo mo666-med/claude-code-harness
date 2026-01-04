@@ -27,6 +27,7 @@ docs/design/
 /CLAUDE.md
 /Plans.md
 /.claude-code-harness-version
+/.orphaned_at
 
 # Cursor user-specific configuration
 /.cursor/hooks.json
