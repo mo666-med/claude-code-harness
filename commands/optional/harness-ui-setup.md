@@ -157,7 +157,36 @@ curl -s http://localhost:37778/api/status
 
 → `{"status":"ok"...}` が返れば成功
 
-### Step 6: 完了メッセージ
+### Step 6: 現在のプロジェクトを登録
+
+サーバー起動後、現在のプロジェクトをドロップダウンに登録:
+
+```bash
+# 現在のプロジェクトを取得
+PROJECT_PATH=$(pwd)
+PROJECT_NAME=$(basename "$PROJECT_PATH")
+
+# プロジェクトを登録
+curl -s -X POST http://localhost:37778/api/projects \
+  -H "Content-Type: application/json" \
+  -d "{\"name\": \"$PROJECT_NAME\", \"path\": \"$PROJECT_PATH\"}"
+```
+
+**成功時のレスポンス:**
+
+```json
+{"project":{"id":"proj_xxx","name":"your-project","path":"/path/to/project"}}
+```
+
+**既に登録済みの場合:**
+
+```json
+{"error":"Project with path \"/path/to/project\" already exists"}
+```
+
+→ エラーでも問題なし（既存プロジェクトが使用される）
+
+### Step 7: 完了メッセージ
 
 > ✅ **harness-ui のセットアップが完了しました！**
 >
@@ -166,12 +195,14 @@ curl -s http://localhost:37778/api/status
 > - Customer ID: {顧客ID}
 > - 環境変数: `HARNESS_BETA_CODE` を ~/.zshrc に追加
 > - 依存関係: インストール済み
+> - プロジェクト登録: 完了
 >
-> **次にやること:**
+> **確認方法:**
 > 1. ブラウザで http://localhost:37778 にアクセス
-> 2. 次回以降は Claude Code 起動時に自動起動
+> 2. 右上のドロップダウンに現在のプロジェクト名が表示されていることを確認
+> 3. 次回以降は Claude Code 起動時に自動起動＆自動登録
 >
-> 💡 **ヒント**: MCP 一覧で `harness-ui` が表示されていれば成功です。
+> 💡 **ヒント**: ドロップダウンが「All Projects」のみの場合は、Step 6 のプロジェクト登録を再実行してください。
 
 ---
 
@@ -235,12 +266,80 @@ lsof -i :37778
 kill -9 {PID}
 ```
 
+### プロジェクトがドロップダウンに表示されない
+
+**原因**: プロジェクト登録がされていない
+
+**解決策**:
+```bash
+# サーバーが起動していることを確認
+curl -s http://localhost:37778/api/status
+
+# プロジェクトを手動登録
+PROJECT_PATH=$(pwd)
+PROJECT_NAME=$(basename "$PROJECT_PATH")
+curl -s -X POST http://localhost:37778/api/projects \
+  -H "Content-Type: application/json" \
+  -d "{\"name\": \"$PROJECT_NAME\", \"path\": \"$PROJECT_PATH\"}"
+
+# 登録済みプロジェクト一覧を確認
+curl -s http://localhost:37778/api/projects | jq
+```
+
+---
+
+## Plans.md フォーマット要件
+
+harness-ui の自動プロジェクト登録には、以下のいずれかが必要です:
+
+### 方法1: `/harness-init` を実行（推奨）
+
+```bash
+/harness-init
+```
+
+→ `.claude-code-harness-version` マーカーファイルが作成され、自動認識されます。
+
+### 方法2: Plans.md に正しいマーカーを含める
+
+Plans.md に以下のマーカーを含めてください:
+
+**新フォーマット（推奨）:**
+
+| マーカー | 意味 |
+|---------|------|
+| `cc:TODO` | 未着手タスク |
+| `cc:WIP` | 作業中タスク |
+| `cc:完了` | 完了タスク |
+| `cc:blocked` | ブロック中 |
+| `pm:依頼中` | PM から依頼 |
+| `pm:確認済` | PM 確認済 |
+
+**旧フォーマット（互換、非推奨）:**
+
+| マーカー | 移行先 |
+|---------|-------|
+| `cursor:WIP` → | `cc:WIP` |
+| `cursor:完了` → | `cc:完了` |
+
+**テンプレート:**
+
+```markdown
+# Plans.md
+
+## タスク一覧
+
+- [ ] タスク1 `cc:TODO`
+- [x] タスク2 `cc:完了`
+```
+
 ---
 
 ## 関連コマンド
 
 - `/validate` - プラグイン検証
 - `/harness-update` - プラグイン更新
+- `/harness-init` - プロジェクト初期化（Plans.md 自動生成）
 
 ---
 
