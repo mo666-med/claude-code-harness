@@ -186,7 +186,32 @@ curl -s -X POST http://localhost:37778/api/projects \
 
 → エラーでも問題なし（既存プロジェクトが使用される）
 
-### Step 7: 完了メッセージ
+### Step 7: Plans.md フォーマット自動変換
+
+旧フォーマット（`cursor:WIP` 等）を新フォーマット（`cc:WIP` 等）に自動変換:
+
+```bash
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/migrate-plans-format.sh
+```
+
+**変換ルール:**
+
+| 旧フォーマット | 新フォーマット |
+|---------------|---------------|
+| `cursor:WIP` | `cc:WIP` |
+| `cursor:完了` | `cc:完了` |
+
+**出力例:**
+
+```
+🔄 旧フォーマットを検出: 3 箇所
+📁 バックアップ作成: Plans.md.bak.20260104213000
+✅ 変換完了！
+```
+
+→ 既に新フォーマットの場合は「変換不要」と表示されます。
+
+### Step 8: 完了メッセージ
 
 > ✅ **harness-ui のセットアップが完了しました！**
 >
@@ -196,6 +221,7 @@ curl -s -X POST http://localhost:37778/api/projects \
 > - 環境変数: `HARNESS_BETA_CODE` を ~/.zshrc に追加
 > - 依存関係: インストール済み
 > - プロジェクト登録: 完了
+> - Plans.md フォーマット: 新フォーマットに変換済み
 >
 > **確認方法:**
 > 1. ブラウザで http://localhost:37778 にアクセス
