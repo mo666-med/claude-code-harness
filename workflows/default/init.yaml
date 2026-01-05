@@ -5,22 +5,39 @@ phase: init
 description: "プロジェクトを初期化し、開発ワークフローをセットアップする"
 
 steps:
-  # Step 1: リポジトリコンテキストの読み取り
-  - id: read-context
-    skill: core-read-repo-context
+  # Step 1: プロジェクト分析（3値判定）
+  - id: analyze-project
+    skill: project-analyzer
     input:
       files:
         - README.md
         - package.json
         - AGENTS.md
+        - CLAUDE.md
         - Plans.md
       context_from:
         - repo_tree
         - git_status
     output:
       variables:
-        - project_type  # new | existing
+        - project_type      # new | existing | ambiguous
+        - ambiguity_reason  # null | template_only | few_files | readme_only | scaffold_only
         - tech_stack
+        - code_file_count
+    mode: required
+
+  # Step 1.5: 曖昧ケースの確認（ambiguous の場合のみ）
+  - id: clarify-project-type
+    skill: ask-project-type
+    condition: "project_type == 'ambiguous'"
+    input:
+      context_from:
+        - ambiguity_reason
+        - code_file_count
+        - tech_stack
+    output:
+      variables:
+        - project_type  # ユーザー選択で new | existing に確定
     mode: required
 
   # Step 2: 要件のヒアリング（新規プロジェクトの場合）

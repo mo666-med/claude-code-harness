@@ -141,20 +141,82 @@ VibeCoder が自然言語だけで開発を始められるよう、プロジェ�
 
 ## 実行フロー
 
-### Phase 1: プロジェクト分析
+### Phase 1: プロジェクト分析（3値判定）
+
+> ⚠️ **重要**: 従来の2値判定（新規/既存）から3値判定（新規/既存/曖昧）に変更。
+> 曖昧なケースでは自動判定せず、ユーザーに質問してフォールバックする。
 
 現在のディレクトリを分析：
 
 ```bash
+# 基本情報の収集
 ls -la 2>/dev/null | head -10
 [ -d .git ] && echo "Git: Yes" || echo "Git: No"
 [ -f package.json ] && cat package.json | head -5
 [ -f AGENTS.md ] && echo "AGENTS.md: 既存"
+
+# コードファイル数のカウント（node_modules, .venv, dist 除外）
+CODE_COUNT=$(find . -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" -o -name "*.py" -o -name "*.rs" -o -name "*.go" \) \
+  ! -path "*/node_modules/*" ! -path "*/.venv/*" ! -path "*/dist/*" ! -path "*/.next/*" ! -path "*/__pycache__/*" 2>/dev/null | wc -l | tr -d ' ')
+
+# ソースディレクトリの存在確認
+[ -d src ] && echo "src/: あり" || echo "src/: なし"
+[ -d app ] && echo "app/: あり" || echo "app/: なし"
+[ -d lib ] && echo "lib/: あり" || echo "lib/: なし"
 ```
 
-**判定**:
-- ファイルがほぼない → **新規プロジェクト** → Phase 2A
-- コードが存在 → **既存プロジェクト** → Phase 2B
+#### 判定フロー（3値判定）
+
+```
+Step 1: 空ディレクトリチェック
+├── ファイル 0 → project_type: "new"
+├── .git/.gitignore のみ → project_type: "new"
+└── それ以外 → Step 2 へ
+
+Step 2: 実質的なコード存在チェック
+├── コードファイル 10+ AND (src/ OR app/ OR lib/) → project_type: "existing"
+├── package.json/requirements.txt あり AND コード 3+ → project_type: "existing"
+└── それ以外 → Step 3 へ
+
+Step 3: 曖昧ケースの分類
+├── package.json あり AND コード 0 → "ambiguous" (template_only)
+├── コード 1〜9 → "ambiguous" (few_files)
+├── README.md/LICENSE のみ → "ambiguous" (readme_only)
+└── 設定ファイルのみ → "ambiguous" (scaffold_only)
+```
+
+**判定結果に応じた分岐**:
+- `project_type: "new"` → **Phase 2A**（新規プロジェクト）
+- `project_type: "existing"` → **Phase 2B**（既存プロジェクト）
+- `project_type: "ambiguous"` → **Phase 1.5**（曖昧ケース：質問で確認）
+
+---
+
+### Phase 1.5: 曖昧ケースの確認（ambiguous の場合のみ）
+
+> 🤔 **プロジェクトの状態を判断できませんでした。**
+>
+> **検出結果**:
+> - コードファイル: {{CODE_COUNT}} ファイル
+> - package.json: {{あり/なし}}
+> - 理由: {{ambiguity_reason の日本語説明}}
+>
+> **どちらとして扱いますか？**
+>
+> 🅰️ **新規プロジェクト**として扱う
+>    - 最初からセットアップ（ヒアリング → 技術選択 → 生成）
+>    - Plans.md に基本タスクを追加
+>
+> 🅱️ **既存プロジェクト**として扱う
+>    - 既存コード・設定を破壊しない
+>    - 不足しているワークフローファイルのみ追加
+>
+> A / B どちらですか？
+
+**回答を待つ**
+
+- **A** を選択 → **Phase 2A**（新規プロジェクト）へ
+- **B** を選択 → **Phase 2B**（既存プロジェクト）へ
 
 ---
 
@@ -310,6 +372,9 @@ npm install @supabase/supabase-js lucide-react
 
 ## Phase 2B: 既存プロジェクト
 
+> ⚠️ **原則**: 既存プロジェクトでは**破壊的に上書きしない**。
+> 既存コードやユーザーが作成した設定を失わないことを最優先とする。
+
 ### Step 1: 構造分析
 
 ```bash
@@ -317,41 +382,78 @@ find . -name "*.ts" -o -name "*.tsx" -o -name "*.py" | head -20
 cat package.json 2>/dev/null | head -10
 ```
 
-### Step 2: 確認
+### Step 2: 既存ワークフローファイルの確認
+
+```bash
+# ワークフローファイルの存在確認
+[ -f AGENTS.md ] && echo "AGENTS.md: あり ($(wc -l < AGENTS.md) 行)" || echo "AGENTS.md: なし"
+[ -f CLAUDE.md ] && echo "CLAUDE.md: あり ($(wc -l < CLAUDE.md) 行)" || echo "CLAUDE.md: なし"
+[ -f Plans.md ] && echo "Plans.md: あり ($(wc -l < Plans.md) 行)" || echo "Plans.md: なし"
+[ -d .claude ] && echo ".claude/: あり" || echo ".claude/: なし"
+```
+
+### Step 3: 検出結果とオプション提示
 
 > 🔍 **既存プロジェクトを検出しました**
 >
+> **プロジェクト情報**:
 > - 言語: {{検出された言語}}
 > - フレームワーク: {{検出されたフレームワーク}}
+> - コードファイル: {{CODE_COUNT}} ファイル
 >
-> **Cursor-CC ワークフローを追加しますか？**
+> **既存ワークフローファイル**:
+> {{存在するファイルのリスト}}
 >
-> **重要**: 既存プロジェクトでは、すでに `AGENTS.md` / `CLAUDE.md` / `Plans.md` が存在する場合があります。  
-> その場合は「残す/入れ替える」ではなく、**既存内容を精査して、対話で引き継ぐ情報を決めた上で、新フォーマットへアップデート（マージ移行）**できます。
+> **どちらにしますか？**
 >
-> どちらにしますか？
+> 🅰️ **追加のみ**（不足ファイルだけ作成）
+>    - 既存の AGENTS.md / CLAUDE.md / Plans.md は**そのまま残す**
+>    - 不足しているファイルのみ新規作成
+>    - 最も安全な選択肢
 >
-> - **A**: 追加のみ（不足ファイルだけ作成。既存ファイルは触らない）
-> - **B**: 新フォーマットへ移行（既存内容を引き継ぎつつアップデート。バックアップ付き・対話あり）【推奨】
+> 🅱️ **新フォーマットへ移行**【推奨】
+>    - 既存内容を**バックアップ後**、最新フォーマットに統合
+>    - 対話で引き継ぐ情報を確認
+>    - Plans.md の既存タスクは保持
+>
+> A / B どちらですか？
 
 **回答を待つ**
 
-### Step 3A: 追加のみ（A を選択）
+### 既存ファイルの扱いマトリックス
 
-- AGENTS.md（なければ作成）
-- CLAUDE.md（なければ作成）
-- Plans.md（なければ作成）
+| ファイル | 既存あり + A選択 | 既存あり + B選択 | 既存なし |
+|---------|-----------------|-----------------|---------|
+| **AGENTS.md** | 変更しない | バックアップ後、新フォーマットへ移行（カスタム部分保持） | 新規作成 |
+| **CLAUDE.md** | 変更しない | バックアップ後、新フォーマットへ移行（カスタム部分保持） | 新規作成 |
+| **Plans.md** | 変更しない | バックアップ後、既存タスクを保持しつつ新フォーマットへ | 新規作成 |
+| **.claude/settings.json** | **非破壊マージ** | **非破壊マージ** | 新規作成 |
+| **.claude/memory/** | 変更しない | 変更しない | 新規作成 |
+
+> 💡 **非破壊マージ**: 既存の permissions.allow 等に追記し、既存設定を削除しない
+
+### Step 4A: 追加のみ（A を選択）
+
+- AGENTS.md（**なければ**作成、**あれば触らない**）
+- CLAUDE.md（**なければ**作成、**あれば触らない**）
+- Plans.md（**なければ**作成、**あれば触らない**）
 - `.claude/settings.json`（**作成/更新**。既存があれば非破壊マージ）
 
-### Step 3B: 新フォーマットへ移行（B を選択・推奨）
+### Step 4B: 新フォーマットへ移行（B を選択・推奨）
 
-1. まず `.claude/settings.json` を **安全ポリシー込みで作成/更新**（既存は非破壊マージ）
+1. **バックアップ作成**
+   ```bash
+   mkdir -p .claude-code-harness/backups/$(date +%Y%m%d_%H%M%S)
+   cp AGENTS.md CLAUDE.md Plans.md .claude-code-harness/backups/$(date +%Y%m%d_%H%M%S)/ 2>/dev/null
+   ```
+
+2. `.claude/settings.json` を **安全ポリシー込みで作成/更新**（既存は非破壊マージ）
    → `generate-claude-settings` を実行
-2. 次に `AGENTS.md` / `CLAUDE.md` / `Plans.md` を **既存内容を引き継ぎつつ新フォーマットへ移行**（対話で引き継ぎ項目を確定）
+
+3. `AGENTS.md` / `CLAUDE.md` / `Plans.md` を **既存内容を引き継ぎつつ新フォーマットへ移行**（対話で引き継ぎ項目を確定）
    → `migrate-workflow-files` を実行
    - `Plans.md` はタスク保持マージ（`merge-plans` 方針）
    - `AGENTS.md` / `CLAUDE.md` はテンプレ骨格 + 「移行したプロジェクト固有ルール」を適切な場所に再配置
-   - 変更前に `.claude-code-harness/backups/` にバックアップを残す
 
 ---
 
