@@ -22,24 +22,23 @@ NC='\033[0m'
 # プラグインソースを検出
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# CLAUDE_PLUGIN_ROOT があればそれを使用、なければ検出を試みる
-if [ -n "$CLAUDE_PLUGIN_ROOT" ]; then
+# Load cross-platform path utilities (if available)
+if [ -f "$SCRIPT_DIR/path-utils.sh" ]; then
+  # shellcheck source=./path-utils.sh
+  source "$SCRIPT_DIR/path-utils.sh"
+fi
+
+# Detect plugin source location
+# Priority: 1. CLAUDE_PLUGIN_ROOT env var, 2. Script's parent directory (default)
+if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
   PLUGIN_SOURCE="$CLAUDE_PLUGIN_ROOT/claude-code-harness"
-elif [ -d "$HOME/Desktop/Code/CC-harness/claude-code-harness" ]; then
-  # 開発環境のパス
-  PLUGIN_SOURCE="$HOME/Desktop/Code/CC-harness/claude-code-harness"
 else
-  # フォールバック：スクリプトの親ディレクトリ
+  # Default: use script's parent directory (works for both dev and installed)
   PLUGIN_SOURCE="$(dirname "$SCRIPT_DIR")"
 fi
 
-# キャッシュから実行されている場合はソースを検出
-if [[ "$SCRIPT_DIR" == *"/.claude/plugins/cache/"* ]]; then
-  # キャッシュからの実行 - 開発ソースを探す
-  if [ -d "$HOME/Desktop/Code/CC-harness/claude-code-harness" ]; then
-    PLUGIN_SOURCE="$HOME/Desktop/Code/CC-harness/claude-code-harness"
-  fi
-fi
+# Note: Removed hardcoded development paths for cross-platform compatibility
+# If you need to override in development, set CLAUDE_PLUGIN_ROOT environment variable
 
 # プラグイン情報
 PLUGIN_NAME="claude-code-harness"
@@ -99,9 +98,10 @@ files_differ() {
 # ===== 同期処理 =====
 sync_file() {
   local rel_path="$1"
+  local cache_dir="$2"  # Explicit argument instead of global variable
   local source_file="$PLUGIN_SOURCE/$rel_path"
-  local cache_file="$CACHE_DIR/$rel_path"
-  
+  local cache_file="$cache_dir/$rel_path"
+
   if [ -f "$source_file" ]; then
     mkdir -p "$(dirname "$cache_file")"
     cp "$source_file" "$cache_file"

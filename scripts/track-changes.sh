@@ -4,8 +4,32 @@
 #
 # Usage: PostToolUse hook から自動実行
 # Input: stdin JSON (Claude Code hooks) / 互換: $1=tool_name, $2=file_path
+#
+# Cross-platform: Supports Windows (Git Bash/MSYS2/Cygwin/WSL), macOS, Linux
 
 set +e
+
+# Load cross-platform path utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/path-utils.sh" ]; then
+  # shellcheck source=./path-utils.sh
+  source "$SCRIPT_DIR/path-utils.sh"
+else
+  # Fallback: minimal normalize_path and is_path_under
+  normalize_path() {
+    local p="$1"
+    p="${p//\\//}"
+    echo "$p"
+  }
+  is_path_under() {
+    local child="$1"
+    local parent="$2"
+    child="$(normalize_path "$child")"
+    parent="$(normalize_path "$parent")"
+    [[ "$parent" != */ ]] && parent="${parent}/"
+    [[ "${child}/" == "${parent}"* ]] || [ "$child" = "${parent%/}" ]
+  }
+fi
 
 INPUT=""
 if [ ! -t 0 ]; then
@@ -47,9 +71,18 @@ fi
 
 TOOL_NAME="${TOOL_NAME:-unknown}"
 
-# 可能ならプロジェクト相対パスへ正規化
-if [ -n "$CWD" ] && [ -n "$FILE_PATH" ] && [[ "$FILE_PATH" == "$CWD/"* ]]; then
-  FILE_PATH="${FILE_PATH#$CWD/}"
+# 可能ならプロジェクト相対パスへ正規化（クロスプラットフォーム対応）
+if [ -n "$CWD" ] && [ -n "$FILE_PATH" ]; then
+  NORM_FILE_PATH="$(normalize_path "$FILE_PATH")"
+  NORM_CWD="$(normalize_path "$CWD")"
+
+  if is_path_under "$NORM_FILE_PATH" "$NORM_CWD"; then
+    # Remove the CWD prefix to get relative path
+    local cwd_with_slash="${NORM_CWD%/}/"
+    if [[ "$NORM_FILE_PATH" == "$cwd_with_slash"* ]]; then
+      FILE_PATH="${NORM_FILE_PATH#$cwd_with_slash}"
+    fi
+  fi
 fi
 STATE_FILE=".claude/state/session.json"
 CURRENT_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)

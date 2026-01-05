@@ -4,14 +4,24 @@
 #
 # Usage: ./scripts/analyze-project.sh [project_path]
 # Output: JSON形式のプロジェクト分析結果
+#
+# Cross-platform: Supports Windows (Git Bash/MSYS2/Cygwin/WSL), macOS, Linux
 
 set -euo pipefail
+
+# Load cross-platform path utilities (if available)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/path-utils.sh" ]; then
+  # shellcheck source=./path-utils.sh
+  source "$SCRIPT_DIR/path-utils.sh"
+fi
 
 PROJECT_PATH="${1:-.}"
 cd "$PROJECT_PATH"
 
-# JSON出力用の一時ファイル
+# JSON出力用の一時ファイル（自動クリーンアップ付き）
 RESULT_FILE=$(mktemp)
+trap 'rm -f "$RESULT_FILE"' EXIT
 
 # ================================
 # ヘルパー関数

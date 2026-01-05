@@ -3,12 +3,25 @@
 # 既存プロジェクトにclaude-code-harnessを適用するセットアップスクリプト
 #
 # Usage: ./scripts/setup-existing-project.sh [project_path]
+#
+# Cross-platform: Supports Windows (Git Bash/MSYS2/Cygwin/WSL), macOS, Linux
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 HARNESS_ROOT="$(dirname "$SCRIPT_DIR")"
+
+# Load cross-platform path utilities
+if [ -f "$SCRIPT_DIR/path-utils.sh" ]; then
+  # shellcheck source=./path-utils.sh
+  source "$SCRIPT_DIR/path-utils.sh"
+fi
+
 PROJECT_PATH="${1:-.}"
+# Normalize project path for cross-platform compatibility
+if type normalize_path &>/dev/null; then
+  PROJECT_PATH="$(normalize_path "$PROJECT_PATH")"
+fi
 
 # カラー出力
 GREEN='\033[0;32m'
@@ -35,7 +48,10 @@ if [ ! -d "$PROJECT_PATH" ]; then
     exit 1
 fi
 
-cd "$PROJECT_PATH"
+cd "$PROJECT_PATH" || {
+    echo -e "${RED}✗ ディレクトリに移動できません: $PROJECT_PATH${NC}"
+    exit 1
+}
 PROJECT_PATH=$(pwd)
 echo -e "${GREEN}✓${NC} プロジェクトディレクトリ: $PROJECT_PATH"
 

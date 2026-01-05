@@ -7,8 +7,37 @@
 #
 # Input: stdin JSON from Claude Code hooks
 # Output: JSON to control PreToolUse permission decisions
+#
+# Cross-platform: Supports Windows (Git Bash/MSYS2/Cygwin/WSL), macOS, Linux
 
 set +e
+
+# Load cross-platform path utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/path-utils.sh" ]; then
+  # shellcheck source=./path-utils.sh
+  source "$SCRIPT_DIR/path-utils.sh"
+else
+  # Fallback: define minimal path utilities if path-utils.sh not found
+  is_absolute_path() {
+    local p="$1"
+    [[ "$p" == /* ]] && return 0
+    [[ "$p" =~ ^[A-Za-z]:[\\/] ]] && return 0
+    return 1
+  }
+  normalize_path() {
+    local p="$1"
+    p="${p//\\//}"
+    echo "$p"
+  }
+  # Note: This expects already-normalized paths from caller for performance
+  is_path_under() {
+    local child="$1"
+    local parent="$2"
+    [[ "$parent" != */ ]] && parent="${parent}/"
+    [[ "${child}/" == "${parent}"* ]] || [ "$child" = "${parent%/}" ]
+  }
+fi
 
 detect_lang() {
   # Default to Japanese for this harness (can be overridden).
@@ -159,16 +188,27 @@ if [ "$TOOL_NAME" = "Write" ] || [ "$TOOL_NAME" = "Edit" ]; then
     exit 0
   fi
 
+  # Normalize paths for cross-platform comparison
+  NORM_FILE_PATH="$(normalize_path "$FILE_PATH")"
+  NORM_CWD="$(normalize_path "$CWD")"
+
   # If absolute and outside project cwd, ask for confirmation.
-  if [ -n "$CWD" ] && [[ "$FILE_PATH" == /* ]] && [[ "$FILE_PATH" != "$CWD/"* ]]; then
-    emit_ask "$(msg ask_write_outside_project "$FILE_PATH")"
-    exit 0
+  # Supports both Unix (/path) and Windows (C:/path, C:\path) absolute paths
+  if [ -n "$NORM_CWD" ] && is_absolute_path "$NORM_FILE_PATH"; then
+    if ! is_path_under "$NORM_FILE_PATH" "$NORM_CWD"; then
+      emit_ask "$(msg ask_write_outside_project "$FILE_PATH")"
+      exit 0
+    fi
   fi
 
   # Normalize to relative when possible for pattern matching.
-  REL_PATH="$FILE_PATH"
-  if [ -n "$CWD" ] && [[ "$FILE_PATH" == "$CWD/"* ]]; then
-    REL_PATH="${FILE_PATH#$CWD/}"
+  REL_PATH="$NORM_FILE_PATH"
+  if [ -n "$NORM_CWD" ] && is_path_under "$NORM_FILE_PATH" "$NORM_CWD"; then
+    # Remove the CWD prefix to get relative path
+    local cwd_with_slash="${NORM_CWD%/}/"
+    if [[ "$NORM_FILE_PATH" == "$cwd_with_slash"* ]]; then
+      REL_PATH="${NORM_FILE_PATH#$cwd_with_slash}"
+    fi
   fi
 
   if is_protected_path "$REL_PATH"; then
