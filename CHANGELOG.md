@@ -7,6 +7,12 @@
 
 ## [Unreleased]
 
+## [2.6.37] - 2026-01-05
+
+### 🎯 あなたにとって何が変わるか
+
+**Claude がテストを改ざんした場合、次のターンで警告が表示されるようになりました。操作はブロックせず、Claude に「見られている」という認識を持たせることで報酬詐欺を抑止します。**
+
 ### Added
 
 - **テスト改ざん検出フック（posttooluse-tampering-detector.sh）**
@@ -14,11 +20,12 @@
   - 操作はブロックせず、`additionalContext` で次のターンに警告を注入
   - 検出パターン:
     - `it.skip()` / `describe.skip()` / `test.skip()` 追加
-    - `it.only()` / `describe.only()` 追加
+    - `it.only()` / `describe.only()` 追加（他テスト無効化）
     - `eslint-disable` / `@ts-ignore` / `@ts-nocheck` 追加
     - アサーション（`expect()` / `assert`）の削除
     - lint/CI 設定ファイルの緩和（`continue-on-error: true` など）
   - `.claude/state/tampering.log` に検出履歴を記録
+  - 第3層防御（Hooks）の実装として CLAUDE.md を更新
 
 ## [2.6.36] - 2026-01-05
 
