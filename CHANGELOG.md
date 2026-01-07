@@ -16,6 +16,7 @@
   - 引数サポート: `/harness-init "ブログ" --mode=solo --stack=next-supabase`
   - 並列処理: 質問中にバックグラウンドでプロジェクト分析
   - Skills Gate 後回し: 初期負担軽減、`/skills-update` で後から調整可能
+  - **完了報告の強化**: 自動決定された設定・生成ファイル・変更方法を詳細サマリーで提示
 
 #### Before/After
 
@@ -24,6 +25,15 @@
 | 最大11回の対話ラウンド | 最小1回、最大2回の対話ラウンド |
 | 言語選択→モード選択→詳細確認... | 統合質問1回で完了（おまかせ選択時） |
 | Skills Gate 設定で必ず質問 | 自動設定、後から調整可能 |
+
+### Changed
+
+- **エラーメッセージの日本語化**
+  - `scripts/install-git-hooks.sh`: エラーと説明文を日本語化
+  - `scripts/template-tracker.sh`: すべてのエラー・Usage・結果メッセージを日本語化
+  - `scripts/claude-mem-mcp`: MCP 起動関連メッセージを日本語化
+  - `tests/test-path-compatibility.sh`: テストサマリーを日本語化
+  - `tests/test-frontmatter-integration.sh`: エラーメッセージとサマリーを日本語化
 
 ### Added
 

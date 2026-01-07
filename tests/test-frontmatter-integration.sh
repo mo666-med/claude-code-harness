@@ -430,12 +430,12 @@ main() {
   
   # 前提条件チェック
   if [ ! -d "$TEMPLATES_DIR" ]; then
-    echo "ERROR: Templates directory not found: $TEMPLATES_DIR"
+    echo "エラー: テンプレートディレクトリが見つかりません: $TEMPLATES_DIR"
     exit 1
   fi
-  
+
   if [ ! -f "$REGISTRY_FILE" ]; then
-    echo "ERROR: Registry file not found: $REGISTRY_FILE"
+    echo "エラー: レジストリファイルが見つかりません: $REGISTRY_FILE"
     exit 1
   fi
   
@@ -452,18 +452,18 @@ main() {
   # 結果サマリー
   echo ""
   echo "========================================"
-  echo "Test Results Summary"
+  echo "テスト結果サマリー"
   echo "========================================"
-  echo -e "${GREEN}PASSED${NC}: $TESTS_PASSED"
-  echo -e "${RED}FAILED${NC}: $TESTS_FAILED"
-  echo -e "${YELLOW}SKIPPED${NC}: $TESTS_SKIPPED"
+  echo -e "${GREEN}合格${NC}: $TESTS_PASSED"
+  echo -e "${RED}失敗${NC}: $TESTS_FAILED"
+  echo -e "${YELLOW}スキップ${NC}: $TESTS_SKIPPED"
   echo ""
-  
+
   if [ $TESTS_FAILED -gt 0 ]; then
-    echo -e "${RED}Some tests failed!${NC}"
+    echo -e "${RED}一部のテストが失敗しました！${NC}"
     exit 1
   else
-    echo -e "${GREEN}All tests passed!${NC}"
+    echo -e "${GREEN}すべてのテストが合格しました！${NC}"
     exit 0
   fi
 }

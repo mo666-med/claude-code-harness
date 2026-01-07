@@ -26,7 +26,7 @@ PLUGIN_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 # フロントマターユーティリティを読み込み
 # shellcheck source=frontmatter-utils.sh
 if [ ! -f "$SCRIPT_DIR/frontmatter-utils.sh" ]; then
-  echo "Error: frontmatter-utils.sh not found. Please reinstall the plugin." >&2
+  echo "エラー: frontmatter-utils.sh が見つかりません。プラグインを再インストールしてください。" >&2
   exit 1
 fi
 source "$SCRIPT_DIR/frontmatter-utils.sh"
@@ -145,7 +145,7 @@ cmd_init() {
   done < <(get_tracked_templates)
 
   save_generated_files "$result"
-  echo "Generated files initialized. Recorded $(echo "$result" | jq '.files | length') files."
+  echo "生成ファイルを初期化しました。$(echo "$result" | jq '.files | length') 件のファイルを記録。"
 }
 
 # チェック: 更新が必要なファイルを検出（JSON出力）
@@ -359,12 +359,12 @@ cmd_record() {
   local file_path="$1"
 
   if [ -z "$file_path" ]; then
-    echo "Usage: template-tracker.sh record <file_path>"
+    echo "使用方法: template-tracker.sh record <file_path>"
     exit 1
   fi
 
   if [ ! -f "$file_path" ]; then
-    echo "Error: File not found: $file_path"
+    echo "エラー: ファイルが見つかりません: $file_path"
     exit 1
   fi
 
@@ -383,7 +383,7 @@ cmd_record() {
   done < <(get_tracked_templates)
 
   if [ -z "$template_version" ]; then
-    echo "Error: Template not found for: $file_path"
+    echo "エラー: テンプレートが見つかりません: $file_path"
     exit 1
   fi
 
@@ -398,9 +398,9 @@ cmd_record() {
       --arg version "$template_version" --arg hash "$file_hash" \
       '.files[$path] = {"templateVersion": $version, "fileHash": $hash, "recordedAt": (now | strftime("%Y-%m-%dT%H:%M:%SZ"))}')
     save_generated_files "$generated"
-    echo "Recorded: $file_path (version: $template_version)"
+    echo "記録完了: $file_path (バージョン: $template_version)"
   else
-    echo "Error: jq is required for this operation"
+    echo "エラー: この操作には jq が必要です"
     exit 1
   fi
 }
@@ -420,13 +420,13 @@ case "${1:-}" in
     cmd_record "$2"
     ;;
   *)
-    echo "Usage: template-tracker.sh {init|check|status|record <file>}"
+    echo "使用方法: template-tracker.sh {init|check|status|record <file>}"
     echo ""
-    echo "Commands:"
-    echo "  init   - Initialize generated-files.json with current file states"
-    echo "  check  - Check for template updates (JSON output for SessionStart)"
-    echo "  status - Show detailed status (human-readable)"
-    echo "  record - Record a file's current state after update"
+    echo "コマンド:"
+    echo "  init   - generated-files.json を現在のファイル状態で初期化"
+    echo "  check  - テンプレート更新をチェック（SessionStart 用 JSON 出力）"
+    echo "  status - 詳細状態を表示（人間向け）"
+    echo "  record - ファイルの現在状態を記録"
     exit 1
     ;;
 esac

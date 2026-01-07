@@ -20,7 +20,7 @@ get_latest_version() {
     latest_version_path=$(ls -1d "$PLUGIN_BASE"/*/ 2>/dev/null | sort -V | tail -1)
 
     if [ -z "$latest_version_path" ]; then
-        echo "Error: claude-mem plugin not found in $PLUGIN_BASE" >&2
+        echo "エラー: claude-mem プラグインが見つかりません: $PLUGIN_BASE" >&2
         exit 1
     fi
 
@@ -42,52 +42,52 @@ start_worker() {
     local worker_cli="$version_path/scripts/worker-cli.js"
 
     if [ ! -f "$worker_cli" ]; then
-        echo "Error: worker-cli.js not found at $worker_cli" >&2
+        echo "エラー: worker-cli.js が見つかりません: $worker_cli" >&2
         exit 1
     fi
 
-    echo "Starting claude-mem worker..." >&2
+    echo "claude-mem worker を起動中..." >&2
     node "$worker_cli" start > /dev/null 2>&1
 
-    # Wait for worker to start
+    # Worker の起動を待機
     local max_retries=10
     local retry=0
     while [ $retry -lt $max_retries ]; do
         if is_worker_running; then
-            echo "Worker started successfully" >&2
+            echo "Worker が正常に起動しました" >&2
             return 0
         fi
         sleep 1
         retry=$((retry + 1))
     done
 
-    echo "Error: Worker failed to start after ${max_retries} seconds" >&2
+    echo "エラー: Worker が ${max_retries} 秒以内に起動しませんでした" >&2
     exit 1
 }
 
-# Main execution
+# メイン処理
 main() {
-    # Get latest version path
+    # 最新バージョンのパスを取得
     LATEST_VERSION=$(get_latest_version)
-    echo "Using claude-mem version: $(basename "$LATEST_VERSION")" >&2
+    echo "claude-mem バージョン: $(basename "$LATEST_VERSION")" >&2
 
-    # Check worker status
+    # Worker の状態をチェック
     if ! is_worker_running; then
-        echo "Worker not running, attempting to start..." >&2
+        echo "Worker が起動していません。起動を試みます..." >&2
         start_worker "$LATEST_VERSION"
     else
-        echo "Worker already running" >&2
+        echo "Worker は起動済みです" >&2
     fi
 
-    # Launch MCP server
+    # MCP サーバーを起動
     MCP_SERVER="$LATEST_VERSION/scripts/mcp-server.cjs"
 
     if [ ! -f "$MCP_SERVER" ]; then
-        echo "Error: mcp-server.cjs not found at $MCP_SERVER" >&2
+        echo "エラー: mcp-server.cjs が見つかりません: $MCP_SERVER" >&2
         exit 1
     fi
 
-    echo "Launching MCP server..." >&2
+    echo "MCP サーバーを起動中..." >&2
     exec node "$MCP_SERVER"
 }
 

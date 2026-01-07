@@ -15,14 +15,14 @@ set -euo pipefail
 
 ROOT="$(git rev-parse --show-toplevel 2>/dev/null || true)"
 if [ -z "$ROOT" ]; then
-  echo "Error: Not a git repository"
+  echo "エラー: Git リポジトリではありません"
   exit 1
 fi
 
 cd "$ROOT"
 
 if [ ! -d ".githooks" ]; then
-  echo "Error: .githooks/ directory not found"
+  echo "エラー: .githooks/ ディレクトリが見つかりません"
   exit 1
 fi
 
@@ -31,22 +31,22 @@ chmod +x .githooks/pre-commit 2>/dev/null || true
 git config core.hooksPath .githooks
 
 echo ""
-echo "=== Git Hooks Enabled ==="
+echo "=== Git Hooks 有効化完了 ==="
 echo ""
 echo "  core.hooksPath = .githooks"
 echo ""
 echo "  pre-commit:"
-echo "    - Auto-bumps VERSION when code changes are staged"
-echo "    - Keeps VERSION and plugin.json in sync"
+echo "    - コード変更時に VERSION を自動更新"
+echo "    - VERSION と plugin.json を同期"
 echo ""
 
-# Windows compatibility notice
+# Windows 向け注意事項
 if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ -n "${WINDIR:-}" ]]; then
-  echo "  [Windows Note]"
-  echo "    Git hooks run via Git Bash (included with Git for Windows)."
-  echo "    If hooks don't work, ensure Git for Windows is installed:"
+  echo "  [Windows 注意]"
+  echo "    Git hooks は Git Bash（Git for Windows に付属）で実行されます。"
+  echo "    hooks が動作しない場合は Git for Windows をインストールしてください:"
   echo "    https://gitforwindows.org/"
   echo ""
 fi
 
-echo "Done!"
+echo "完了！"
