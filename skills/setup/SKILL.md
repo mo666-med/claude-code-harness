@@ -21,6 +21,7 @@ metadata:
 | project-scaffolder | 新規プロジェクトのスキャフォールディング |
 | generate-workflow-files | CLAUDE.md, AGENTS.md, Plans.md 生成 |
 | generate-claude-settings | .claude/settings.json 生成 |
+| ask-project-type | 曖昧ケースでユーザーに新規/既存を質問 |
 
 ## ルーティング
 
@@ -28,6 +29,7 @@ metadata:
 - スキャフォールディング: project-scaffolder/doc.md
 - ワークフローファイル: generate-workflow-files/doc.md
 - 設定ファイル: generate-claude-settings/doc.md
+- プロジェクト種別確認: ask-project-type/doc.md
 
 ## 実行手順
 
