@@ -4,6 +4,9 @@
 
 Claude Code v2.1.0 で導入された新機能に harness を対応させるためのアップデートプランです。
 
+> **📌 運用ルール**: このドキュメントは「参照用プラン」です。実際のタスク追跡は `Plans.md` に起票して行います。
+> チェックボックスは計画の全体像を示すためのものであり、進捗管理は Plans.md で行ってください。
+
 ---
 
 ## 📋 変更一覧
@@ -12,14 +15,20 @@ Claude Code v2.1.0 で導入された新機能に harness を対応させるた�
 
 #### 1.1 新しいフロントマターフィールドの対応
 
-| フィールド | 対象 | 説明 | 用途 |
-|-----------|------|------|------|
-| `context: fork` | skill/command | 分離コンテキストで実行 | 重い処理の分離、コンテキスト汚染防止 |
-| `agent` | skill | エージェントタイプを指定 | スキル実行時のモデル・設定指定 |
-| `skills` | agent | サブエージェント用スキル自動読み込み | エージェントに必要なスキルを宣言 |
-| `user-invocable: false` | skill | スラッシュメニューから非表示 | 内部スキルの非公開化 |
-| `permissionMode` | agent | エージェントの権限モード | 安全性制御 |
-| `disallowedTools` | agent | 禁止ツールリスト | 明示的なツールブロック |
+| フィールド | 対象 | 説明 | 根拠 | ステータス |
+|-----------|------|------|------|-----------|
+| `context: fork` | skill/command | 分離コンテキストで実行 | [CHANGELOG 2.1.0](https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md) | ✅ 確認済み |
+| `agent` | skill | エージェントタイプを指定 | [CHANGELOG 2.1.0](https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md) | ✅ 確認済み |
+| `skills` | agent | サブエージェント用スキル自動読み込み | [Skills Documentation](https://code.claude.com/docs/en/skills) | ✅ 確認済み |
+| `user-invocable: false` | skill | スラッシュメニューから非表示 | [CHANGELOG 2.1.0](https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md) - "opt-out with `user-invocable: false`" | ✅ 確認済み |
+
+**設定/CLIオプション（フロントマター外）**:
+
+| オプション | 対象 | 説明 | 根拠 | ステータス |
+|-----------|------|------|------|-----------|
+| `--disallowedTools` | CLI | 禁止ツールリスト | [CLI Reference](https://code.claude.com/docs/en/cli-reference) | ✅ 確認済み |
+| `disallowedTools` | agent定義 | エージェント固有の禁止ツール | [CHANGELOG 2.0.30](https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md) - "Added `disallowedTools` field to custom agent definitions" | ✅ 確認済み |
+| `permissionMode` | agent定義 | エージェントの権限モード | [CHANGELOG 2.0.43](https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md) - "Added `permissionMode` field for custom agents" | ✅ 確認済み |
 
 - [ ] cc:TODO `/harness-init`で生成するテンプレートに新フィールドを追加
 - [ ] cc:TODO 既存エージェント（6個）に `skills` フィールド追加を検討
@@ -29,6 +38,8 @@ Claude Code v2.1.0 で導入された新機能に harness を対応させるた�
 #### 1.2 エージェントへのインラインフック対応
 
 Claude Code 2.1.0 では、エージェントのフロントマターに直接フックを定義可能になりました。
+
+**根拠**: [CHANGELOG 2.1.0](https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md) - "Added hooks support to agent frontmatter, allowing agents to define PreToolUse, PostToolUse, and Stop hooks scoped to the agent's lifecycle"
 
 ```yaml
 ---
@@ -54,18 +65,43 @@ hooks:
 
 #### 2.1 新しいフック設定オプション
 
-| オプション | 説明 | ユースケース |
-|-----------|------|-------------|
-| `once: true` | フックを1回だけ実行 | セッション初期化、1回限りの通知 |
-| `SubagentStart` | サブエージェント開始時 | サブエージェント監視、ログ記録 |
-| `SubagentStop` | サブエージェント終了時 | 結果収集、エスカレーション判定 |
+| オプション | 説明 | 根拠 | ステータス |
+|-----------|------|------|-----------|
+| `once: true` | フックを1回だけ実行 | [CHANGELOG 2.1.0](https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md) - "Added support for `once: true` config for hooks" | ✅ 確認済み |
+| `SubagentStart` | サブエージェント開始時イベント | [CHANGELOG 2.0.43](https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md) - "Added the `SubagentStart` hook event" | ✅ 確認済み |
+| `SubagentStop` | サブエージェント終了時イベント | [Hooks Documentation](https://code.claude.com/docs/en/hooks)、[CHANGELOG 2.0.41](https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md) - "Split Stop hook triggering into Stop and SubagentStop" | ✅ 確認済み |
 
-- [ ] cc:TODO `hooks/hooks.json` に `SubagentStart` フック追加
-- [ ] cc:TODO `SubagentStop` フック追加（agent_id, agent_transcript_path活用）
-- [ ] cc:TODO `session-init.sh` フックに `once: true` を適用（重複実行防止）
-- [ ] cc:TODO フック用スクリプト `subagent-tracker.sh` 作成
+#### 2.2 `once: true` の設定例
 
-#### 2.2 hooks.json の更新
+**根拠**: [CHANGELOG 2.1.0](https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md)
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/run-script.js\" session-init",
+            "timeout": 30,
+            "once": true
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+#### 2.3 SubagentStart / SubagentStop の設定例
+
+**根拠**: [Hooks Documentation](https://code.claude.com/docs/en/hooks)、[Plugins Reference](https://code.claude.com/docs/en/plugins-reference)
+
+`SubagentStop` では以下のフィールドが利用可能:
+- `agent_id`: サブエージェントの識別子（[CHANGELOG 2.0.42](https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md)）
+- `agent_transcript_path`: トランスクリプトファイルのパス（[CHANGELOG 2.0.42](https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md)）
 
 ```json
 {
@@ -94,20 +130,31 @@ hooks:
 }
 ```
 
+- [ ] cc:TODO `hooks/hooks.json` に `SubagentStart` フック追加
+- [ ] cc:TODO `SubagentStop` フック追加（agent_id, agent_transcript_path活用）
+- [ ] cc:TODO `session-init.sh` フックに `once: true` を適用（重複実行防止）
+- [ ] cc:TODO フック用スクリプト `subagent-tracker.sh` 作成
+
 ---
 
 ### Phase 3: 設定テンプレートの更新（中優先度）
 
 #### 3.1 language設定の追加
 
-Claude Code 2.1.0 では `language` 設定で応答言語を指定可能になりました。
+**根拠**: [CHANGELOG 2.1.0](https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md) - "Added `language` setting to configure Claude's response language (e.g., language: \"japanese\")"
+
+```json
+{
+  "language": "japanese"
+}
+```
 
 - [ ] cc:TODO `templates/claude/settings.local.json.template` に `language` 設定追加
 - [ ] cc:TODO `/harness-init` で言語設定を自動検出（ja/en）
 
 #### 3.2 ワイルドカード権限パターンの活用
 
-Bash権限で `*` ワイルドカードが使用可能になりました。
+**根拠**: [CHANGELOG 2.1.0](https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md) - "Added wildcard pattern matching for Bash tool permissions using `*` at any position in rules"
 
 ```json
 {
@@ -126,7 +173,7 @@ Bash権限で `*` ワイルドカードが使用可能になりました。
 
 #### 3.3 MCP動的更新対応
 
-MCP `list_changed` 通知により、サーバーが動的にツールを更新可能になりました。
+**根拠**: [CHANGELOG 2.1.0](https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md) - "Added support for MCP `list_changed` notifications, allowing MCP servers to dynamically update their available tools"
 
 - [ ] cc:TODO `harness-ui` MCP サーバーで動的ツール更新を検討
 
@@ -134,13 +181,23 @@ MCP `list_changed` 通知により、サーバーが動的にツールを更新�
 
 ### Phase 4: ドキュメント更新（中優先度）
 
-#### 4.1 新機能ドキュメント
+#### 4.1 Skills ホットリロード対応
+
+**根拠**: [CHANGELOG 2.1.0](https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md) - "Added automatic skill hot-reload - skills created or modified in `~/.claude/skills` or `.claude/skills` are now immediately available without restarting the session"
+
+**運用への影響**: 従来は「スキル追加後は再起動が必要」という前提がありましたが、2.1.0以降は再起動不要になりました。
+
+- [ ] cc:TODO 既存ドキュメントで「再起動が必要」と記載している箇所を見直し
+- [ ] cc:TODO `/skill-list` コマンドの説明を更新（ホットリロード対応を明記）
+- [ ] cc:TODO `docs/ARCHITECTURE.md` のスキル説明を更新
+
+#### 4.2 新機能ドキュメント
 
 - [ ] cc:TODO `docs/CLAUDE_CODE_2_1_FEATURES.md` 作成（新機能解説）
 - [ ] cc:TODO `docs/ARCHITECTURE.md` 更新（新フック、新フィールド）
 - [ ] cc:TODO `README.md` 更新（Claude Code 2.1.0対応を明記）
 
-#### 4.2 CHANGELOG更新
+#### 4.3 CHANGELOG更新
 
 - [ ] cc:TODO `CHANGELOG.md` に v2.7.0 エントリ追加
 
@@ -150,7 +207,7 @@ MCP `list_changed` 通知により、サーバーが動的にツールを更新�
 
 #### 5.1 Exploreサブエージェント活用
 
-Claude Code 2.0.17 で導入された `Explore` サブエージェントは Haiku でコードベースを効率的に検索します。
+**根拠**: [CHANGELOG 2.0.17](https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md) - "Introducing the Explore subagent. Powered by Haiku it'll search through your codebase efficiently to save context!"
 
 - [ ] cc:TODO `/sync-status` コマンドで Explore エージェント活用を検討
 - [ ] cc:TODO プロジェクト分析スキルで Explore 活用
@@ -166,20 +223,20 @@ Claude Code 2.0.17 で導入された `Explore` サブエージェントは Haik
 
 ### 非推奨となった機能
 
-| 機能 | 状態 | harness対応 |
-|------|------|------------|
-| `claude config` コマンド | 非推奨 | ✅ すでに settings.json 使用 |
-| 出力スタイル | 非推奨→再有効化 | ⚠️ 検討 |
-| `ignorePatterns` in .claude.json | 移行済み | ✅ settings.json へ |
+| 機能 | 状態 | harness対応 | 根拠 |
+|------|------|------------|------|
+| `claude config` コマンド | 非推奨 | ✅ すでに settings.json 使用 | [CHANGELOG 1.0.7](https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md) |
+| 出力スタイル | 非推奨→再有効化 | ⚠️ 検討 | [CHANGELOG 2.0.32](https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md) |
+| `ignorePatterns` in .claude.json | 移行済み | ✅ settings.json へ | [CHANGELOG 1.0.7](https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md) |
 
 ### 新しいフック入力フィールド
 
-| フィールド | 追加バージョン | 対応状況 |
-|-----------|---------------|---------|
-| `tool_use_id` | 2.0.43 | ⚠️ 未使用 |
-| `agent_id` (SubagentStop) | 2.0.42 | ⚠️ 未対応 |
-| `agent_transcript_path` (SubagentStop) | 2.0.42 | ⚠️ 未対応 |
-| `hook_event_name` | 2.0.41 | ⚠️ 未使用 |
+| フィールド | 追加バージョン | 対応状況 | 根拠 |
+|-----------|---------------|---------|------|
+| `tool_use_id` | 2.0.43 | ⚠️ 未使用 | [CHANGELOG 2.0.43](https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md) |
+| `agent_id` (SubagentStop) | 2.0.42 | ⚠️ 未対応 | [CHANGELOG 2.0.42](https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md) |
+| `agent_transcript_path` (SubagentStop) | 2.0.42 | ⚠️ 未対応 | [CHANGELOG 2.0.42](https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md) |
+| `hook_event_name` | 2.0.41 | ⚠️ 未使用 | [CHANGELOG 2.0.41](https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md) |
 
 ---
 
@@ -190,7 +247,7 @@ Claude Code 2.0.17 で導入された `Explore` サブエージェントは Haik
 | Phase 1 | 高 | 6 | 中 |
 | Phase 2 | 高 | 5 | 中 |
 | Phase 3 | 中 | 4 | 小 |
-| Phase 4 | 中 | 4 | 小 |
+| Phase 4 | 中 | 6 | 小 |
 | Phase 5 | 低 | 4 | 小 |
 
 ---
@@ -206,6 +263,12 @@ Claude Code 2.0.17 で導入された `Explore` サブエージェントは Haik
 
 ## 📝 参考リンク
 
-- [Claude Code CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
-- [Claude Code Plugins Documentation](https://code.claude.com/docs/en/plugins)
-- [Claude Code Hooks Documentation](https://code.claude.com/docs/en/hooks)
+| リソース | URL |
+|---------|-----|
+| Claude Code CHANGELOG | https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md |
+| Claude Code CHANGELOG (raw) | https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md |
+| Plugins Documentation | https://code.claude.com/docs/en/plugins |
+| Plugins Reference | https://code.claude.com/docs/en/plugins-reference |
+| Hooks Documentation | https://code.claude.com/docs/en/hooks |
+| Skills Documentation | https://code.claude.com/docs/en/skills |
+| CLI Reference | https://code.claude.com/docs/en/cli-reference |
