@@ -7,6 +7,16 @@
 
 ## [Unreleased]
 
+## [2.7.1] - 2026-01-08
+
+### Fixed
+
+- **削除済みコマンド参照の撤去（移行導線の修正）**
+  - README / skills / hooks 内の `/validate` `/cleanup` `/remember` `/refactor` 参照を撤去し、スキル誘導（例: 「整理して」）へ統一
+  - `CHANGELOG.md` に移行テーブル（削除コマンド → 代替スキル）を追記
+- **メタデータの補完**
+  - `commands/optional/harness-mem.md` に frontmatter `description` / `description-en` を追加
+
 ## [2.7.0] - 2026-01-08
 
 ### 🎯 あなたにとって何が変わるか
@@ -1132,7 +1142,9 @@ Observation recorded: 10946-10951 ✅
 - **v0.4.0**: Claude Rules、Plugin Hooks、Named Sessions 対応
 - **v0.3.0**: 初期リリース（Plan → Work → Review サイクル）
 
-[Unreleased]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.6.44...HEAD
+[Unreleased]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.1...HEAD
+[2.7.1]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.0...v2.7.1
+[2.7.0]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.6.44...v2.7.0
 [2.6.44]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.6.37...v2.6.44
 [2.6.36]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.6.34...v2.6.36
 [2.6.34]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.6.33...v2.6.34
