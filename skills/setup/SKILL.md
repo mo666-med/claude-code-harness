@@ -2,6 +2,7 @@
 name: setup
 description: "Sets up new projects and generates workflow files like CLAUDE.md, AGENTS.md, Plans.md. Use when user mentions セットアップ, setup, 初期化, initialize, 新規プロジェクト, ワークフローファイル生成. Do NOT load for: 実装作業, レビュー, ビルド検証, デプロイ."
 allowed-tools: ["Read", "Write", "Edit", "Grep", "Glob", "Bash"]
+user-invocable: false
 metadata:
   skillport:
     category: setup
