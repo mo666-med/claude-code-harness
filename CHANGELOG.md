@@ -7,6 +7,32 @@
 
 ## [Unreleased]
 
+## [2.7.4] - 2026-01-10
+
+### Changed
+
+- **Intelligent Stop Hook 導入**
+  - 既存の3つの Stop スクリプト（check-pending, cleanup-check, plans-reminder）を1つの `type: "prompt"` フックに統合
+  - `model: "haiku"` でコスト最適化
+  - LLM がセッション終了時に5つの観点（タスク完了度、エラー有無、フォローアップ、Plans.md更新、整理推奨）を評価
+  - `session-summary.sh`（command 型）は維持
+
+- **`context: fork` を ci/troubleshoot スキルに追加**
+  - 診断結果を独立コンテキストで返すことでコンテキスト汚染を防止
+  - review スキルと合わせて3スキルが `context: fork` 対応
+
+### Added
+
+- **TDD テストファイル**
+  - `tests/test-intelligent-stop-hook.sh` - Intelligent Stop Hook の検証（6テスト）
+  - `tests/test-hooks-sync.sh` - hooks.json 同期検証（5テスト）
+
+### Fixed
+
+- **Claude Code 2.1.x 機能活用の検証・強化**
+  - `type: "prompt"` は Stop/SubagentStop で公式サポートされていることを確認
+  - `model` パラメータ、`context: fork`、wildcard Bash permissions、`language` setting の活用状況を検証
+
 ## [2.7.3] - 2026-01-08
 
 ### Fixed
@@ -1165,7 +1191,8 @@ Observation recorded: 10946-10951 ✅
 - **v0.4.0**: Claude Rules、Plugin Hooks、Named Sessions 対応
 - **v0.3.0**: 初期リリース（Plan → Work → Review サイクル）
 
-[Unreleased]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.3...HEAD
+[Unreleased]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.4...HEAD
+[2.7.4]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.3...v2.7.4
 [2.7.3]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.2...v2.7.3
 [2.7.2]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.1...v2.7.2
 [2.7.1]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.0...v2.7.1

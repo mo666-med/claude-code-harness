@@ -56,7 +56,7 @@
           {
             "type": "command",
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/run-script.js\" subagent-tracker start",
-            "timeout": 5
+            "timeout": 10
           }
         ]
       }
@@ -67,7 +67,7 @@
           {
             "type": "command",
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/run-script.js\" subagent-tracker stop",
-            "timeout": 5
+            "timeout": 10
           }
         ]
       }
@@ -165,19 +165,10 @@
             "timeout": 30
           },
           {
-            "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/run-script.js\" stop-check-pending",
-            "timeout": 10
-          },
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/run-script.js\" stop-cleanup-check",
-            "timeout": 10
-          },
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/run-script.js\" stop-plans-reminder",
-            "timeout": 10
+            "type": "prompt",
+            "prompt": "セッション終了時の評価を行ってください。以下の観点で判断し、必要に応じてユーザーにフィードバックしてください:\n\n1. **タスク完了度**: ユーザーの依頼は完了しましたか？未完了のタスクがある場合は具体的に指摘してください。\n\n2. **エラー・問題**: 未解決のエラーや問題が残っていませんか？ビルドエラー、テスト失敗、型エラーなどを確認してください。\n\n3. **フォローアップ**: 追加作業やフォローアップが必要ですか？次のステップとして推奨するアクションがあれば提案してください。\n\n4. **Plans.md 更新**: Plans.md のマーカー（cc:WIP, cc:完了など）は適切に更新されていますか？更新が必要な場合は指摘してください。\n\n5. **整理推奨**: ファイルの肥大化（Plans.md > 200行、session-log.md > 500行）がある場合は、「整理して」でメンテナンススキルの実行を推奨してください。\n\n回答は簡潔に、ユーザーにとって有用な情報のみを含めてください。問題がなければ短い確認メッセージで構いません。",
+            "model": "haiku",
+            "timeout": 30
           }
         ]
       }

@@ -2,6 +2,7 @@
 name: ci
 description: "Diagnoses and fixes CI/CD pipeline failures. Use when user mentions 'CI', 'GitHub Actions', 'GitLab CI', 'ビルドエラー', 'テスト失敗', 'パイプライン', 'CIが落ちた', or asks to analyze build/test failures. Do NOT load for: ローカルビルド, 通常の実装作業, レビュー, セットアップ."
 allowed-tools: ["Read", "Grep", "Bash", "Task"]
+context: fork
 metadata:
   skillport:
     category: ci
