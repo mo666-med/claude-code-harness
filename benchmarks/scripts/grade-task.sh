@@ -614,11 +614,31 @@ def grade_skill_routing(project_dir: str, output_file: Optional[str], trace_file
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(add_help=False)
-    ap.add_argument("--task", required=True)
-    ap.add_argument("--project-dir", required=True)
-    ap.add_argument("--output-file")
-    ap.add_argument("--trace-file")
+    ap = argparse.ArgumentParser(
+        description="Benchmark task grader - evaluates task completion based on outcome/transcript checks",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Supported tasks:
+  plan-feature        Plans.md creation with checkbox tasks
+  impl-utility        string-helpers.ts implementation
+  impl-test           Test file creation for string-helpers
+  impl-refactor       Legacy JS to modern TS refactoring
+  complex-feature     Multi-file feature implementation
+  parallel-review     Parallel code review (security/quality/performance)
+  review-security     Security-focused code review
+  review-quality      Quality-focused code review
+  multi-file-refactor Multi-file refactoring with types/errors
+  skill-routing       Skill evaluation flow with impl/test/review
+
+Example:
+  grade-task.sh --task plan-feature --project-dir ./test-project
+  grade-task.sh --task review-security --project-dir ./test-project --output-file review.txt
+"""
+    )
+    ap.add_argument("--task", required=True, help="Task name to grade")
+    ap.add_argument("--project-dir", required=True, help="Path to the test project directory")
+    ap.add_argument("--output-file", help="Path to task output file (for review tasks)")
+    ap.add_argument("--trace-file", help="Path to trace file (for parallelism detection)")
     args = ap.parse_args()
 
     task = args.task

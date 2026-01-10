@@ -33,10 +33,25 @@ ultrathink
 ## 受入条件
 - （3〜5個）
 
+## Evals（採点/検証）
+Plans.md の「評価（Evals）」に従って、**outcome/transcript を採点できる形**で進めてください。
+
+- tasks（シナリオ）:
+  - （例: 具体的な入力/手順/期待結果）
+- trials（回数/集計）:
+  - （例: 3回、成功率 + 中央値）
+- graders（採点）:
+  - outcome:
+    - （例: unit tests / typecheck / ファイル状態）
+  - transcript:
+    - （例: 禁止行為なし / 余計な変更なし）
+- 実行コマンド（可能なら）:
+  - （例: `npm test`, `./tests/validate-plugin.sh` など）
+
 ## 参考
 - 関連ファイル（あれば）
 
-**作業完了後**: `handofCursor` を実行して完了報告すること
+**作業完了後**: `/handoff-to-cursor` を実行して完了報告すること
 ```
 
 

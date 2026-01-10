@@ -84,6 +84,40 @@ cat benchmarks/results/*.json | jq .
 | `plugin_agent_detected` | プラグインエージェント検出数 | no-plugin: 0 |
 | `grade.pass` | 最小 grader による成功判定（outcome/transcript） | - |
 | `grade.score` | 最小 grader のスコア（0〜1） | - |
+| `input_tokens` | 入力トークン数 | - |
+| `output_tokens` | 出力トークン数 | - |
+| `estimated_cost_usd` | 推定コスト（USD） | - |
+| `cost_assumption` | コスト計算の前提条件 | - |
+
+### トークン/コストメトリクス（推定値）
+
+結果 JSON には以下のトークン/コスト関連フィールドが含まれます:
+
+```json
+{
+  "input_tokens": 12345,
+  "output_tokens": 6789,
+  "estimated_cost_usd": 0.1234,
+  "cost_assumption": "sonnet_3_5_input_3_per_mtok_output_15_per_mtok"
+}
+```
+
+**重要**: これらは **推定値** であり、実際の請求額とは異なる場合があります。
+
+| フィールド | 説明 |
+|-----------|------|
+| `input_tokens` | trace から抽出した入力トークン数の合計 |
+| `output_tokens` | trace から抽出した出力トークン数の合計 |
+| `estimated_cost_usd` | `cost_assumption` に基づく推定コスト |
+| `cost_assumption` | コスト計算の前提（モデル・料金体系） |
+
+**`cost_assumption` の意味**:
+- `sonnet_3_5_input_3_per_mtok_output_15_per_mtok`: Claude 3.5 Sonnet 基準（入力 $3/MTok、出力 $15/MTok）
+
+**注意事項**:
+- トークン数は `--trace` モードが有効な場合のみ取得可能
+- 実際のモデルや契約条件により料金は異なる
+- キャッシュや割引は考慮されていない
 
 ## 検証ポイント
 
