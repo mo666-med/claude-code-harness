@@ -2,6 +2,11 @@
 description: コードレビュー（組み込み review との衝突回避）
 description-en: Code review (multi-perspective security/performance/quality)
 context: fork
+hooks:
+  - event: PreCommandInvoke
+    type: command
+    command: "${CLAUDE_PLUGIN_ROOT}/scripts/check-codex.sh"
+    once: true
 ---
 
 # /harness-review - コードレビュー（ソロモード）
@@ -31,6 +36,7 @@ context: fork
 | スキル | 用途 | 呼び出しタイミング |
 |-------|------|------------------|
 | `review` | レビュー（親スキル） | レビュー開始時 |
+| `codex-review` | Codex セカンドオピニオン | Codex 有効時（オプション） |
 
 **呼び出し方法**:
 ```
@@ -120,6 +126,37 @@ Skill ツールを使用:
 
 ## 実行フロー
 
+### Step 0: Codex セカンドオピニオン確認（once hook で自動実行）
+
+**初回実行時に `once: true` hook により Codex の有無を自動確認します。**
+
+このコマンドの frontmatter に定義された hook:
+```yaml
+hooks:
+  - event: PreCommandInvoke
+    type: command
+    command: "${CLAUDE_PLUGIN_ROOT}/scripts/check-codex.sh"
+    once: true
+```
+
+**動作**:
+- セッション内で最初の `/harness-review` 実行時のみ `check-codex.sh` が実行される
+- Codex がインストールされていれば、有効化方法を案内
+- 2回目以降は自動スキップ（`once: true` の効果）
+
+**Codex を有効化する場合**:
+
+プロジェクト設定ファイル（`.claude-code-harness.config.yaml`）に以下を追加:
+```yaml
+review:
+  codex:
+    enabled: true
+```
+
+> 💡 **手動で Codex レビューのみ実行したい場合**: `/codex-review` コマンドを使用してください
+
+---
+
 ### Step 1: 変更ファイルの特定
 
 ```bash
@@ -204,6 +241,44 @@ Task tool #4:
 - [ ] altテキスト
 - [ ] キーボード操作
 - [ ] カラーコントラスト
+
+### Step 2.5: Codex セカンドオピニオン（有効時のみ）
+
+**`codex.enabled: true` の場合、Claude のレビュー完了後に Codex にもレビューを依頼します。**
+
+```
+🤖 Codex セカンドオピニオン実行中...
+
+MCP 経由で Codex にレビューを依頼:
+- 対象: {changed_files}
+- プロンプト: 日本語でコードレビューを行い、問題点と改善提案を出力してください
+
+→ Claude とは異なる視点での問題検出を期待
+```
+
+**結果の統合**:
+
+```markdown
+## 📊 レビュー結果比較
+
+| 観点 | Claude | Codex | 一致 |
+|------|--------|-------|------|
+| セキュリティ | 2件 | 1件 | 1件共通 |
+| パフォーマンス | 1件 | 2件 | 1件共通 |
+
+### 🔴 両者が指摘（優先度高）
+- SQL インジェクションの可能性（src/api/users.ts:45）
+
+### 🟡 Claude のみ指摘
+- 未使用変数（src/utils/helpers.ts:12）
+
+### 🟢 Codex のみ指摘
+- N+1 クエリの可能性（src/api/posts.ts:30）
+```
+
+> 💡 **Codex レビューのみを実行したい場合**: `/codex-review` コマンドを使用してください
+
+---
 
 ### Step 3: レビュー結果の出力
 

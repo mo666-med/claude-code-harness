@@ -1,0 +1,152 @@
+---
+description: Codex MCP を使ったセカンドオピニオンレビュー
+description-en: Second-opinion code review using Codex MCP
+---
+
+# /codex-review - Codex セカンドオピニオンレビュー
+
+OpenAI Codex を使って、コードのセカンドオピニオンレビューを取得します。
+
+---
+
+## 🎯 こう言えばOK
+
+- 「`/codex-review`」→ Codex にレビューを依頼
+- 「Codex にも見てもらって」→ このコマンド
+- 「別の AI の意見がほしい」→ このコマンド
+
+---
+
+## できること
+
+- Claude のレビューに加えて、Codex からセカンドオピニオンを取得
+- 複数 AI モデルの得意分野を活用（論理推論 vs 実装パターン知識）
+- レビュー結果を統合して表示
+
+---
+
+## 🔧 自動呼び出しスキル（必須）
+
+**このコマンドは以下のスキルを Skill ツールで明示的に呼び出すこと**：
+
+| スキル | 用途 | 呼び出しタイミング |
+|-------|------|------------------|
+| `codex-review` | Codex 統合（親スキル） | コマンド開始時 |
+
+**呼び出し方法**:
+```
+Skill ツールを使用:
+  skill: "claude-code-harness:codex-review"
+```
+
+---
+
+## 前提条件
+
+### 1. Codex CLI がインストール済み
+
+```bash
+which codex  # パスが表示されること
+```
+
+### 2. Codex にログイン済み
+
+```bash
+codex login status  # 認証済みであること
+```
+
+### 3. MCP サーバーとして登録済み
+
+```bash
+claude mcp list  # codex が表示されること
+```
+
+**未設定の場合**:
+```bash
+claude mcp add --scope user codex -- codex mcp-server
+```
+
+---
+
+## 実行フロー
+
+### Step 1: Codex 環境確認
+
+```bash
+# Codex が利用可能か確認
+which codex && codex login status
+```
+
+**未設定の場合**:
+```markdown
+⚠️ Codex が設定されていません
+
+セットアップ方法:
+1. Codex CLI をインストール
+2. `codex login` で認証
+3. `claude mcp add --scope user codex -- codex mcp-server` で登録
+
+詳細: `skills/codex-review/references/codex-mcp-setup.md`
+```
+
+### Step 2: 変更ファイルの特定
+
+```bash
+git diff --name-only HEAD~1 2>/dev/null || git status --short
+```
+
+### Step 3: Codex レビュー実行
+
+MCP 経由で Codex にレビューを依頼:
+
+```
+📊 Codex レビュー開始...
+
+対象ファイル: {changed_files}
+プロンプト: 日本語でコードレビューを行い、問題点と改善提案を出力してください
+```
+
+### Step 4: 結果表示
+
+```markdown
+## 🤖 Codex レビュー結果
+
+### 問題点
+
+| ファイル | 行 | 重要度 | 内容 |
+|---------|-----|--------|------|
+| src/api/users.ts | 45 | 高 | SQL インジェクションの可能性 |
+
+### 改善提案
+
+1. パラメータ化クエリの使用を推奨
+2. 入力バリデーションの追加
+```
+
+---
+
+## オプション
+
+```
+/codex-review              # 全変更ファイルをレビュー
+/codex-review src/         # 特定ディレクトリのみ
+/codex-review --security   # セキュリティ観点に特化
+```
+
+---
+
+## /harness-review との違い
+
+| コマンド | 内容 |
+|---------|------|
+| `/harness-review` | Claude によるフルレビュー（+ Codex オプション） |
+| `/codex-review` | Codex 単独のレビュー |
+
+**推奨**: 通常は `/harness-review` を使用し、追加でセカンドオピニオンが必要な場合に `/codex-review` を使用
+
+---
+
+## 関連コマンド
+
+- `/harness-review` - フルレビュー（Claude + オプションで Codex）
+- `/harness-init` - プロジェクト初期化（Codex 設定含む）
