@@ -7,6 +7,28 @@
 
 ## [Unreleased]
 
+## [2.7.11] - 2026-01-11
+
+### Changed
+
+- **Codex を並列レビューに統合**
+  - `/harness-review` で Codex を5つ目の並列サブエージェントとして実行
+  - Codex 有効時は 4+1=5 つのレビューが同時並列実行
+  - Codex 逐次実行時より約 30 秒短縮
+
+- **Codex レビュー結果の検証フローを追加**
+  - Codex の指摘を Claude が検証し、修正が必要かどうかを判断
+  - 検証済みの修正提案をユーザーに提示
+  - 承認後は Plans.md に反映して `/work` で自動実行
+
+#### Before/After
+
+| Before | After |
+|--------|-------|
+| Codex は Claude レビュー完了後に逐次実行 | Codex も並列サブエージェントとして同時実行 |
+| Codex の結果をそのまま表示 | Claude が検証した上で修正提案 |
+| レビュー結果は表示のみ | 承認後 Plans.md に反映→`/work` 実行 |
+
 ## [2.7.10] - 2026-01-11
 
 ### Added
@@ -1258,7 +1280,8 @@ Observation recorded: 10946-10951 ✅
 - **v0.4.0**: Claude Rules、Plugin Hooks、Named Sessions 対応
 - **v0.3.0**: 初期リリース（Plan → Work → Review サイクル）
 
-[Unreleased]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.10...HEAD
+[Unreleased]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.11...HEAD
+[2.7.11]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.10...v2.7.11
 [2.7.10]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.9...v2.7.10
 [2.7.9]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.8...v2.7.9
 [2.7.8]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.7...v2.7.8
