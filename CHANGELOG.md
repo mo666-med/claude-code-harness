@@ -7,6 +7,27 @@
 
 ## [Unreleased]
 
+### Added
+
+- **Codex MCP 統合（セカンドオピニオンレビュー）**
+  - OpenAI Codex CLI を MCP サーバーとして Claude Code に統合
+  - `/harness-review` 実行時に Codex からセカンドオピニオンを取得可能
+  - Solo / 2-Agent どちらのモードでも使用可能
+  - 新規スキル `codex-review` を追加:
+    - `skills/codex-review/SKILL.md` - Codex 統合スキル
+    - `skills/codex-review/references/codex-mcp-setup.md` - MCP セットアップ手順
+    - `skills/codex-review/references/codex-review-integration.md` - レビュー実行手順
+  - 既存 `review` スキルに Codex 統合を追加:
+    - `skills/review/references/codex-integration.md` - レビューへの統合手順
+  - 設定ファイルに `review.codex` セクションを追加:
+    ```yaml
+    review:
+      codex:
+        enabled: false  # 有効化フラグ
+        auto: false     # 自動実行 or 毎回確認
+        prompt: "..."   # Codex へのプロンプト
+    ```
+
 ## [2.7.8] - 2026-01-11
 
 ### Fixed

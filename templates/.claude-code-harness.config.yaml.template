@@ -25,6 +25,16 @@ cleanup:
   # - hook: check on PostToolUse hook
   auto_run: hook
 
+# Codex integration for second-opinion reviews
+review:
+  codex:
+    # Enable Codex as a second-opinion reviewer
+    enabled: false
+    # Auto-run Codex review (true) or ask each time (false)
+    auto: false
+    # Prompt sent to Codex for code review
+    prompt: "日本語でコードレビューを行い、問題点と改善提案を出力してください"
+
 hooks:
   enabled: true
   post_tool_use:

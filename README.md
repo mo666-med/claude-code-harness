@@ -9,7 +9,7 @@
 Claude Code を「Plan → Work → Review」の自律サイクルで運用し、
 **迷い・雑さ・事故・忘却** を仕組みで防ぐ開発ハーネスです。
 
-[![Version: 2.7.6](https://img.shields.io/badge/version-2.7.6-blue.svg)](VERSION)
+[![Version: 2.7.9](https://img.shields.io/badge/version-2.7.9-blue.svg)](VERSION)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE.md)
 [![Harness Score](https://img.shields.io/badge/harness_score-92%2F100-brightgreen.svg)](#採点基準)
 
@@ -300,6 +300,38 @@ claude-code-harness/
 
 ---
 
+## 評価スイート（Scorecard）
+
+エージェント評価の客観指標を提供します。
+
+### 指標の見方
+
+| 指標 | 説明 |
+|------|------|
+| **成功率** | `grade.pass` の割合（タスクの成果物が基準を満たしたか） |
+| **Grade Score** | 各チェック項目の加重平均（0.0〜1.0） |
+| **所要時間** | 中央値で比較（揺れを吸収） |
+| **推定コスト** | Claude 3.5 Sonnet 基準の参考値（実際の請求額ではありません） |
+
+### 再現手順
+
+```bash
+# 1. ベンチマーク実行（例: plan-feature を 3回）
+./benchmarks/scripts/run-isolated-benchmark.sh --task plan-feature --with-plugin
+./benchmarks/scripts/run-isolated-benchmark.sh --task plan-feature
+
+# 2. Scorecard 生成
+./benchmarks/scripts/generate-scorecard.sh
+```
+
+### CI での実行
+
+GitHub Actions の `benchmark` workflow を `workflow_dispatch` で手動実行できます。
+
+詳細: [Scorecard 仕様書](docs/SCORECARD_SPEC.md) | [Evals 運用プレイブック](docs/EVALS_PLAYBOOK.md)
+
+---
+
 ## 採点基準
 
 | カテゴリ | 配点 | スコア |
@@ -321,6 +353,7 @@ claude-code-harness/
 - [実装ガイド](IMPLEMENTATION_GUIDE.md)
 - [開発フロー完全ガイド](DEVELOPMENT_FLOW_GUIDE.md)
 - [Evals運用プレイブック](docs/EVALS_PLAYBOOK.md)
+- [Scorecard仕様書](docs/SCORECARD_SPEC.md)
 - [メモリポリシー](docs/MEMORY_POLICY.md)
 - [アーキテクチャ](docs/ARCHITECTURE.md)
 - [Cursor統合](docs/CURSOR_INTEGRATION.md)

@@ -18,6 +18,7 @@ context: fork
 | **セキュリティ** | See [references/security-review.md](references/security-review.md) |
 | **パフォーマンス** | See [references/performance-review.md](references/performance-review.md) |
 | **アクセシビリティ** | See [references/accessibility-review.md](references/accessibility-review.md) |
+| **Codex 統合** | See [references/codex-integration.md](references/codex-integration.md) |
 
 ## 実行手順
 
