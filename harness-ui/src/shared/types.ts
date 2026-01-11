@@ -41,6 +41,17 @@ export interface HealthResponse {
 }
 
 // Kanban Types
+export interface TaskSource {
+  /** Line number in Plans.md (1-based) */
+  lineNumber: number
+  /** Original line content for conflict detection */
+  originalLine: string
+  /** Detected marker (e.g., 'cc:WIP', 'cc:TODO') */
+  marker?: string
+  /** File path (for multi-file support) */
+  filePath?: string
+}
+
 export interface Task {
   id: string
   title: string
@@ -48,6 +59,8 @@ export interface Task {
   status: 'plan' | 'work' | 'review' | 'done'
   priority?: 'high' | 'medium' | 'low'
   createdAt?: string
+  /** Source information for safe updates */
+  source?: TaskSource
 }
 
 export type WorkflowMode = 'solo' | '2agent'
@@ -219,4 +232,137 @@ export interface Insight {
 export interface InsightsResponse {
   insights: Insight[]
   generatedAt: string
+}
+
+// Agent SDK Types
+export type AgentSessionStatus = 'idle' | 'running' | 'paused' | 'completed' | 'error' | 'interrupted'
+
+export interface AgentSession {
+  id: string
+  status: AgentSessionStatus
+  startedAt: string
+  completedAt?: string
+  prompt: string
+  workingDirectory?: string
+  messages: AgentMessage[]
+  error?: string
+}
+
+export interface AgentMessage {
+  id: string
+  type: 'user' | 'assistant' | 'tool_use' | 'tool_result' | 'system' | 'error'
+  content: string
+  timestamp: string
+  toolName?: string
+  toolInput?: unknown
+  toolResult?: unknown
+}
+
+export interface AgentExecuteRequest {
+  prompt: string
+  workingDirectory?: string
+  sessionId?: string // For resuming sessions
+  permissionMode?: 'default' | 'acceptEdits' | 'bypassPermissions' | 'plan'
+}
+
+export interface AgentExecuteResponse {
+  sessionId: string
+  status: AgentSessionStatus
+  message?: string
+}
+
+export interface AgentInterruptRequest {
+  sessionId: string
+}
+
+export interface AgentInterruptResponse {
+  success: boolean
+  message: string
+}
+
+export interface AgentSessionResponse {
+  session: AgentSession | null
+  error?: string
+}
+
+export interface AgentToolApprovalRequest {
+  sessionId: string
+  toolUseId: string
+  toolName: string
+  toolInput: unknown
+}
+
+export interface AgentToolApprovalResponse {
+  sessionId: string
+  toolUseId: string
+  decision: 'allow' | 'deny' | 'modify'
+  modifiedInput?: unknown
+  reason?: string
+}
+
+// AskUserQuestion Types
+export interface AskUserQuestionOption {
+  label: string
+  description?: string
+}
+
+export interface AskUserQuestionItem {
+  question: string
+  header: string
+  options: AskUserQuestionOption[]
+  multiSelect?: boolean
+}
+
+export interface AskUserQuestionRequest {
+  type: 'ask_user_question'
+  sessionId: string
+  toolUseId: string
+  questions: AskUserQuestionItem[]
+}
+
+export interface AskUserQuestionResponse {
+  sessionId: string
+  toolUseId: string
+  answers: Record<string, string>
+}
+
+// SSOT Types
+export interface SSOTFile {
+  found: boolean
+  content: string | null
+  path: string | null
+  message?: string
+}
+
+export interface SSOTResponse {
+  available: boolean
+  decisions: SSOTFile
+  patterns: SSOTFile
+  error?: string
+}
+
+// Guardrail Event Types (for visualization)
+export interface GuardrailEvent {
+  id: string
+  type: 'approval_request' | 'approved' | 'denied'
+  toolName: string
+  toolInput: unknown
+  timestamp: string
+  reason?: string
+}
+
+// 2-Agent Role Types (Task 9.1)
+export type AgentRole = 'pm' | 'impl'
+
+// Handoff State Types (Task 9.2)
+export type HandoffState = 'pm_waiting' | 'impl_waiting' | 'idle'
+
+export interface HandoffStatus {
+  state: HandoffState
+  /** Tasks waiting for PM review (cc:完了 in 2agent mode) */
+  pmWaitingCount: number
+  /** Tasks waiting for implementation (pm:依頼中) */
+  implWaitingCount: number
+  /** Tasks currently being worked on (cc:WIP) */
+  inProgressCount: number
 }

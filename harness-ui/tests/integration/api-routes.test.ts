@@ -10,6 +10,7 @@ import hooksRoutes from '../../src/server/routes/hooks.ts'
 import claudeMemRoutes from '../../src/server/routes/claude-mem.ts'
 import usageRoutes from '../../src/server/routes/usage.ts'
 import projectsRoutes from '../../src/server/routes/projects.ts'
+import ssotRoutes from '../../src/server/routes/ssot.ts'
 
 // Server will be started for integration tests
 const API_BASE = 'http://localhost:37779' // Use different port for tests
@@ -33,6 +34,7 @@ function createTestApp() {
   app.route('/api/claude-mem', claudeMemRoutes)
   app.route('/api/usage', usageRoutes)
   app.route('/api/projects', projectsRoutes)
+  app.route('/api/ssot', ssotRoutes)
 
   app.get('/api/status', (c) => {
     return c.json({
@@ -110,6 +112,69 @@ describe('API Routes Integration', () => {
       expect(Array.isArray(data.work)).toBe(true)
       expect(Array.isArray(data.review)).toBe(true)
       expect(Array.isArray(data.done)).toBe(true)
+    })
+  })
+
+  describe('PATCH /api/plans/task', () => {
+    test('returns 400 when required parameters are missing', async () => {
+      const response = await fetch(`${API_BASE}/api/plans/task`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          // Missing required fields
+          lineNumber: 1
+        })
+      })
+      expect(response.status).toBe(400)
+
+      const data = await response.json()
+      expect(data.error).toBeDefined()
+    })
+
+    test('returns 409 when expectedLine does not match current content (conflict detection)', async () => {
+      // This tests the conflict detection mechanism
+      // We intentionally send a mismatched expectedLine to trigger a 409
+      const response = await fetch(`${API_BASE}/api/plans/task`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lineNumber: 1,
+          expectedLine: '# This line definitely does not exist in Plans.md',
+          oldMarker: 'cc:WIP',
+          newMarker: 'cc:完了'
+        })
+      })
+
+      // Could be 409 (conflict) or 404 (no Plans.md) depending on test environment
+      expect([404, 409]).toContain(response.status)
+
+      const data = await response.json()
+      if (response.status === 409) {
+        expect(data.conflict).toBe(true)
+        expect(data.suggestion).toBeDefined()
+      } else {
+        // 404 case - Plans.md not found
+        expect(data.error).toBeDefined()
+      }
+    })
+
+    test('returns 400 when line number is out of range', async () => {
+      // Test with an extremely large line number that won't exist
+      const response = await fetch(`${API_BASE}/api/plans/task`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lineNumber: 999999,
+          expectedLine: 'any content',
+          oldMarker: 'cc:WIP',
+          newMarker: 'cc:完了'
+        })
+      })
+
+      // Could be 400 (out of range) or 404 (no Plans.md)
+      expect([400, 404]).toContain(response.status)
+      const data = await response.json()
+      expect(data.error).toBeDefined()
     })
   })
 
@@ -242,6 +307,28 @@ describe('API Routes Integration', () => {
 
       const data = await response.json()
       expect(data).toHaveProperty('project')
+    })
+  })
+
+  describe('GET /api/ssot', () => {
+    test('returns SSOT response with required fields (Task 8.4)', async () => {
+      const response = await fetch(`${API_BASE}/api/ssot`)
+      expect(response.ok).toBe(true)
+
+      const data = await response.json()
+      expect(typeof data.available).toBe('boolean')
+      expect(data).toHaveProperty('decisions')
+      expect(data).toHaveProperty('patterns')
+      expect(typeof data.decisions.found).toBe('boolean')
+      expect(typeof data.patterns.found).toBe('boolean')
+    })
+
+    test('accepts keywords parameter for filtering', async () => {
+      const response = await fetch(`${API_BASE}/api/ssot?keywords=test,example`)
+      expect(response.ok).toBe(true)
+
+      const data = await response.json()
+      expect(typeof data.available).toBe('boolean')
     })
   })
 

@@ -8,7 +8,8 @@ import type {
   HooksResponse,
   ClaudeMemResponse,
   UsageResponse,
-  WorkflowMode
+  WorkflowMode,
+  SSOTResponse
 } from '../../shared/types.ts'
 
 const API_BASE = '/api'
@@ -42,6 +43,67 @@ export async function fetchHealth(projectPath?: string): Promise<HealthResponse>
 
 export async function fetchPlans(mode: WorkflowMode = 'solo', projectPath?: string): Promise<KanbanResponse> {
   return fetchAPI<KanbanResponse>(`/plans${buildProjectQuery(projectPath, { mode })}`)
+}
+
+/**
+ * Update task marker response
+ */
+export interface UpdateTaskResponse {
+  success: boolean
+  lineNumber: number
+  oldLine: string
+  newLine: string
+  message: string
+}
+
+/**
+ * Conflict error response
+ */
+export interface TaskConflictError {
+  error: string
+  conflict: true
+  expectedLine: string
+  currentLine: string
+  suggestion: string
+}
+
+/**
+ * Update a task marker in Plans.md
+ *
+ * @param lineNumber - Line number to update (1-based)
+ * @param expectedLine - Expected original line content for conflict detection
+ * @param oldMarker - Old marker to replace (e.g., 'cc:WIP')
+ * @param newMarker - New marker to set (e.g., 'cc:完了')
+ * @param projectPath - Optional project path
+ * @returns Update result or throws on conflict (409)
+ */
+export async function updateTaskMarker(
+  lineNumber: number,
+  expectedLine: string,
+  oldMarker: string,
+  newMarker: string,
+  projectPath?: string
+): Promise<UpdateTaskResponse> {
+  const response = await fetch(`${API_BASE}/plans/task${buildProjectQuery(projectPath)}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ lineNumber, expectedLine, oldMarker, newMarker }),
+  })
+
+  const data = await response.json()
+
+  if (response.status === 409) {
+    // Conflict detected
+    const error = new Error(data.error || 'Conflict detected') as Error & { conflict: TaskConflictError }
+    error.conflict = data as TaskConflictError
+    throw error
+  }
+
+  if (!response.ok) {
+    throw new Error(data.error || `API error: ${response.status}`)
+  }
+
+  return data as UpdateTaskResponse
 }
 
 export async function fetchSkills(projectPath?: string): Promise<SkillsResponse> {
@@ -86,6 +148,21 @@ export async function searchObservations(query: string): Promise<ClaudeMemRespon
 
 export async function fetchUsage(projectPath?: string): Promise<UsageResponse> {
   return fetchAPI<UsageResponse>(`/usage${buildProjectQuery(projectPath)}`)
+}
+
+/**
+ * Fetch SSOT files (decisions.md and patterns.md)
+ *
+ * @param projectPath - Optional project path
+ * @param keywords - Optional keywords for filtering relevant sections
+ */
+export async function fetchSSOT(projectPath?: string, keywords?: string[]): Promise<SSOTResponse> {
+  const params = new URLSearchParams()
+  if (projectPath) params.set('project', projectPath)
+  if (keywords && keywords.length > 0) params.set('keywords', keywords.join(','))
+
+  const query = params.toString()
+  return fetchAPI<SSOTResponse>(`/ssot${query ? `?${query}` : ''}`)
 }
 
 // ========== Projects API ==========
