@@ -3,11 +3,6 @@ name: troubleshoot
 description: "Guides diagnosis and resolution when problems occur. Use when user mentions 動かない, エラーが出た, 壊れた, うまくいかない, broken, doesn't work, error. Do NOT load for: 正常なビルド, 新機能実装, レビュー."
 allowed-tools: ["Read", "Grep", "Bash"]
 context: fork
-metadata:
-  skillport:
-    category: worker
-    tags: [troubleshoot, debug, error, diagnosis]
-    alwaysApply: false
 ---
 
 # Troubleshoot Skill

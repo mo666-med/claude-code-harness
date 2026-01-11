@@ -2,11 +2,6 @@
 name: plans-management
 description: "Manages Plans.md tasks and marker operations. Use when user mentions タスクを追加, Plans.md更新, 完了マーク, タスク状態変更, add task, update plans, mark complete. Do NOT load for: 実装作業, レビュー, Plans.md以外のファイル操作."
 allowed-tools: ["Read", "Write", "Edit"]
-metadata:
-  skillport:
-    category: pm
-    tags: [plans, task, management, marker]
-    alwaysApply: false
 ---
 
 # Plans Management Skill

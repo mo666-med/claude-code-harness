@@ -3,11 +3,6 @@ name: ci
 description: "Diagnoses and fixes CI/CD pipeline failures. Use when user mentions 'CI', 'GitHub Actions', 'GitLab CI', 'ビルドエラー', 'テスト失敗', 'パイプライン', 'CIが落ちた', or asks to analyze build/test failures. Do NOT load for: ローカルビルド, 通常の実装作業, レビュー, セットアップ."
 allowed-tools: ["Read", "Grep", "Bash", "Task"]
 context: fork
-metadata:
-  skillport:
-    category: ci
-    tags: [ci-cd, github-actions, pipeline, debugging]
-    alwaysApply: false
 ---
 
 # CI/CD Skills
@@ -24,36 +19,12 @@ CI/CD パイプラインに関する問題を解決するスキル群です。
 
 ---
 
-## 含まれる小スキル
+## 機能詳細
 
-| スキル | 用途 | トリガー |
-|--------|------|----------|
-| ci-analyze-failures | 失敗原因の分析 | 「ログを見て」「原因を調べて」 |
-| ci-fix-failing-tests | テスト修正の提案 | 「テストを直して」「修正案を出して」 |
-
----
-
-## ルーティングロジック
-
-ユーザーの意図に応じて適切な小スキルを選択:
-
-### 分析・調査が必要な場合
-
-→ `ci-analyze-failures/doc.md` を参照
-
-例:
-- 「CIが落ちた原因を教えて」
-- 「GitHub Actionsのログを見て」
-- 「なんでビルドが失敗したの？」
-
-### 修正・対応が必要な場合
-
-→ `ci-fix-failing-tests/doc.md` を参照
-
-例:
-- 「テストを直して」
-- 「エラーを修正して」
-- 「パイプラインを通るようにして」
+| 機能 | 詳細 | トリガー |
+|------|------|----------|
+| **失敗分析** | See [references/analyzing-failures.md](references/analyzing-failures.md) | 「ログを見て」「原因を調べて」 |
+| **テスト修正** | See [references/fixing-tests.md](references/fixing-tests.md) | 「テストを直して」「修正案を出して」 |
 
 ---
 
@@ -62,7 +33,7 @@ CI/CD パイプラインに関する問題を解決するスキル群です。
 1. **テスト vs 実装判定**（Step 0）
 2. ユーザーの意図を分類（分析 or 修正）
 3. 複雑度を判定（下記参照）
-4. 適切な小スキルの doc.md を読む、または ci-cd-fixer サブエージェント起動
+4. 上記の「機能詳細」から適切な参照ファイルを読む、または ci-cd-fixer サブエージェント起動
 5. 結果を確認し、必要に応じて再実行
 
 ### Step 0: テスト vs 実装判定（品質判定ゲート）

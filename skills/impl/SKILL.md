@@ -2,11 +2,6 @@
 name: impl
 description: "Implements features and writes code based on Plans.md tasks. Use when user mentions 実装, implement, 機能追加, コードを書いて, 機能を作って, feature, coding, 新機能, implementing functions, classes, or features, 新しい関数. Do not use for review or build verification."
 allowed-tools: ["Read", "Write", "Edit", "Grep", "Glob", "Bash"]
-metadata:
-  skillport:
-    category: impl
-    tags: [implementation, coding, feature, development]
-    alwaysApply: false
 ---
 
 # Implementation Skills
@@ -58,29 +53,19 @@ def slugify(text: str) -> str:
 ### 選択肢: [考えられる案]
 ```
 
-## 含まれる小スキル
+## 機能詳細
 
-| スキル | 用途 |
-|--------|------|
-| work-impl-feature | 機能の実装 |
-| work-write-tests | テストコードの作成 |
-
-## ルーティング
-
-### 機能実装
-
-work-impl-feature/doc.md を参照
-
-### テスト作成
-
-work-write-tests/doc.md を参照
+| 機能 | 詳細 |
+|------|------|
+| **機能実装** | See [references/implementing-features.md](references/implementing-features.md) |
+| **テスト作成** | See [references/writing-tests.md](references/writing-tests.md) |
 
 ## 実行手順
 
 1. **品質判定ゲート**（Step 0）
 2. ユーザーのリクエストを分類
 3. **（Claude-mem 有効時）過去の実装パターンを検索**
-4. 適切な小スキルの doc.md を読む
+4. 上記の「機能詳細」から適切な参照ファイルを読む
 5. その内容に従って実装
 
 ### Step 0: 品質判定ゲート（最初に実行）

@@ -3,36 +3,21 @@ name: review
 description: "Reviews code for quality, security, performance, and accessibility issues. Use when user mentions レビュー, review, コードレビュー, セキュリティ, パフォーマンス, 品質チェック, セルフレビュー, PR, diff, 変更確認. Do NOT load for: 実装作業, 新機能開発, バグ修正, セットアップ."
 allowed-tools: ["Read", "Grep", "Glob", "Bash", "Task"]
 context: fork
-metadata:
-  skillport:
-    category: review
-    tags: [review, quality, security, performance, accessibility]
-    alwaysApply: false
 ---
 
 # Review Skills
 
 コードレビューと品質チェックを担当するスキル群です。
 
-## 含まれる小スキル
+## 機能詳細
 
-| スキル | 用途 |
-|--------|------|
-| review-changes | 変更内容のレビュー |
-| review-quality | コード品質チェック |
-| review-security | セキュリティレビュー |
-| review-performance | パフォーマンスレビュー |
-| review-accessibility | アクセシビリティチェック |
-
-## ルーティング
-
-ユーザーの意図に応じて適切な小スキルを選択:
-
-- 一般的なレビュー: review-changes/doc.md
-- 品質重視: review-quality/doc.md
-- セキュリティ重視: review-security/doc.md
-- パフォーマンス重視: review-performance/doc.md
-- アクセシビリティ重視: review-accessibility/doc.md
+| 機能 | 詳細 |
+|------|------|
+| **変更レビュー** | See [references/changes-review.md](references/changes-review.md) |
+| **品質チェック** | See [references/quality-review.md](references/quality-review.md) |
+| **セキュリティ** | See [references/security-review.md](references/security-review.md) |
+| **パフォーマンス** | See [references/performance-review.md](references/performance-review.md) |
+| **アクセシビリティ** | See [references/accessibility-review.md](references/accessibility-review.md) |
 
 ## 実行手順
 
@@ -40,7 +25,7 @@ metadata:
 2. ユーザーのリクエストを分類
 3. **（Claude-mem 有効時）過去のレビュー指摘を検索**
 4. 並列実行の判定（下記参照）
-5. 適切な小スキルの doc.md を読む、または並列サブエージェント起動
+5. 上記の「機能詳細」から適切な参照ファイルを読む、または並列サブエージェント起動
 6. 結果を統合してレビュー完了
 
 ### Step 0: 品質判定ゲート（レビュー重点領域の特定）

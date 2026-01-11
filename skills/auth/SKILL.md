@@ -2,34 +2,24 @@
 name: auth
 description: "Implements authentication and payment features using Clerk, Supabase Auth, or Stripe. Use when user mentions ログイン, 認証, auth, authentication, Clerk, Supabase, 決済, payment, Stripe, 課金, サブスクリプション. Do NOT load for: 一般的なUI作成, データベース設計, 非認証機能."
 allowed-tools: ["Read", "Write", "Edit", "Bash"]
-metadata:
-  skillport:
-    category: auth
-    tags: [auth, authentication, payments, clerk, supabase, stripe]
-    alwaysApply: false
 ---
 
 # Auth Skills
 
 認証と決済機能の実装を担当するスキル群です。
 
-## 含まれる小スキル
+## 機能詳細
 
-| スキル | 用途 |
-|--------|------|
-| auth-impl | Clerk/Supabase Auth による認証実装 |
-| payments | Stripe による決済実装 |
-
-## ルーティング
-
-- 認証機能: auth-impl/doc.md
-- 決済機能: payments/doc.md
+| 機能 | 詳細 |
+|------|------|
+| **認証機能** | See [references/authentication.md](references/authentication.md) |
+| **決済機能** | See [references/payments.md](references/payments.md) |
 
 ## 実行手順
 
 1. **品質判定ゲート**（Step 0）
 2. ユーザーのリクエストを分類(認証 or 決済)
-3. 適切な小スキルの doc.md を読む
+3. 上記の「機能詳細」から適切な参照ファイルを読む
 4. その内容に従って実装
 
 ### Step 0: 品質判定ゲート（セキュリティチェックリスト）

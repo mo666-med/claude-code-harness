@@ -2,11 +2,6 @@
 name: verify
 description: "Verifies builds, recovers from errors, and applies review fixes. Use when user mentions ビルド, build, 検証, verify, エラー復旧, error recovery, 指摘を適用, apply fixes, テスト実行, tests fail, lint errors occur, CI breaks, テスト失敗, lintエラー, 型エラー, ビルドエラー, CIが落ちた. Do NOT load for: 実装作業, レビュー, セットアップ, 新機能開発."
 allowed-tools: ["Read", "Write", "Edit", "Grep", "Glob", "Bash"]
-metadata:
-  skillport:
-    category: verify
-    tags: [build, verify, error-recovery, fixes]
-    alwaysApply: false
 ---
 
 # Verify Skills
@@ -75,28 +70,21 @@ metadata:
 - `.husky/**`, `.github/workflows/**`
 - `*.test.*`, `*.spec.*`, `jest.config.*`, `vitest.config.*`
 
-## 含まれる小スキル
+## 機能詳細
 
-| スキル | 用途 |
-|--------|------|
-| verify-build | ビルド検証 |
-| error-recovery | エラー復旧 |
-| review-aggregate | レビュー結果の集約 |
-| review-apply-fixes | レビュー指摘の適用 |
-
-## ルーティング
-
-- ビルド検証: verify-build/doc.md
-- エラー復旧: error-recovery/doc.md
-- レビュー集約: review-aggregate/doc.md
-- 指摘適用: review-apply-fixes/doc.md
+| 機能 | 詳細 |
+|------|------|
+| **ビルド検証** | See [references/build-verification.md](references/build-verification.md) |
+| **エラー復旧** | See [references/error-recovery.md](references/error-recovery.md) |
+| **レビュー集約** | See [references/review-aggregation.md](references/review-aggregation.md) |
+| **指摘適用** | See [references/applying-fixes.md](references/applying-fixes.md) |
 
 ## 実行手順
 
 1. **品質判定ゲート**（Step 0）
 2. ユーザーのリクエストを分類
 3. **（Claude-mem 有効時）過去のエラーパターンを検索**
-4. 適切な小スキルの doc.md を読む
+4. 上記の「機能詳細」から適切な参照ファイルを読む
 5. その内容に従って検証/復旧実行
 
 ### Step 0: 品質判定ゲート（再現テスト提案）

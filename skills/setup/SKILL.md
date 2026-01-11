@@ -3,37 +3,24 @@ name: setup
 description: "Sets up new projects and generates workflow files like CLAUDE.md, AGENTS.md, Plans.md. Use when user mentions セットアップ, setup, 初期化, initialize, 新規プロジェクト, ワークフローファイル生成. Do NOT load for: 実装作業, レビュー, ビルド検証, デプロイ."
 allowed-tools: ["Read", "Write", "Edit", "Grep", "Glob", "Bash"]
 user-invocable: false
-metadata:
-  skillport:
-    category: setup
-    tags: [setup, initialize, workflow, project]
-    alwaysApply: false
 ---
 
 # Setup Skills
 
 プロジェクトセットアップとワークフローファイル生成を担当するスキル群です。
 
-## 含まれる小スキル
+## 機能詳細
 
-| スキル | 用途 |
-|--------|------|
-| adaptive-setup | プロジェクト状況に応じた適応的セットアップ |
-| project-scaffolder | 新規プロジェクトのスキャフォールディング |
-| generate-workflow-files | CLAUDE.md, AGENTS.md, Plans.md 生成 |
-| generate-claude-settings | .claude/settings.json 生成 |
-| ask-project-type | 曖昧ケースでユーザーに新規/既存を質問 |
-
-## ルーティング
-
-- 適応的セットアップ: adaptive-setup/doc.md
-- スキャフォールディング: project-scaffolder/doc.md
-- ワークフローファイル: generate-workflow-files/doc.md
-- 設定ファイル: generate-claude-settings/doc.md
-- プロジェクト種別確認: ask-project-type/doc.md
+| 機能 | 詳細 |
+|------|------|
+| **適応的セットアップ** | See [references/adaptive-setup.md](references/adaptive-setup.md) |
+| **スキャフォールディング** | See [references/project-scaffolding.md](references/project-scaffolding.md) |
+| **ワークフローファイル** | See [references/workflow-files.md](references/workflow-files.md) |
+| **設定ファイル** | See [references/claude-settings.md](references/claude-settings.md) |
+| **プロジェクト種別確認** | See [references/project-type-detection.md](references/project-type-detection.md) |
 
 ## 実行手順
 
 1. ユーザーのリクエストを分類
-2. 適切な小スキルの doc.md を読む
+2. 上記の「機能詳細」から適切な参照ファイルを読む
 3. その内容に従ってセットアップ

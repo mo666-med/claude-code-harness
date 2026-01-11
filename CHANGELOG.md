@@ -7,6 +7,28 @@
 
 ## [Unreleased]
 
+## [2.7.7] - 2026-01-11
+
+### Changed
+
+- **Skills 公式仕様準拠（Progressive Disclosure パターン導入）**
+  - `doc.md` → `references/*.md` への移行（43ファイル）
+  - 親 SKILL.md を Progressive Disclosure パターンに更新（14スキル）
+  - 説明的なファイル名に変更（例: `implementing-features.md`, `security-review.md`）
+  - 非公式フィールド `metadata.skillport` を全スキルから削除（63ファイル）
+
+#### Before/After
+
+| Before | After |
+|--------|-------|
+| `skills/impl/work-impl-feature/doc.md` | `skills/impl/references/implementing-features.md` |
+| `## ルーティング` + 手動パス指定 | `## 機能詳細` + Progressive Disclosure テーブル |
+| `metadata.skillport` 付き frontmatter | 公式フィールドのみ（name, description, allowed-tools） |
+
+### Fixed
+
+- `vibecoder-guide/SKILL.md` の `name` を `vibecoder-guide-legacy` から `vibecoder-guide` に修正
+
 ## [2.7.4] - 2026-01-10
 
 ### Changed
@@ -1191,7 +1213,8 @@ Observation recorded: 10946-10951 ✅
 - **v0.4.0**: Claude Rules、Plugin Hooks、Named Sessions 対応
 - **v0.3.0**: 初期リリース（Plan → Work → Review サイクル）
 
-[Unreleased]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.4...HEAD
+[Unreleased]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.7...HEAD
+[2.7.7]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.4...v2.7.7
 [2.7.4]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.3...v2.7.4
 [2.7.3]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.2...v2.7.3
 [2.7.2]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.1...v2.7.2
