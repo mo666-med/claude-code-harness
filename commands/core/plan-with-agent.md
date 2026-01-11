@@ -43,13 +43,13 @@ description-en: Create implementation plan (idea → Plans.md → ready for /wor
 
 | スキル | 完全修飾名 | 呼び出しタイミング |
 |-------|-----------|------------------|
-| `adaptive-setup` | `claude-code-harness:setup:adaptive-setup` | **最初に必ず呼び出す** |
+| `setup` | `claude-code-harness:setup` | **最初に必ず呼び出す**（適応的セットアップを実行） |
 | `vibecoder-guide` | `claude-code-harness:vibecoder-guide` | ユーザーが非技術者の場合 |
 
 **呼び出し方法（必須）**:
 ```
 Skill ツールを使用:
-  skill: "claude-code-harness:setup:adaptive-setup"
+  skill: "claude-code-harness:setup"
 ```
 
 **なぜ Skill 呼び出しが必須か**:
@@ -58,7 +58,7 @@ Skill ツールを使用:
 3. プロジェクト状態の正確な把握ができる
 
 > ❌ **禁止**: コマンドドキュメントを読んで直接実行フローに進むこと
-> ✅ **正解**: 最初に Skill ツールで `adaptive-setup` を呼び出してから進むこと
+> ✅ **正解**: 最初に Skill ツールで `setup` を呼び出してから進むこと
 
 ---
 

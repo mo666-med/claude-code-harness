@@ -7,6 +7,14 @@
 
 ## [Unreleased]
 
+## [2.7.8] - 2026-01-11
+
+### Fixed
+
+- **`/plan-with-agent` のスキル参照エラーを修正**
+  - v2.7.7 の Progressive Disclosure 移行で、古いスキルパス `setup:adaptive-setup` が残っていた問題を修正
+  - `claude-code-harness:setup:adaptive-setup` → `claude-code-harness:setup` に変更
+
 ## [2.7.7] - 2026-01-11
 
 ### Changed
