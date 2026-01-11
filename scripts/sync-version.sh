@@ -11,7 +11,7 @@ set -euo pipefail
 VERSION_FILE="VERSION"
 PLUGIN_JSON=".claude-plugin/plugin.json"
 MARKETPLACE_JSON=".claude-plugin/marketplace.json"
-README_FILE="README.md"
+README_FILES=("README.md" "README.ja.md")
 
 # 現在のバージョンを取得
 get_version() {
@@ -74,14 +74,16 @@ sync_optional_files() {
         fi
     fi
 
-    # README badge
-    if [ -f "$README_FILE" ]; then
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            sed -i '' -E "s|\\[!\\[Version: [0-9]+\\.[0-9]+\\.[0-9]+\\]\\(https://img\\.shields\\.io/badge/version-[0-9]+\\.[0-9]+\\.[0-9]+-blue\\.svg\\)\\]\\(VERSION\\)|[![Version: ${version}](https://img.shields.io/badge/version-${version}-blue.svg)](VERSION)|" "$README_FILE" || true
-        else
-            sed -i -E "s|\\[!\\[Version: [0-9]+\\.[0-9]+\\.[0-9]+\\]\\(https://img\\.shields\\.io/badge/version-[0-9]+\\.[0-9]+\\.[0-9]+-blue\\.svg\\)\\]\\(VERSION\\)|[![Version: ${version}](https://img.shields.io/badge/version-${version}-blue.svg)](VERSION)|" "$README_FILE" || true
+    # README badge (README.md + README.ja.md)
+    for readme in "${README_FILES[@]}"; do
+        if [ -f "$readme" ]; then
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                sed -i '' -E "s|\\[!\\[Version: [0-9]+\\.[0-9]+\\.[0-9]+\\]\\(https://img\\.shields\\.io/badge/version-[0-9]+\\.[0-9]+\\.[0-9]+-blue\\.svg\\)\\]\\(VERSION\\)|[![Version: ${version}](https://img.shields.io/badge/version-${version}-blue.svg)](VERSION)|" "$readme" || true
+            else
+                sed -i -E "s|\\[!\\[Version: [0-9]+\\.[0-9]+\\.[0-9]+\\]\\(https://img\\.shields\\.io/badge/version-[0-9]+\\.[0-9]+\\.[0-9]+-blue\\.svg\\)\\]\\(VERSION\\)|[![Version: ${version}](https://img.shields.io/badge/version-${version}-blue.svg)](VERSION)|" "$readme" || true
+            fi
         fi
-    fi
+    done
 }
 
 # パッチバージョンを上げる

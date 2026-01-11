@@ -31,13 +31,13 @@ cat VERSION
 
 ユーザーに確認：「次のバージョンは何にしますか？ (例: 2.5.23)」
 
-### Step 3: CHANGELOG.md 更新
+### Step 3: CHANGELOG 更新（JP + EN）
 
 **[Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) フォーマットに準拠**
 
-> ⚠️ **注意**: CHANGELOG 作成後、Step 3.5 で README 更新が必要か必ず確認すること
+> ⚠️ **注意**: CHANGELOG 作成後、Step 3.5 で README 更新が必要か必ず確認すること（JP/EN 両方）
 
-CHANGELOG.md の `## [Unreleased]` の直後に新バージョンのエントリを追加。
+`CHANGELOG.md`（日本語）と `CHANGELOG.en.md`（英語）の **両方** で、`## [Unreleased]` の直後に新バージョンのエントリを追加。
 
 #### フォーマット
 
@@ -103,24 +103,31 @@ CHANGELOG.md 末尾のリンクセクションに追加：
 [Unreleased]: https://github.com/Chachamaru127/claude-code-harness/compare/vX.Y.Z...HEAD
 ```
 
+#### CHANGELOG.en.md（英語）の書き方
+
+- 目的は **ユーザーが理解できる変更点** を伝えること（コミットログの翻訳ではない）
+- `### 🎯 What's Changed for You` を基本にし、必要なら `#### Before/After` を追加
+- 日本語版（CHANGELOG.md）と **同じバージョン番号が存在** する状態を維持する
+
 ### Step 4: バージョン更新
 
 ```bash
-# VERSION ファイル更新
-echo "X.Y.Z" > VERSION
+# 既定（推奨）: patch リリース
+./scripts/sync-version.sh bump
 
-# plugin.json 更新
-jq '.version = "X.Y.Z"' .claude-plugin/plugin.json > /tmp/plugin.json && mv /tmp/plugin.json .claude-plugin/plugin.json
+# minor/major などで明示的に指定したい場合:
+echo "X.Y.Z" > VERSION
+./scripts/sync-version.sh sync
 ```
 
 ### Step 5: コミット & タグ
 
 ```bash
 # ステージング
-git add VERSION .claude-plugin/plugin.json CHANGELOG.md [変更されたファイル]
+git add VERSION .claude-plugin/plugin.json .claude-plugin/marketplace.json CHANGELOG.md CHANGELOG.en.md README.md README.ja.md [変更されたファイル]
 
 # コミット
-git commit -m "release: vX.Y.Z - 一言説明
+git commit -m "chore: release vX.Y.Z - 一言説明
 
 - 変更点1
 - 変更点2
@@ -202,11 +209,11 @@ cat ~/.claude/plugins/cache/claude-code-harness-marketplace/claude-code-harness/
 
 ### Step 3.5: README 更新（必須確認）
 
-> 🔴 **必ず確認**: 以下に該当する場合は **README.md と README.en.md の両方** を更新すること
+> 🔴 **必ず確認**: 以下に該当する場合は **README.md と README.ja.md の両方** を更新すること
 
 **対象ファイル**:
-- `README.md` - 日本語版（メイン）
-- `README.en.md` - 英語版
+- `README.md` - 英語版（デフォルト）
+- `README.ja.md` - 日本語版
 
 **更新が必要なケース**:
 - ✅ 新機能追加（Added セクションに項目がある）
@@ -221,15 +228,15 @@ cat ~/.claude/plugins/cache/claude-code-harness-marketplace/claude-code-harness/
 
 **更新手順**:
 
-1. **README.md（日本語）** を更新
-   - 「v2.6 の新機能」セクションに追加
+1. **README.md（英語）** を更新（デフォルト）
+   - `## What's New in vX.Y` を更新（存在しない場合は追加）
    - 関連するコマンド/スキルの説明を更新
 
-2. **README.en.md（英語）** を同期
-   - 「What's New in v2.6」セクションに追加
+2. **README.ja.md（日本語）** を同期
+   - `## vX.Y の新機能 | What's New in vX.Y` を更新（存在しない場合は追加）
    - 関連するコマンド/スキルの説明を更新
 
-3. **バージョンバッジ** を両方で更新
+3. **バージョンバッジ** を両方で確認（`./scripts/sync-version.sh` が自動更新しますが、差分が出ていないか目視チェック）
    ```markdown
    [![Version: X.Y.Z](https://img.shields.io/badge/version-X.Y.Z-blue.svg)](VERSION)
    ```
@@ -237,6 +244,16 @@ cat ~/.claude/plugins/cache/claude-code-harness-marketplace/claude-code-harness/
 **新機能セクションの例**:
 
 README.md:
+```markdown
+### Feature Name (vX.Y.Z)
+
+**English explanation**
+
+- Feature 1
+- Feature 2
+```
+
+README.ja.md:
 ```markdown
 ### 機能名（vX.Y.Z）| Feature Name
 
@@ -247,20 +264,10 @@ README.md:
 - 機能の特徴2
 ```
 
-README.en.md:
-```markdown
-### Feature Name (vX.Y.Z)
-
-**English explanation**
-
-- Feature 1
-- Feature 2
-```
-
 **更新対象セクション例**:
-| README.md | README.en.md |
+| README.md | README.ja.md |
 |-----------|--------------|
-| 「v2.6 の新機能」 | "What's New in v2.6" |
+| "What's New in vX.Y" | 「vX.Y の新機能 \| What's New in vX.Y」 |
 | 「3行でわかる」 | "In 3 Lines" |
 | 「機能一覧」 | "Features" |
 | 「コマンド早見表」 | "Command Quick Reference" |

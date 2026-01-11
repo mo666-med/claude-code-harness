@@ -800,8 +800,8 @@ Observation recorded: 10946-10951 ✅
 
 ### Added
 
-- 英語版 README.en.md の追加
-  - 日本語 README.md との言語切り替えナビゲーション
+- 英語版 README の追加
+  - 日本語版との言語切り替えナビゲーション
 
 ### Changed
 

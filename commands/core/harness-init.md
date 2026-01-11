@@ -309,7 +309,7 @@ command -v gh >/dev/null 2>&1 && echo "✅ gh" || echo "⚠️ gh"
 > | 変更したいこと | コマンド/方法 |
 > |--------------|--------------|
 > | Skills Gate のスキル追加/削除 | `/skills-update` |
-> | 2-Agent モードに切り替え | `/setup-cursor` |
+> | 2-Agent モードに切り替え | `/harness-init --mode=2agent`（または「2-agent運用を始めたい」） |
 > | 技術スタック変更 | 手動でファイル編集 or プロジェクト再作成 |
 > | 言語設定変更 | `claude-code-harness.config.json` を編集 |
 >

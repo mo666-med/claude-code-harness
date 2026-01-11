@@ -1,155 +1,123 @@
-# Claude harness2
+# Claude harness
 
-[English](README.en.md) | 日本語
+English | [日本語](README.ja.md)
 
 ![Claude harness](docs/images/claude-harness-logo-with-text.png)
 
-**個人開発を、プロ品質へ | Elevate Solo Development to Pro Quality**
+**Elevate Solo Development to Pro Quality**
 
-Claude Code を「Plan → Work → Review」の自律サイクルで運用し、
-**迷い・雑さ・事故・忘却** を仕組みで防ぐ開発ハーネスです。
+A development harness that runs Claude Code in an autonomous "Plan → Work → Review" cycle,
+systematically preventing **confusion, sloppiness, accidents, and forgetfulness**.
 
-[![Version: 2.7.12](https://img.shields.io/badge/version-2.7.12-blue.svg)](VERSION)
+[![Version: 2.7.13](https://img.shields.io/badge/version-2.7.13-blue.svg)](VERSION)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE.md)
-[![Harness Score](https://img.shields.io/badge/harness_score-92%2F100-brightgreen.svg)](#採点基準)
+[![Harness Score](https://img.shields.io/badge/harness_score-92%2F100-brightgreen.svg)](#scoring-criteria)
 
 ---
 
-## v2.6 の新機能 | What's New in v2.6
+## What's New in v2.7
 
-### 品質判定ゲートシステム（v2.6.2）| Quality Gate System
+### Codex Second Opinion Review (v2.7.9+)
 
-**適切な場面で適切な品質基準を自動提案**
-*Auto-suggest appropriate quality standards at the right time*
+- Codex is optionally integrated into `/harness-review` (config: `review.codex.enabled` in `.claude-code-harness.config.yaml`)
+- Run `/codex-review` for a Codex-only review
 
-| 判定タイプ | 対象 | 提案内容 |
-|-----------|------|---------|
-| **TDD** | `[feature]` タグ、`src/core/` | 「テストから書きますか？」 |
-| **Security** | 認証/API/決済 | セキュリティチェックリスト表示 |
-| **a11y** | UI コンポーネント | アクセシビリティチェック |
-| **Performance** | DB クエリ、ループ処理 | N+1 警告 |
+### Evaluation Suite (Scorecard) (v2.7.9+)
 
-- 強制ではなく**提案**（VibeCoder にも優しい）
-- `/plan-with-agent` で計画作成時に自動でマーカー付与
-
-### Claude-mem 統合（v2.6.0）| Claude-mem Integration
-
-```bash
-/harness-mem  # Claude-mem を統合
-```
-
-**過去の失敗から学び、同じミスを繰り返さない**
-*Learn from past mistakes and avoid repeating them*
-
-- 過去のテスト改ざん警告・ビルドエラー解決策を自動参照
-- `impl` / `review` / `verify` スキルが知見を活用
-- 重要な学びは SSOT（decisions.md/patterns.md）に昇格可能
-
-### Skill 階層リマインダー（v2.6.1）| Skill Hierarchy Reminder
-
-親スキルを使うと、**関連する子スキルを自動で提案**。
-*Auto-suggest related child skills when using a parent skill.*
-
-「どのスキルを読めばいいか」で迷わなくなります。
-
-### Cursor × Claude-mem 自動記録（v2.6.13）| Cursor Auto-Recording
-
-```bash
-/cursor-mem  # ワンコマンドでセットアップ
-```
-
-**Cursor での作業を自動記録し、Claude Code と作業履歴を共有**
-*Auto-record Cursor work and share history with Claude Code*
-
-- **自動記録**: プロンプト、ファイル編集、セッション完了を自動記録
-- **双方向共有**: Claude Code ⇄ claude-mem ⇄ Cursor
-- **2-Agent 運用**: PM（Cursor）と実装役（Claude Code）の連携を強化
-
-詳細: [Cursor 統合ガイド](docs/guides/cursor-mem-integration.md)
-
-**テスト: Cursor フック動作確認** - Cursor 統合フックの動作を確認済み（PreToolUse/PostToolUse が正常に動作）。
+- Generate `scorecard.md` / `scorecard.json` from benchmark results (`benchmarks/results/*.json`)
+- Spec: [Scorecard Spec](docs/SCORECARD_SPEC.md) | Ops: [Evals Playbook](docs/EVALS_PLAYBOOK.md)
 
 ---
 
-## 3行でわかる
+## What's New in v2.6
 
-| コマンド | 何をする | 結果 |
-|----------|----------|------|
-| `/plan-with-agent` | 壁打ち → 計画化 | **Plans.md** 作成 |
-| `/work` | 計画を実行（並列対応） | 動くコード |
-| `/harness-review` | 多観点レビュー | プロ品質 |
+### Quality Gate System (v2.6.2)
+
+**Auto-suggest appropriate quality standards at the right time**
+
+| Gate Type | Targets | Suggestion |
+|-----------|---------|------------|
+| **TDD** | `[feature]` tag, `src/core/` | "Would you like to write tests first?" |
+| **Security** | Auth/API/Payments | Security checklist displayed |
+| **a11y** | UI Components | Accessibility check |
+| **Performance** | DB queries, loops | N+1 query warning |
+
+- **Suggestions, not enforcement** (VibeCoder-friendly)
+- Auto-assigns quality markers when creating plans with `/plan-with-agent`
+
+### Claude-mem Integration (v2.6.0)
+
+```bash
+/harness-mem  # Integrate Claude-mem
+```
+
+**Learn from past mistakes and avoid repeating them**
+
+- Auto-reference past test tampering warnings and build error solutions
+- `impl` / `review` / `verify` skills leverage past knowledge
+- Important learnings can be promoted to SSOT (decisions.md/patterns.md)
+
+### Skill Hierarchy Reminder (v2.6.1)
+
+When using a parent skill, **related child skills are auto-suggested**.
+No more wondering "which skill should I read?"
+
+---
+
+## In 3 Lines
+
+| Command | What it does | Result |
+|---------|--------------|--------|
+| `/plan-with-agent` | Brainstorm → Plan | **Plans.md** created |
+| `/work` | Execute plan (parallel support) | Working code |
+| `/harness-review` | Multi-perspective review | Pro quality |
 
 ![Quick Overview](docs/images/quick-overview.png)
 
 ---
 
-## 解決する4つの問題
+## 4 Problems Solved
 
-| 問題 | 症状 | 解決策 |
-|------|------|--------|
-| **迷う** | 何をすべきかわからない | `/plan-with-agent` で整理 |
-| **雑になる** | 品質が落ちる | `/harness-review` で多観点チェック |
-| **事故る** | 危険な操作を実行 | Hooks で自動ガード |
-| **忘れる** | 前提が抜ける | SSOT + Claude-mem で継続 |
+| Problem | Symptom | Solution |
+|---------|---------|----------|
+| **Confusion** | Don't know what to do | `/plan-with-agent` to organize |
+| **Sloppiness** | Quality drops | `/harness-review` for multi-perspective check |
+| **Accidents** | Dangerous operations | Hooks for auto-guard |
+| **Forgetfulness** | Missing context | SSOT + Claude-mem for continuity |
 
 ![Four Walls](docs/images/four-walls.png)
 
 ---
 
-## 5分で始める
+## Get Started in 5 Minutes
 
-### Step 1: インストール（コピペでOK）
+### 1. Install
 
 ```bash
-# 1. プロジェクトで Claude Code を起動
 cd /path/to/your-project
 claude
 
-# 2. マーケットプレイスからインストール（2行）
+# Add marketplace → Install
 /plugin marketplace add Chachamaru127/claude-code-harness
 /plugin install claude-code-harness@claude-code-harness-marketplace
 ```
 
-### Step 2: 初期化
+### 2. Initialize
 
 ```bash
 /harness-init
 ```
 
-→ CLAUDE.md、Plans.md、.claude/rules/ が自動生成されます。
-
-### Step 3: 開発ループ（これだけ覚えればOK）
-
-```
-┌─────────────────────────────────────────────────────────┐
-│  /plan-with-agent  →  /work  →  /harness-review        │
-│      計画作成          実装        品質チェック          │
-└─────────────────────────────────────────────────────────┘
-```
-
-**具体的な使い方：**
+### 3. Development Loop
 
 ```bash
-# 「○○機能を追加したい」と言って計画を作る
-/plan-with-agent
-
-# Plans.md のタスクを実行する
-/work
-
-# 変更内容をレビューする
-/harness-review
+/plan-with-agent  # Plan
+/work             # Implement
+/harness-review   # Review
 ```
 
-### 困ったときは
-
-| 状況 | 言えばOK |
-|------|----------|
-| 何ができるか知りたい | `/skill-list` |
-| 進捗を確認したい | `/sync-status` |
-| Plans.md が長くなった | 「整理して」（maintenance スキル） |
-
 <details>
-<summary>ローカルクローン（開発者・コントリビューター向け）</summary>
+<summary>Local Clone (for developers)</summary>
 
 ```bash
 git clone https://github.com/Chachamaru127/claude-code-harness.git ~/claude-plugins/claude-code-harness
@@ -157,227 +125,191 @@ cd /path/to/your-project
 claude --plugin-dir ~/claude-plugins/claude-code-harness
 ```
 
-**注意**: このリポジトリ自体で `/work` を実行すると、ハーネス自身のコードを編集することになります（自己参照）。
-
 </details>
 
 ---
 
-## 誰のためのツールか
+## Who Is This For?
 
-| ユーザー | メリット |
-|----------|----------|
-| **個人開発者** | 速さと品質を両立 |
-| **フリーランス** | レビュー結果を納品物として提出 |
-| **VibeCoder** | 自然言語で開発を回す |
-| **Cursor 併用派** | 2-Agent 運用で役割分担 |
-
----
-
-## 機能一覧
-
-### 安全性（Hooks）
-
-| 機能 | 説明 |
-|------|------|
-| **保護パスガード** | `.git/`・`.env`・秘密鍵への書き込みを拒否 |
-| **危険コマンド確認** | `git push`・`rm -rf`・`sudo` は確認を要求 |
-| **安全コマンド許可** | `git status`・`npm test` は自動許可 |
-
-### 継続性（SSOT + Memory）
-
-| 機能 | 説明 |
-|------|------|
-| **decisions.md** | 決定事項（Why）を蓄積 |
-| **patterns.md** | 再利用パターン（How）を蓄積 |
-| **Claude-mem 統合** | セッション跨ぎで過去の学びを活用 |
-
-### 品質保証（3層防御）
-
-| 層 | 仕組み | 強制力 |
-|----|--------|--------|
-| 第1層 | Rules（test-quality.md 等） | 良心ベース |
-| 第2層 | Skills 内蔵ガードレール | 文脈的強制 |
-| 第3層 | Hooks で改ざん検出 | 技術的強制 |
-
-**禁止パターン**: `it.skip()` への変更、アサーション削除、形骸化実装
+| User | Benefit |
+|------|---------|
+| **Solo Developers** | Balance speed and quality |
+| **Freelancers** | Submit review results as deliverables |
+| **VibeCoder** | Drive development with natural language |
+| **Cursor Users** | 2-Agent workflow for role separation |
 
 ---
 
-## コマンド早見表
+## Features
 
-### コア（Plan → Work → Review）
+### Safety (Hooks)
 
-| コマンド | 用途 |
-|----------|------|
-| `/harness-init` | プロジェクト初期化 |
-| `/plan-with-agent` | 計画作成 |
-| `/work` | タスク実装（並列対応） |
-| `/harness-review` | 多観点レビュー |
-| `/skill-list` | スキル一覧 |
+| Feature | Description |
+|---------|-------------|
+| **Protected Path Guard** | Reject writes to `.git/`, `.env`, secret keys |
+| **Dangerous Command Confirmation** | Require confirmation for `git push`, `rm -rf`, `sudo` |
+| **Safe Command Allow** | Auto-allow `git status`, `npm test` |
 
-### 品質・運用
+### Continuity (SSOT + Memory)
 
-| コマンド | 用途 |
-|----------|------|
-| `/harness-update` | プラグイン更新 |
-| `/sync-status` | 進捗確認 → 次アクション提案 |
+| Feature | Description |
+|---------|-------------|
+| **decisions.md** | Accumulate decisions (Why) |
+| **patterns.md** | Accumulate reusable patterns (How) |
+| **Claude-mem Integration** | Leverage past learnings across sessions |
 
-### 知識・連携
+### Quality Assurance (3-Layer Defense)
 
-| コマンド | 用途 |
-|----------|------|
-| `/harness-mem` | Claude-mem 統合セットアップ |
-| `/cursor-mem` | Cursor × Claude-mem 自動記録セットアップ |
-| `/handoff-to-cursor` | Cursor(PM) への完了報告 |
+| Layer | Mechanism | Enforcement |
+|-------|-----------|-------------|
+| Layer 1 | Rules (test-quality.md, etc.) | Conscience-based |
+| Layer 2 | Skills built-in guardrails | Contextual enforcement |
+| Layer 3 | Hooks for tampering detection | Technical enforcement |
 
-### スキル（会話で自動起動）
-
-| スキル | トリガー例 |
-|--------|-----------|
-| `impl` | 「実装して」「機能追加」 |
-| `review` | 「レビューして」「セキュリティチェック」 |
-| `verify` | 「ビルドして」「エラー復旧」 |
-| `auth` | 「ログイン機能」「Stripe決済」 |
-| `deploy` | 「Vercelにデプロイ」 |
-| `ui` | 「ヒーローを作って」 |
-
-`/skill-list` で全67スキルを確認できます。
+**Prohibited Patterns**: Changes to `it.skip()`, assertion deletion, hollow implementations
 
 ---
 
-## Cursor 2-Agent 運用（任意）
+## Command Quick Reference
 
-「2-agent運用を始めたい」と言えば自動セットアップ。
+### Core (Plan → Work → Review)
 
-| 役割 | 担当 |
-|------|------|
-| **Cursor (PM)** | 計画・レビュー・タスク管理 |
-| **Claude Code (Worker)** | 実装・テスト・デバッグ |
+| Command | Purpose |
+|---------|---------|
+| `/harness-init` | Initialize project |
+| `/plan-with-agent` | Create plan |
+| `/work` | Implement tasks (parallel support) |
+| `/harness-review` | Multi-perspective review |
+| `/skill-list` | List all skills |
 
-**ワークフロー**:
+### Quality & Operations
+
+| Command | Purpose |
+|---------|---------|
+| `/harness-update` | Update plugin |
+| `/sync-status` | Check progress → Suggest next action |
+| `/codex-review` | Codex second-opinion review (Codex-only) |
+
+### Knowledge & Collaboration
+
+| Command | Purpose |
+|---------|---------|
+| `/harness-mem` | Claude-mem integration setup |
+| `/handoff-to-cursor` | Report completion to Cursor (PM) |
+
+### Skills (Auto-triggered by conversation)
+
+| Skill | Trigger Examples |
+|-------|-----------------|
+| `impl` | "implement", "add feature" |
+| `review` | "review", "security check" |
+| `verify` | "build", "error recovery" |
+| `auth` | "login feature", "Stripe payment" |
+| `deploy` | "deploy to Vercel" |
+| `ui` | "create a hero section" |
+
+Use `/skill-list` to see all 67 skills.
+
+---
+
+## Cursor 2-Agent Workflow (Optional)
+
+Say "I want to start 2-agent workflow" for auto-setup.
+
+| Role | Responsibility |
+|------|----------------|
+| **Cursor (PM)** | Planning, Review, Task Management |
+| **Claude Code (Worker)** | Implementation, Testing, Debugging |
+
+**Workflow**:
 
 ```
 Cursor: /plan-with-cc → /handoff-to-claude
 Claude Code: /work → /handoff-to-cursor
-Cursor: /review-cc-work → 承認 or 修正依頼
+Cursor: /review-cc-work → Approve or Request Fixes
 ```
 
 ---
 
-## アーキテクチャ
+## Architecture
 
 ```
 claude-code-harness/
-├── commands/     # スラッシュコマンド（21）
-├── skills/       # スキル（67 / 22カテゴリ）
-├── agents/       # サブエージェント（6）
-├── hooks/        # ライフサイクルフック
-├── scripts/      # ガード・自動化スクリプト
-├── templates/    # 生成テンプレート
-└── docs/         # ドキュメント
+├── commands/     # Slash commands (21)
+├── skills/       # Skills (67 / 22 categories)
+├── agents/       # Sub-agents (6)
+├── hooks/        # Lifecycle hooks
+├── scripts/      # Guard & automation scripts
+├── templates/    # Generation templates
+└── docs/         # Documentation
 ```
 
-### 3層設計
+### 3-Layer Design
 
-| 層 | ファイル | 役割 |
-|----|----------|------|
-| Profile | `profiles/claude-worker.yaml` | ペルソナ定義 |
-| Workflow | `workflows/default/*.yaml` | 作業フロー |
-| Skill | `skills/**/SKILL.md` | 具体的な機能 |
+| Layer | File | Role |
+|-------|------|------|
+| Profile | `profiles/claude-worker.yaml` | Persona definition |
+| Workflow | `workflows/default/*.yaml` | Work flow |
+| Skill | `skills/**/SKILL.md` | Specific functionality |
 
 ---
 
-## 検証
+## Validation
 
 ```bash
-# プラグイン構造の検証
+# Validate plugin structure
 ./tests/validate-plugin.sh
 
-# 整合性チェック
+# Consistency check
 ./scripts/ci/check-consistency.sh
 ```
 
 ---
 
-## 評価スイート（Scorecard）
+## Scoring Criteria
 
-エージェント評価の客観指標を提供します。
-
-### 指標の見方
-
-| 指標 | 説明 |
-|------|------|
-| **成功率** | `grade.pass` の割合（タスクの成果物が基準を満たしたか） |
-| **Grade Score** | 各チェック項目の加重平均（0.0〜1.0） |
-| **所要時間** | 中央値で比較（揺れを吸収） |
-| **推定コスト** | Claude 3.5 Sonnet 基準の参考値（実際の請求額ではありません） |
-
-### 再現手順
-
-```bash
-# 1. ベンチマーク実行（例: plan-feature を 3回）
-./benchmarks/scripts/run-isolated-benchmark.sh --task plan-feature --with-plugin
-./benchmarks/scripts/run-isolated-benchmark.sh --task plan-feature
-
-# 2. Scorecard 生成
-./benchmarks/scripts/generate-scorecard.sh
-```
-
-### CI での実行
-
-GitHub Actions の `benchmark` workflow を `workflow_dispatch` で手動実行できます。
-
-詳細: [Scorecard 仕様書](docs/SCORECARD_SPEC.md) | [Evals 運用プレイブック](docs/EVALS_PLAYBOOK.md)
+| Category | Max | Score |
+|----------|----:|------:|
+| Onboarding | 15 | 14 |
+| Workflow Design | 20 | 19 |
+| Safety | 15 | 15 |
+| Continuity | 10 | 9 |
+| Automation | 10 | 9 |
+| Extensibility | 10 | 8 |
+| Quality Assurance | 10 | 8 |
+| Documentation | 10 | 10 |
+| **Total** | **100** | **92 (S)** |
 
 ---
 
-## 採点基準
+## Documentation
 
-| カテゴリ | 配点 | スコア |
-|----------|-----:|------:|
-| オンボーディング | 15 | 14 |
-| ワークフロー設計 | 20 | 19 |
-| 安全性 | 15 | 15 |
-| 継続性 | 10 | 9 |
-| 自動化 | 10 | 9 |
-| 拡張性 | 10 | 8 |
-| 品質保証 | 10 | 8 |
-| ドキュメント | 10 | 10 |
-| **合計** | **100** | **92（S）** |
+- [Implementation Guide](IMPLEMENTATION_GUIDE.md)
+- [Development Flow Guide](DEVELOPMENT_FLOW_GUIDE.md)
+- [Memory Policy](docs/MEMORY_POLICY.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Cursor Integration](docs/CURSOR_INTEGRATION.md)
+- [Changelog](CHANGELOG.en.md) | [Japanese](CHANGELOG.md)
 
 ---
 
-## ドキュメント
+## Acknowledgments
 
-- [実装ガイド](IMPLEMENTATION_GUIDE.md)
-- [開発フロー完全ガイド](DEVELOPMENT_FLOW_GUIDE.md)
-- [Evals運用プレイブック](docs/EVALS_PLAYBOOK.md)
-- [Scorecard仕様書](docs/SCORECARD_SPEC.md)
-- [メモリポリシー](docs/MEMORY_POLICY.md)
-- [アーキテクチャ](docs/ARCHITECTURE.md)
-- [Cursor統合](docs/CURSOR_INTEGRATION.md)
-- [変更履歴](CHANGELOG.md) | [English](CHANGELOG.en.md)
+- **Hierarchical Skill Structure**: Implemented based on feedback from [AI Masao](https://note.com/masa_wunder)
+- **Test Tampering Prevention**: [Beagle](https://github.com/beagleworks) "Techniques to prevent Claude Code from taking shortcuts with tests" (Claude Code Meetup Tokyo 2025.12.22)
 
 ---
 
-## 謝辞
+## References
 
-- **階層型スキル構造**: [AIまさお氏](https://note.com/masa_wunder) のフィードバックに基づいて実装
-- **テスト改ざん防止**: [びーぐる氏](https://github.com/beagleworks)「Claude Codeにテストで楽をさせない技術」（Claude Code Meetup Tokyo 2025.12.22）
-
----
-
-## 参考
-
-- [Claude Code Plugins（公式）](https://docs.claude.com/en/docs/claude-code/plugins)
+- [Claude Code Plugins (Official)](https://docs.claude.com/en/docs/claude-code/plugins)
 - [anthropics/claude-code](https://github.com/anthropics/claude-code)
 - [davila7/claude-code-templates](https://github.com/davila7/claude-code-templates)
 
 ---
 
-## ライセンス
+## License
 
-**MIT License** - 使用・改変・配布・商用利用が自由です。
+**MIT License** - Free to use, modify, distribute, and commercialize.
 
-- [English](LICENSE.md) | [日本語](LICENSE.ja.md)
+- [English](LICENSE.md) | [Japanese](LICENSE.ja.md)

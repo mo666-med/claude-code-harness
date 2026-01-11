@@ -21,11 +21,10 @@ Cursor連携を有効化すると、以下の役割分担で開発を進めら�
 
 ### Step 1: Cursor連携の有効化
 
-Claude Codeで以下のコマンドを実行します。
+Claude Code に以下のように話しかけてください（2-Agent セットアップが走ります）。
 
-```bash
-/setup-cursor
-```
+- 「2-agent運用を始めたい」
+- 「Cursor連携をセットアップして」
 
 これにより、`.cursor/commands/`ディレクトリに以下のコマンドファイルが生成されます。
 

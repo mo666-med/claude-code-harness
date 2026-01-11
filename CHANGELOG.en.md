@@ -13,6 +13,171 @@ Change history for claude-code-harness.
 
 ---
 
+## [2.7.12] - 2026-01-11
+
+### 🎯 What's Changed for You
+
+**Codex now checks its own version and supports model selection.**
+
+- **Codex CLI version check**: On first run, compares the installed Codex CLI version with the latest version and guides you through updating (runs `npm update -g @openai/codex` after approval).
+- **Codex model selection**: Choose the model via config.
+  - Default: `gpt-5.2-codex`
+  - Options: `gpt-5.2-codex`, `gpt-5.1-codex`, `gpt-5-codex-mini`
+
+---
+
+## [2.7.11] - 2026-01-11
+
+### 🎯 What's Changed for You
+
+**Codex is now a true parallel reviewer inside `/harness-review` — and its suggestions can be verified and turned into executable Plans.md tasks.**
+
+#### Before/After
+
+| Before | After |
+|--------|-------|
+| Codex ran after Claude reviews (sequential) | Codex runs as the 5th parallel reviewer |
+| Codex output was shown as-is | Claude validates Codex findings and proposes vetted fixes |
+| Review results were “display-only” | After approval, fixes are written to Plans.md and executed via `/work` |
+
+---
+
+## [2.7.10] - 2026-01-11
+
+### 🎯 What's Changed for You
+
+**You can run Codex as a standalone reviewer with `/codex-review`, and `/harness-review` can auto-detect Codex on first run.**
+
+- **New `/codex-review` command**: Runs a Codex-only second-opinion review.
+- **First-run Codex detection (`once: true` hook)**: `/harness-review` checks whether Codex is installed and guides enablement when found.
+- Added `scripts/check-codex.sh`.
+
+---
+
+## [2.7.9] - 2026-01-11
+
+### 🎯 What's Changed for You
+
+**Codex MCP integration: get a second-opinion review from Codex during `/harness-review`.**
+
+- Integrates OpenAI Codex CLI as an MCP server for Claude Code.
+- Works in both Solo and 2-Agent workflows.
+- Added a new skill and references:
+  - `skills/codex-review/SKILL.md`
+  - `skills/codex-review/references/codex-mcp-setup.md`
+  - `skills/codex-review/references/codex-review-integration.md`
+- Added Codex integration guidance to the existing `review` skill:
+  - `skills/review/references/codex-integration.md`
+- Added `review.codex` config section (example):
+  ```yaml
+  review:
+    codex:
+      enabled: false
+      auto: false
+      prompt: "..."
+  ```
+
+---
+
+## [2.7.8] - 2026-01-11
+
+### 🎯 What's Changed for You
+
+**Fixed a broken skill reference in `/plan-with-agent`.**
+
+- After the Progressive Disclosure migration in v2.7.7, an old skill path remained.
+- Updated `claude-code-harness:setup:adaptive-setup` → `claude-code-harness:setup`.
+
+---
+
+## [2.7.7] - 2026-01-11
+
+### 🎯 What's Changed for You
+
+**Skills now align with the official spec more closely (Progressive Disclosure), making them easier to discover and less fragile.**
+
+- Migrated `doc.md` → `references/*.md` (43 files)
+- Updated parent `SKILL.md` to the Progressive Disclosure pattern (14 skills)
+- Removed non-official frontmatter field `metadata.skillport` (63 files)
+- Fixed `vibecoder-guide/SKILL.md` name: `vibecoder-guide-legacy` → `vibecoder-guide`
+
+#### Before/After
+
+| Before | After |
+|--------|-------|
+| `skills/impl/work-impl-feature/doc.md` | `skills/impl/references/implementing-features.md` |
+| Manual routing via `## Routing` + paths | “Details” table via Progressive Disclosure |
+| Non-official `metadata.skillport` | Official fields only (`name`, `description`, `allowed-tools`) |
+
+---
+
+## [2.7.4] - 2026-01-10
+
+### 🎯 What's Changed for You
+
+**Sessions end smarter and cheaper with the Intelligent Stop Hook.**
+
+- Consolidated 3 Stop scripts (check-pending, cleanup-check, plans-reminder) into a single `type: "prompt"` hook.
+- Uses `model: "haiku"` to optimize cost/latency.
+- Evaluates 5 angles on session stop: task completion, errors, follow-ups, Plans.md updates, cleanup recommendation.
+- Kept `session-summary.sh` (command hook) as-is.
+- Added `context: fork` to `ci` / `troubleshoot` skills to prevent context pollution.
+- Added test coverage:
+  - `tests/test-intelligent-stop-hook.sh`
+  - `tests/test-hooks-sync.sh`
+
+---
+
+## [2.7.3] - 2026-01-08
+
+### 🎯 What's Changed for You
+
+**Fixed 2.6.x → 2.7.x migration compatibility so Stop hooks keep working even with older cached plugin versions.**
+
+- `sync-plugin-cache.sh` now also syncs `.claude-plugin/hooks.json` and `.claude-plugin/plugin.json`.
+- New Stop helper scripts are synced as well (`stop-cleanup-check.sh`, `stop-plans-reminder.sh`).
+
+---
+
+## [2.7.2] - 2026-01-08
+
+### 🎯 What's Changed for You
+
+**Fixed compatibility with Claude Code 2.1.1 security changes that blocked `prompt`-type Stop hooks.**
+
+- Converted the Stop hook from `prompt` → `command` and implemented alternatives:
+  - `stop-cleanup-check.sh` (cleanup recommendation)
+  - `stop-plans-reminder.sh` (Plans.md marker reminder)
+- Fully synchronized `hooks/hooks.json` and `.claude-plugin/hooks.json`.
+
+---
+
+## [2.7.1] - 2026-01-08
+
+### 🎯 What's Changed for You
+
+**Removed references to deprecated commands and clarified migration paths.**
+
+- Removed `/validate` `/cleanup` `/remember` `/refactor` mentions across README / skills / hooks, replaced with skill guidance.
+- Added missing frontmatter (`description`, `description-en`) to `commands/optional/harness-mem.md`.
+
+---
+
+## [2.7.0] - 2026-01-08
+
+### 🎯 What's Changed for You
+
+**Major update for Claude Code 2.1.0: fewer slash entries, stronger safety, and better lifecycle visibility.**
+
+- Added SubagentStart/SubagentStop hooks (with history logging).
+- Added `once: true` hooks to prevent duplicate runs in a session.
+- Added `context: fork` support for heavy operations (e.g. `review` / `/harness-review`).
+- Added `skills` and `disallowedTools` fields to agents for safer execution.
+- Added templates for `language` setting and wildcard Bash permissions.
+- Removed 4 duplicate commands in favor of skills: `/validate`, `/cleanup`, `/remember`, `/refactor`.
+
+---
+
 ## [2.5.23] - 2025-12-23
 
 ### 🎯 What's Changed for You

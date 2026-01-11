@@ -22,6 +22,15 @@ docs/design/
 # .mcp.json はプラグイン MCP 設定として配布に含める
 .github/mlc_config.json
 
+# claude-mem observation context files (auto-generated)
+# See: https://github.com/thedotmack/claude-mem/issues/641
+**/CLAUDE.md
+!harness-ui/CLAUDE.md
+
+# harness-ui local state (generated)
+harness-ui/.claude/state/
+harness-ui/.env.example
+
 # 2-Agent setup files (auto-generated)
 /AGENTS.md
 /CLAUDE.md
