@@ -316,76 +316,71 @@ export async function* executeAgent(
       },
     }
 
-    // Safe tools that don't require approval
+    // Safe tools that don't require approval (read-only or low-risk tools)
+    // Note: Write, Edit, Bash are intentionally excluded - they require approval
     const SAFE_TOOLS = new Set([
-      'Bash', 'Read', 'Write', 'Edit', 'Glob', 'Grep',
-      'Task', 'TodoWrite', 'WebFetch', 'WebSearch',
-      'NotebookEdit', 'LSP', 'Skill', 'MCPSearch',
-      'ListMcpResourcesTool', 'ReadMcpResourceTool',
+      'Read', 'Glob', 'Grep',           // Read-only file operations
+      'Task', 'TodoWrite',              // Agent management
+      'WebFetch', 'WebSearch',          // Web access (read-only)
+      'LSP', 'MCPSearch',               // Code intelligence
+      'ListMcpResourcesTool', 'ReadMcpResourceTool',  // MCP read operations
     ])
 
-    // Add canUseTool callback for tool approval UI
-    // Use WebSocket if connected, otherwise use provided handler or auto-allow
-    const wsHandler = wsConnections.get(sessionId)
-    if (wsHandler || onToolApproval) {
-      queryOptions.options = {
-        ...queryOptions.options,
-        canUseTool: async (toolName: string, input: Record<string, unknown>) => {
-          const toolUseId = `tool-${Date.now()}`
-          console.log(`[canUseTool] Tool requested: ${toolName}, toolUseId=${toolUseId}`)
+    // Protected paths that always require approval regardless of permission mode
+    const PROTECTED_PATHS = [
+      'Plans.md',
+      '.claude/memory/',
+      '.claude/memory/decisions.md',
+      '.claude/memory/patterns.md',
+    ]
 
-          // Auto-approve safe tools
-          if (SAFE_TOOLS.has(toolName)) {
-            console.log(`[canUseTool] Auto-approving safe tool: ${toolName}`)
-            return { behavior: 'allow' as const, updatedInput: input }
-          }
+    // Check if a path is protected
+    const isProtectedPath = (filePath: string | undefined): boolean => {
+      if (!filePath) return false
+      return PROTECTED_PATHS.some(
+        (protectedPath) =>
+          filePath.endsWith(protectedPath) ||
+          filePath.includes('/.claude/memory/')
+      )
+    }
 
-          // Special handling for AskUserQuestion - send to UI for user response
-          if (toolName === 'AskUserQuestion' && wsHandler) {
-            console.log(`[canUseTool] AskUserQuestion detected! sessionId=${sessionId}, toolUseId=${toolUseId}`)
-            console.log(`[canUseTool] AskUserQuestion input:`, JSON.stringify(input, null, 2))
-            const questions = (input as { questions?: unknown[] }).questions
-            if (questions && Array.isArray(questions)) {
-              console.log(`[canUseTool] Sending ask_user_question to UI, questions count: ${questions.length}`)
-              // Send question request to UI
-              wsHandler({
-                type: 'ask_user_question',
-                sessionId,
-                toolUseId,
-                questions,
-              })
-              console.log(`[canUseTool] ask_user_question message sent to WebSocket`)
+    // Dangerous tools that require approval (Write/Edit/Bash)
+    const DANGEROUS_TOOLS = new Set(['Write', 'Edit', 'Bash', 'NotebookEdit', 'Skill'])
 
-              // Wait for user response
-              try {
-                const response = await requestToolApproval(sessionId, toolUseId, toolName, input, 120000)
-                // Return the answers as modified input
-                return {
-                  behavior: 'allow' as const,
-                  updatedInput: response.modifiedInput as Record<string, unknown> ?? input,
-                }
-              } catch {
-                // Timeout - return empty answers
-                return {
-                  behavior: 'allow' as const,
-                  updatedInput: { ...input, answers: {} },
-                }
-              }
-            }
-          }
+    // Always set up canUseTool callback - this ensures guardrails work even if WebSocket
+    // connects after execution starts. We fetch wsHandler fresh each time it's needed.
+    queryOptions.options = {
+      ...queryOptions.options,
+      canUseTool: async (toolName: string, input: Record<string, unknown>) => {
+        const toolUseId = `tool-${Date.now()}`
+        console.log(`[canUseTool] Tool requested: ${toolName}, toolUseId=${toolUseId}`)
 
-          // If WebSocket is connected, send approval request via WebSocket
+        // Fetch wsHandler fresh each time (not captured at start)
+        const wsHandler = wsConnections.get(sessionId)
+
+        // Auto-approve safe tools (read-only operations)
+        if (SAFE_TOOLS.has(toolName)) {
+          console.log(`[canUseTool] Auto-approving safe tool: ${toolName}`)
+          return { behavior: 'allow' as const, updatedInput: input }
+        }
+
+        // Check for protected paths on Write/Edit operations
+        const filePath = (input as { file_path?: string; filePath?: string }).file_path ||
+                        (input as { file_path?: string; filePath?: string }).filePath
+        if ((toolName === 'Write' || toolName === 'Edit') && isProtectedPath(filePath)) {
+          console.log(`[canUseTool] Protected path detected: ${filePath}, requiring explicit approval`)
+          // Force explicit approval for protected paths (Plans.md, .claude/memory/*)
           if (wsHandler) {
-            // Send tool approval request to UI
             wsHandler({
               type: 'tool_approval_request',
               sessionId,
               toolUseId,
               toolName,
               toolInput: input,
+              isProtected: true,
+              protectedReason: `保護対象パス: ${filePath}`,
             })
 
-            // Wait for approval response
             try {
               const response = await requestToolApproval(sessionId, toolUseId, toolName, input, 60000)
               if (response.decision === 'allow') {
@@ -396,21 +391,72 @@ export async function* executeAgent(
               } else {
                 return {
                   behavior: 'deny' as const,
-                  message: response.reason ?? 'User denied tool execution',
+                  message: response.reason ?? `保護対象パス (${filePath}) への変更が拒否されました`,
                 }
               }
             } catch {
-              // Timeout or error - deny by default
               return {
                 behavior: 'deny' as const,
-                message: 'Tool approval timed out',
+                message: `保護対象パス (${filePath}) への変更はタイムアウトしました`,
+              }
+            }
+          } else {
+            // No WebSocket - deny by default for protected paths
+            return {
+              behavior: 'deny' as const,
+              message: `保護対象パス (${filePath}) への変更にはUI承認が必要です`,
+            }
+          }
+        }
+
+        // Special handling for AskUserQuestion - send to UI for user response
+        if (toolName === 'AskUserQuestion' && wsHandler) {
+          console.log(`[canUseTool] AskUserQuestion detected! sessionId=${sessionId}, toolUseId=${toolUseId}`)
+          console.log(`[canUseTool] AskUserQuestion input:`, JSON.stringify(input, null, 2))
+          const questions = (input as { questions?: unknown[] }).questions
+          if (questions && Array.isArray(questions)) {
+            console.log(`[canUseTool] Sending ask_user_question to UI, questions count: ${questions.length}`)
+            // Send question request to UI
+            wsHandler({
+              type: 'ask_user_question',
+              sessionId,
+              toolUseId,
+              questions,
+            })
+            console.log(`[canUseTool] ask_user_question message sent to WebSocket`)
+
+            // Wait for user response
+            try {
+              const response = await requestToolApproval(sessionId, toolUseId, toolName, input, 120000)
+              // Return the answers as modified input
+              return {
+                behavior: 'allow' as const,
+                updatedInput: response.modifiedInput as Record<string, unknown> ?? input,
+              }
+            } catch {
+              // Timeout - return empty answers
+              return {
+                behavior: 'allow' as const,
+                updatedInput: { ...input, answers: {} },
               }
             }
           }
+        }
 
-          // Use provided handler if available
-          if (onToolApproval) {
-            const response = await onToolApproval(toolName, input, toolUseId)
+        // If WebSocket is connected, send approval request via WebSocket
+        if (wsHandler) {
+          // Send tool approval request to UI
+          wsHandler({
+            type: 'tool_approval_request',
+            sessionId,
+            toolUseId,
+            toolName,
+            toolInput: input,
+          })
+
+          // Wait for approval response
+          try {
+            const response = await requestToolApproval(sessionId, toolUseId, toolName, input, 60000)
             if (response.decision === 'allow') {
               return {
                 behavior: 'allow' as const,
@@ -422,12 +468,43 @@ export async function* executeAgent(
                 message: response.reason ?? 'User denied tool execution',
               }
             }
+          } catch {
+            // Timeout or error - deny by default
+            return {
+              behavior: 'deny' as const,
+              message: 'Tool approval timed out',
+            }
           }
+        }
 
-          // Default: allow
-          return { behavior: 'allow' as const, updatedInput: input }
-        },
-      }
+        // Use provided handler if available
+        if (onToolApproval) {
+          const response = await onToolApproval(toolName, input, toolUseId)
+          if (response.decision === 'allow') {
+            return {
+              behavior: 'allow' as const,
+              updatedInput: (response.modifiedInput ?? input) as Record<string, unknown>,
+            }
+          } else {
+            return {
+              behavior: 'deny' as const,
+              message: response.reason ?? 'User denied tool execution',
+            }
+          }
+        }
+
+        // No WebSocket and no handler - deny dangerous tools, allow others
+        if (DANGEROUS_TOOLS.has(toolName)) {
+          console.log(`[canUseTool] Denying dangerous tool without UI approval: ${toolName}`)
+          return {
+            behavior: 'deny' as const,
+            message: `${toolName} の実行にはUI承認が必要です（WebSocket未接続）`,
+          }
+        }
+
+        // Default: allow non-dangerous tools
+        return { behavior: 'allow' as const, updatedInput: input }
+      },
     }
 
     // Start the query

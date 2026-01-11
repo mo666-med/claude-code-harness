@@ -600,7 +600,7 @@ export async function parsePlans(projectRoot?: string, mode?: 'solo' | '2agent')
   for (const plansPath of possiblePaths) {
     const content = await readFileContent(plansPath)
     if (content) {
-      return parsePlansMarkdown(content, workflowMode)
+      return parsePlansMarkdown(content, workflowMode, plansPath)
     }
   }
 

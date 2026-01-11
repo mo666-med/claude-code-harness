@@ -88,6 +88,20 @@ export function parsePositiveInt(
 }
 
 /**
+ * Check if an error is an expected "file not found" error
+ */
+function isExpectedMissingError(error: unknown): boolean {
+  if (error instanceof Error) {
+    // ENOENT: No such file or directory (expected for optional files)
+    // ENOTDIR: Not a directory (expected when checking paths)
+    return error.message.includes('ENOENT') ||
+           error.message.includes('ENOTDIR') ||
+           error.message.includes('no such file')
+  }
+  return false
+}
+
+/**
  * Read a file and return its content
  */
 export async function readFileContent(filePath: string): Promise<string> {
@@ -95,7 +109,10 @@ export async function readFileContent(filePath: string): Promise<string> {
     const file = Bun.file(filePath)
     return await file.text()
   } catch (error) {
-    console.error(`Failed to read file: ${filePath}`, error)
+    // Suppress ENOENT errors (expected for optional files like Plans.md, .claude/memory/)
+    if (!isExpectedMissingError(error)) {
+      console.error(`Failed to read file: ${filePath}`, error)
+    }
     return ''
   }
 }
@@ -137,7 +154,10 @@ export async function listFiles(
       }
     }
   } catch (error) {
-    console.error(`Failed to list directory: ${dirPath}`, error)
+    // Suppress ENOENT errors (expected for optional directories like .claude/memory/)
+    if (!isExpectedMissingError(error)) {
+      console.error(`Failed to list directory: ${dirPath}`, error)
+    }
   }
 
   return files

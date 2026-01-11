@@ -68,6 +68,11 @@ export interface TaskConflictError {
 }
 
 /**
+ * Actor role for 2-agent workflow
+ */
+export type ActorRole = 'pm' | 'impl' | 'user'
+
+/**
  * Update a task marker in Plans.md
  *
  * @param lineNumber - Line number to update (1-based)
@@ -75,19 +80,33 @@ export interface TaskConflictError {
  * @param oldMarker - Old marker to replace (e.g., 'cc:WIP')
  * @param newMarker - New marker to set (e.g., 'cc:完了')
  * @param projectPath - Optional project path
- * @returns Update result or throws on conflict (409)
+ * @param workflowMode - Workflow mode ('solo' or '2agent')
+ * @param actorRole - Actor role for permission check (required for 2agent mode)
+ * @returns Update result or throws on conflict (409) or invalid transition (422)
  */
 export async function updateTaskMarker(
   lineNumber: number,
   expectedLine: string,
   oldMarker: string,
   newMarker: string,
-  projectPath?: string
+  projectPath?: string,
+  workflowMode?: 'solo' | '2agent',
+  actorRole?: ActorRole
 ): Promise<UpdateTaskResponse> {
+  const body: Record<string, unknown> = { lineNumber, expectedLine, oldMarker, newMarker }
+
+  // Include workflowMode and actorRole if provided
+  if (workflowMode) {
+    body.workflowMode = workflowMode
+  }
+  if (actorRole) {
+    body.actorRole = actorRole
+  }
+
   const response = await fetch(`${API_BASE}/plans/task${buildProjectQuery(projectPath)}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ lineNumber, expectedLine, oldMarker, newMarker }),
+    body: JSON.stringify(body),
   })
 
   const data = await response.json()
@@ -96,6 +115,21 @@ export async function updateTaskMarker(
     // Conflict detected
     const error = new Error(data.error || 'Conflict detected') as Error & { conflict: TaskConflictError }
     error.conflict = data as TaskConflictError
+    throw error
+  }
+
+  if (response.status === 422) {
+    // Invalid state transition or permission error
+    const error = new Error(data.error || 'Invalid state transition') as Error & {
+      invalidTransition: boolean
+      oldMarker: string
+      newMarker: string
+      actorRole?: string
+    }
+    error.invalidTransition = data.invalidTransition ?? true
+    error.oldMarker = data.oldMarker
+    error.newMarker = data.newMarker
+    error.actorRole = data.actorRole
     throw error
   }
 

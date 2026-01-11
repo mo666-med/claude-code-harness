@@ -1,4 +1,4 @@
-import type { Task, KanbanResponse } from '../../shared/types.ts'
+import type { Task, KanbanResponse, TaskSource } from '../../shared/types.ts'
 
 /**
  * Workflow mode configuration
@@ -12,6 +12,10 @@ interface ParsedTask {
   completed: boolean
   priority?: 'high' | 'medium' | 'low'
   marker?: string
+  /** Line number in source file (1-based) */
+  lineNumber?: number
+  /** Original line content */
+  originalLine?: string
 }
 
 /**
@@ -80,7 +84,7 @@ export function extractTasks(content: string, status: Task['status']): Task[] {
  * - solo mode: cc:TODO -> plan, cc:WIP -> work, cc:完了 -> done
  * - 2agent mode: cc:TODO -> plan, cc:WIP -> work, cc:完了 -> review, pm:確認済 -> done
  */
-export function extractMarkerTasks(markdown: string, mode: WorkflowMode = 'solo'): KanbanResponse {
+export function extractMarkerTasks(markdown: string, mode: WorkflowMode = 'solo', filePath?: string): KanbanResponse {
   const result: KanbanResponse = {
     plan: [],
     work: [],
@@ -90,8 +94,11 @@ export function extractMarkerTasks(markdown: string, mode: WorkflowMode = 'solo'
 
   const lines = markdown.split('\n')
 
-  for (const line of lines) {
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i] ?? ''
+    const lineNumber = i + 1 // 1-based line number
     const parsed = parseTaskLine(line)
+
     if (parsed && parsed.marker) {
       let status: Task['status']
 
@@ -118,11 +125,20 @@ export function extractMarkerTasks(markdown: string, mode: WorkflowMode = 'solo'
         status = parsed.completed ? 'done' : 'plan'
       }
 
+      // Build source information for safe updates
+      const source: TaskSource = {
+        lineNumber,
+        originalLine: line,
+        marker: parsed.marker,
+        filePath
+      }
+
       result[status].push({
         id: generateId(),
         title: parsed.title,
         status,
-        priority: parsed.priority
+        priority: parsed.priority,
+        source
       })
     }
   }
@@ -144,8 +160,9 @@ export function extractMarkerTasks(markdown: string, mode: WorkflowMode = 'solo'
  *
  * @param markdown - The markdown content to parse
  * @param mode - Workflow mode: 'solo' (default) or '2agent'
+ * @param filePath - Optional file path for source tracking
  */
-export function parsePlansMarkdown(markdown: string, mode: WorkflowMode = 'solo'): KanbanResponse {
+export function parsePlansMarkdown(markdown: string, mode: WorkflowMode = 'solo', filePath?: string): KanbanResponse {
   const result: KanbanResponse = {
     plan: [],
     work: [],
@@ -162,7 +179,7 @@ export function parsePlansMarkdown(markdown: string, mode: WorkflowMode = 'solo'
 
   // Step 1: Extract ALL marker-based tasks from the entire document
   // This is the primary source of truth for task status
-  const markerResult = extractMarkerTasks(markdown, mode)
+  const markerResult = extractMarkerTasks(markdown, mode, filePath)
   const markerTaskTitles = new Set<string>()
 
   // Collect titles of marker-based tasks to avoid duplicates
@@ -208,7 +225,10 @@ export function parsePlansMarkdown(markdown: string, mode: WorkflowMode = 'solo'
   const lines = markdown.split('\n')
   let currentSection: Task['status'] | null = null
 
-  for (const line of lines) {
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i] ?? ''
+    const lineNumber = i + 1 // 1-based line number
+
     // Check if this line is a known section header
     let matchedSection: Task['status'] | null = null
 
@@ -236,11 +256,19 @@ export function parsePlansMarkdown(markdown: string, mode: WorkflowMode = 'solo'
 
         // Skip if we already have this task from marker-based extraction
         if (!markerTaskTitles.has(normalizedTitle)) {
+          // Build source information for safe updates
+          const source: TaskSource = {
+            lineNumber,
+            originalLine: line,
+            filePath
+          }
+
           result[currentSection].push({
             id: generateId(),
             title: parsed.title,
             status: currentSection,
-            priority: parsed.priority
+            priority: parsed.priority,
+            source
           })
           markerTaskTitles.add(normalizedTitle)
         }

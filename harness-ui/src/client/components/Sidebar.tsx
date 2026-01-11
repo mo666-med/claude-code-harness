@@ -5,6 +5,7 @@ interface SidebarProps {
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+  { id: 'agent', label: 'Agent', icon: '🤖' },
   { id: 'skills', label: 'Skills', icon: '⚡' },
   { id: 'commands', label: 'Commands', icon: '📋' },
   { id: 'memory', label: 'Memory', icon: '🧠' },

@@ -138,23 +138,29 @@ export function ProjectSelector({ onProjectChange }: ProjectSelectorProps) {
             <div className="project-empty">プロジェクトがありません</div>
           ) : (
             projects.map((project) => (
-              <button
+              <div
                 key={project.id}
                 className={`project-item ${project.id === activeProjectId ? 'active' : ''}`}
                 onClick={() => handleSelect(project)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === 'Enter' && handleSelect(project)}
               >
                 <span className="project-item-icon">
                   {project.id === activeProjectId ? '✓' : ''}
                 </span>
                 <span className="project-item-name">{project.name}</span>
-                <button
+                <span
                   className="project-item-remove"
                   onClick={(e) => handleRemove(e, project.id)}
+                  role="button"
+                  tabIndex={0}
                   title="削除"
+                  onKeyDown={(e) => e.key === 'Enter' && handleRemove(e as unknown as React.MouseEvent, project.id)}
                 >
                   ×
-                </button>
-              </button>
+                </span>
+              </div>
             ))
           )}
 

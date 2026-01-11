@@ -11,9 +11,10 @@ import { InsightsPanel } from './components/InsightsPanel.tsx'
 import { Guide } from './components/Guide.tsx'
 import { Settings } from './components/Settings.tsx'
 import { ProjectSelector } from './components/ProjectSelector.tsx'
+import { AgentConsole } from './components/AgentConsole.tsx'
 import type { Project } from './lib/api.ts'
 
-type Page = 'dashboard' | 'skills' | 'commands' | 'memory' | 'rules' | 'hooks' | 'usage' | 'insights' | 'guide' | 'settings'
+type Page = 'dashboard' | 'agent' | 'skills' | 'commands' | 'memory' | 'rules' | 'hooks' | 'usage' | 'insights' | 'guide' | 'settings'
 
 // プロジェクトコンテキスト
 interface ProjectContextType {
@@ -38,6 +39,8 @@ export function App() {
     switch (currentPage) {
       case 'dashboard':
         return <Dashboard onNavigate={(page) => setCurrentPage(page as Page)} />
+      case 'agent':
+        return <AgentConsole />
       case 'skills':
         return <SkillsManager />
       case 'commands':

@@ -18,7 +18,7 @@ describe('isClaudeMemAvailable', () => {
   test('returns true when claude-mem responds with 200', async () => {
     globalThis.fetch = mock(() =>
       Promise.resolve(new Response(JSON.stringify({ status: 'ok' }), { status: 200 }))
-    ) as typeof fetch
+    ) as unknown as typeof fetch
 
     const result = await isClaudeMemAvailable()
     expect(result).toBe(true)
@@ -27,7 +27,7 @@ describe('isClaudeMemAvailable', () => {
   test('returns false when claude-mem returns non-200', async () => {
     globalThis.fetch = mock(() =>
       Promise.resolve(new Response('Not Found', { status: 404 }))
-    ) as typeof fetch
+    ) as unknown as typeof fetch
 
     const result = await isClaudeMemAvailable()
     expect(result).toBe(false)
@@ -36,7 +36,7 @@ describe('isClaudeMemAvailable', () => {
   test('returns false when fetch throws (connection refused)', async () => {
     globalThis.fetch = mock(() =>
       Promise.reject(new Error('ECONNREFUSED'))
-    ) as typeof fetch
+    ) as unknown as typeof fetch
 
     const result = await isClaudeMemAvailable()
     expect(result).toBe(false)
@@ -45,7 +45,7 @@ describe('isClaudeMemAvailable', () => {
   test('returns false on timeout', async () => {
     globalThis.fetch = mock(() =>
       new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 100))
-    ) as typeof fetch
+    ) as unknown as typeof fetch
 
     const result = await isClaudeMemAvailable()
     expect(result).toBe(false)
@@ -68,7 +68,7 @@ describe('fetchObservations', () => {
     // claude-mem returns paginated response: { items: [...], hasMore, limit, offset }
     globalThis.fetch = mock(() =>
       Promise.resolve(new Response(JSON.stringify({ items: mockObservations, hasMore: false }), { status: 200 }))
-    ) as typeof fetch
+    ) as unknown as typeof fetch
 
     const result = await fetchObservations()
     expect(result.available).toBe(true)
@@ -80,7 +80,7 @@ describe('fetchObservations', () => {
   test('returns fallback when claude-mem is not running', async () => {
     globalThis.fetch = mock(() =>
       Promise.reject(new Error('ECONNREFUSED'))
-    ) as typeof fetch
+    ) as unknown as typeof fetch
 
     const result = await fetchObservations()
     expect(result.available).toBe(false)
@@ -92,7 +92,7 @@ describe('fetchObservations', () => {
   test('returns fallback when claude-mem returns error status', async () => {
     globalThis.fetch = mock(() =>
       Promise.resolve(new Response('Internal Server Error', { status: 500 }))
-    ) as typeof fetch
+    ) as unknown as typeof fetch
 
     const result = await fetchObservations()
     expect(result.available).toBe(false)
@@ -103,7 +103,7 @@ describe('fetchObservations', () => {
   test('returns fallback when response is not valid JSON', async () => {
     globalThis.fetch = mock(() =>
       Promise.resolve(new Response('Not JSON', { status: 200 }))
-    ) as typeof fetch
+    ) as unknown as typeof fetch
 
     const result = await fetchObservations()
     expect(result.available).toBe(false)
@@ -114,7 +114,7 @@ describe('fetchObservations', () => {
     // claude-mem returns paginated response: { items: [...], hasMore, limit, offset }
     globalThis.fetch = mock(() =>
       Promise.resolve(new Response(JSON.stringify({ items: [], hasMore: false }), { status: 200 }))
-    ) as typeof fetch
+    ) as unknown as typeof fetch
 
     const result = await fetchObservations()
     expect(result.available).toBe(true)
@@ -135,7 +135,7 @@ describe('fetchObservations', () => {
     globalThis.fetch = mock((url: string | URL | Request) => {
       capturedUrl = url.toString()
       return Promise.resolve(new Response(JSON.stringify({ items: mockObservations, hasMore: false }), { status: 200 }))
-    }) as typeof fetch
+    }) as unknown as typeof fetch
 
     await fetchObservations({ limit: 5 })
     expect(capturedUrl).toContain('limit=5')
@@ -147,7 +147,7 @@ describe('fetchObservations', () => {
     globalThis.fetch = mock((url: string | URL | Request) => {
       capturedUrl = url.toString()
       return Promise.resolve(new Response(JSON.stringify({ items: [], hasMore: false }), { status: 200 }))
-    }) as typeof fetch
+    }) as unknown as typeof fetch
 
     await fetchObservations({ type: 'decision' })
     expect(capturedUrl).toContain('type=decision')
@@ -157,7 +157,7 @@ describe('fetchObservations', () => {
 describe('Fallback UI behavior', () => {
   test('fallback response has correct structure', async () => {
     const originalFetch = globalThis.fetch
-    globalThis.fetch = mock(() => Promise.reject(new Error('ECONNREFUSED'))) as typeof fetch
+    globalThis.fetch = mock(() => Promise.reject(new Error('ECONNREFUSED'))) as unknown as typeof fetch
 
     const result: ClaudeMemResponse = await fetchObservations()
 
@@ -172,7 +172,7 @@ describe('Fallback UI behavior', () => {
 
   test('fallback message is user-friendly', async () => {
     const originalFetch = globalThis.fetch
-    globalThis.fetch = mock(() => Promise.reject(new Error('ECONNREFUSED'))) as typeof fetch
+    globalThis.fetch = mock(() => Promise.reject(new Error('ECONNREFUSED'))) as unknown as typeof fetch
 
     const result = await fetchObservations()
 

@@ -258,14 +258,44 @@ export function AgentConsole({ onSessionChange }: AgentConsoleProps) {
     }))
   }, [pendingQuestion])
 
-  // Handle task selection - generate prompt template
+  // Handle task selection - generate prompt template with guardrails
   const handleTaskSelect = useCallback((task: Task) => {
-    const template = `「${task.title}」タスクを実行してください。完了したら報告してください。`
+    // Safe execution template that prevents runaway behavior and aligns with harness philosophy:
+    // 1. Scope limitation: Only this specific task
+    // 2. Plans.md protection: State updates via UI API only
+    // 3. Confirmation before changes: Propose changes before applying
+    // 4. Clear acceptance criteria and verification
+    // 5. Evidence requirements for completion
+    const template = `【タスク実行リクエスト】
+
+■ タスク: ${task.title}
+
+■ 禁止事項:
+- Plans.md は直接編集しない（状態更新はUIのマーカー更新で行う）
+- 指定タスク以外のファイル変更は事前確認なしに行わない
+
+■ 実行手順:
+1. 変更対象ファイル・理由・差分方針を先に提示し、承認を取る
+2. 承認後、変更を実施
+3. 検証コマンド（例: bun test, bun run typecheck）を実行
+4. 完了報告を出す
+
+■ 受入条件:
+- typecheck が通ること
+- 既存テストが壊れないこと
+- 新規機能にはテストを追加すること（可能な場合）
+
+■ 完了時の証跡（必須）:
+- 変更点サマリ（どのファイルを何のために変更したか）
+- 実行したコマンドと結果
+- 未解決の課題があれば明記
+
+上記のタスクを実行してください。`
     setPrompt(template)
     promptInputRef.current?.focus()
   }, [])
 
-  // Handle task completion - update marker
+  // Handle task completion - update marker with state transition validation
   const handleTaskCompletion = useCallback(async (task: Task, newMarker: string) => {
     if (!task.source || isUpdatingTask) return
 
@@ -273,12 +303,16 @@ export function AgentConsole({ onSessionChange }: AgentConsoleProps) {
     setTaskUpdateError(null)
 
     try {
+      // Pass workflowMode and actorRole for state transition validation
+      // In 2-agent mode, these are required for proper validation
       await updateTaskMarker(
         task.source.lineNumber,
         task.source.originalLine,
         task.source.marker ?? 'cc:WIP',
         newMarker,
-        activeProject?.path
+        activeProject?.path,
+        workflowMode,
+        agentRole
       )
 
       // Refresh plans data after successful update
@@ -288,13 +322,16 @@ export function AgentConsole({ onSessionChange }: AgentConsoleProps) {
       if ((error as Error & { conflict?: TaskConflictError }).conflict) {
         const conflictError = (error as Error & { conflict: TaskConflictError }).conflict
         setTaskUpdateError(`${conflictError.error}\n${conflictError.suggestion}`)
+      } else if ((error as Error & { invalidTransition?: boolean }).invalidTransition) {
+        // Handle 422 invalid state transition error
+        setTaskUpdateError(`状態遷移エラー: ${(error as Error).message}`)
       } else {
         setTaskUpdateError(error instanceof Error ? error.message : '更新に失敗しました')
       }
     } finally {
       setIsUpdatingTask(false)
     }
-  }, [activeProject?.path, isUpdatingTask, refreshPlans])
+  }, [activeProject?.path, isUpdatingTask, refreshPlans, workflowMode, agentRole])
 
   // Show completion dialog when execution completes (Task 8.1 修正: 先頭固定→ユーザー選択)
   useEffect(() => {
@@ -461,22 +498,41 @@ export function AgentConsole({ onSessionChange }: AgentConsoleProps) {
     return `agent-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
   }
 
+  // Pending registration callbacks (to handle already-connected case)
+  const pendingRegistrations = useRef<Map<string, { resolve: () => void; reject: (e: Error) => void }>>(new Map())
+
   // Connect WebSocket and wait for registration confirmation
   function connectAndRegister(sessionId: string): Promise<void> {
     return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        pendingRegistrations.current.delete(sessionId)
+        reject(new Error('WebSocket registration timeout'))
+      }, 5000)
+
+      // Store the pending registration callback
+      pendingRegistrations.current.set(sessionId, {
+        resolve: () => {
+          clearTimeout(timeout)
+          pendingRegistrations.current.delete(sessionId)
+          resolve()
+        },
+        reject: (e: Error) => {
+          clearTimeout(timeout)
+          pendingRegistrations.current.delete(sessionId)
+          reject(e)
+        }
+      })
+
       if (wsRef.current?.readyState === WebSocket.OPEN) {
-        // Already connected, just register
+        // Already connected - send register and wait for registered response
+        console.log('[WS] Already connected, registering session:', sessionId)
         wsRef.current.send(JSON.stringify({ type: 'register_session', sessionId }))
-        resolve()
+        // Don't resolve here - wait for 'registered' message in onmessage handler
         return
       }
 
       const ws = new WebSocket(WS_URL)
       wsRef.current = ws
-
-      const timeout = setTimeout(() => {
-        reject(new Error('WebSocket connection timeout'))
-      }, 5000)
 
       ws.onopen = () => {
         console.log('[WS] Connected')
@@ -487,9 +543,12 @@ export function AgentConsole({ onSessionChange }: AgentConsoleProps) {
         try {
           const data = JSON.parse(event.data)
           // Wait for registration confirmation before resolving
-          if (data.type === 'registered' && data.sessionId === sessionId) {
-            clearTimeout(timeout)
-            resolve()
+          if (data.type === 'registered') {
+            const pending = pendingRegistrations.current.get(data.sessionId)
+            if (pending) {
+              console.log('[WS] Registration confirmed for session:', data.sessionId)
+              pending.resolve()
+            }
           }
           if (data.type === 'tool_approval_request') {
             setPendingApproval(data as ToolApprovalRequest)
@@ -515,12 +574,20 @@ export function AgentConsole({ onSessionChange }: AgentConsoleProps) {
       ws.onclose = () => {
         console.log('[WS] Disconnected')
         wsRef.current = null
+        // Reject any pending registrations
+        for (const [, pending] of pendingRegistrations.current) {
+          pending.reject(new Error('WebSocket disconnected'))
+        }
+        pendingRegistrations.current.clear()
       }
 
       ws.onerror = (e) => {
-        clearTimeout(timeout)
         console.error('[WS] Error:', e)
-        reject(new Error('WebSocket connection failed'))
+        // Reject any pending registrations
+        for (const [, pending] of pendingRegistrations.current) {
+          pending.reject(new Error('WebSocket connection failed'))
+        }
+        pendingRegistrations.current.clear()
       }
     })
   }

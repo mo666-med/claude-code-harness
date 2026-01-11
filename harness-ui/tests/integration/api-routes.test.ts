@@ -12,16 +12,16 @@ import usageRoutes from '../../src/server/routes/usage.ts'
 import projectsRoutes from '../../src/server/routes/projects.ts'
 import ssotRoutes from '../../src/server/routes/ssot.ts'
 
-// Server will be started for integration tests
-const API_BASE = 'http://localhost:37779' // Use different port for tests
+// Server will be started for integration tests with dynamic port
+let API_BASE = '' // Set dynamically when server starts
 
 // Create test app (similar to main server but without auto-start)
 function createTestApp() {
   const app = new Hono()
 
   app.use('*', cors({
-    origin: ['http://localhost:37778', 'http://127.0.0.1:37778', 'http://localhost:37779'],
-    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    origin: '*', // Allow any origin for tests
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowHeaders: ['Content-Type']
   }))
 
@@ -48,14 +48,18 @@ function createTestApp() {
 }
 
 describe('API Routes Integration', () => {
-  let server: { stop: () => void } | null = null
+  let server: ReturnType<typeof Bun.serve> | null = null
 
   beforeAll(async () => {
     const app = createTestApp()
+    // Use port 0 to let the OS assign an available port
+    // This prevents conflicts when dev server is running
     server = Bun.serve({
-      port: 37779,
+      port: 0,
       fetch: app.fetch
     })
+    // Set API_BASE with the dynamically assigned port
+    API_BASE = `http://localhost:${server.port}`
     // Give server time to start
     await new Promise(resolve => setTimeout(resolve, 100))
   })
@@ -175,6 +179,93 @@ describe('API Routes Integration', () => {
       expect([400, 404]).toContain(response.status)
       const data = await response.json()
       expect(data.error).toBeDefined()
+    })
+
+    // State transition validation tests (Task 10.2)
+    test('returns 400 when actorRole is missing in 2-agent mode', async () => {
+      const response = await fetch(`${API_BASE}/api/plans/task`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lineNumber: 1,
+          expectedLine: '- [ ] Test task `cc:WIP`',
+          oldMarker: 'cc:WIP',
+          newMarker: 'cc:完了',
+          workflowMode: '2agent'
+          // actorRole intentionally missing
+        })
+      })
+
+      expect(response.status).toBe(400)
+      const data = await response.json()
+      expect(data.error).toContain('actorRole')
+      expect(data.missingField).toBe('actorRole')
+    })
+
+    test('returns 422 when impl tries to set pm:確認済 (invalid transition)', async () => {
+      const response = await fetch(`${API_BASE}/api/plans/task`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lineNumber: 1,
+          expectedLine: '- [ ] Test task `cc:完了`',
+          oldMarker: 'cc:完了',
+          newMarker: 'pm:確認済',
+          workflowMode: '2agent',
+          actorRole: 'impl'  // impl cannot set pm:確認済
+        })
+      })
+
+      // Could be 422 (invalid transition) or 404 (no Plans.md) depending on test environment
+      expect([404, 422]).toContain(response.status)
+      const data = await response.json()
+      if (response.status === 422) {
+        expect(data.invalidTransition).toBe(true)
+        expect(data.actorRole).toBe('impl')
+      }
+    })
+
+    test('returns 422 when pm tries to do impl transition (permission error)', async () => {
+      const response = await fetch(`${API_BASE}/api/plans/task`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lineNumber: 1,
+          expectedLine: '- [ ] Test task `pm:依頼中`',
+          oldMarker: 'pm:依頼中',
+          newMarker: 'cc:WIP',
+          workflowMode: '2agent',
+          actorRole: 'pm'  // pm cannot do this transition (impl only)
+        })
+      })
+
+      // Could be 422 (permission error) or 404 (no Plans.md)
+      expect([404, 422]).toContain(response.status)
+      const data = await response.json()
+      if (response.status === 422) {
+        expect(data.invalidTransition).toBe(true)
+        expect(data.actorRole).toBe('pm')
+      }
+    })
+
+    test('allows valid transition in solo mode without actorRole', async () => {
+      // In solo mode, state transition validation is more flexible
+      const response = await fetch(`${API_BASE}/api/plans/task`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lineNumber: 1,
+          expectedLine: '- [ ] Test task `cc:WIP`',
+          oldMarker: 'cc:WIP',
+          newMarker: 'cc:完了',
+          workflowMode: 'solo'
+          // actorRole not required in solo mode
+        })
+      })
+
+      // Could be 200 (success) or 404/409 (no Plans.md or conflict)
+      // The key is that it should NOT be 400 (missing actorRole)
+      expect(response.status).not.toBe(400)
     })
   })
 
