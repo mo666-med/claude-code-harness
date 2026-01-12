@@ -141,10 +141,77 @@ AgentでWIP/Planを確認 → タスク選択 → テンプレ挿入
 
 ---
 
+## 📋 フェーズ10: Solo有料価値（速度×統制 + Review成果物） `pm:確認済`
+
+> **狙い**: “チャットUI”から脱却し、Plan→Work→Review を **状態機械として強制**する。  
+> **前提（方針）**: **ハードブロック**（抜け道なし）。止まらないUXは「ブロックしない」ではなく、**ブロックを即時解消できる導線**で作る。
+
+### 背景 / 目的
+- **背景**: 現状は Plan/Review が任意で、`cc:完了` が「根拠なし完了」になり得る（= harness思想がUIを支配していない）
+- **目的**: Solo開発でも、Plan→Work→Review が **逸脱できないフロー**として成立する
+- **有料価値**: ユーザーの思考を止めずに “次の一手” に導き、手作業より **速く・安全に**回せる
+
+### スコープ（やる）
+- タスク未選択の実行を **UIで禁止**（理由表示つき）
+- Start Work を主要CTAに統一し、**開始時に `cc:WIP` へ遷移 → 成功後に実行**（失敗時は実行不可）
+- 実行完了後は Review ステップへ自動遷移し、Review未完了の `cc:完了` を **UIで禁止**
+- Review成果物（要約/確認手順/承認履歴/実行ログ要点）を **UIで生成・保持（セッション内）**
+
+### 非スコープ（やらない）
+- 2-agent（PM/Impl）前提の体験最適化（フェーズ9までで十分）
+- Review成果物の永続化/共有（まずは **セッション内 + コピー導線**で十分）
+- “理由を書けば抜けられる” 例外ルート（方針として不採用）
+
+### 受入条件（測定可能）
+- [ ] タスク未選択では Execute/Start Work が押せない（disabled + 理由が表示される）
+- [ ] Start Work は `PATCH /api/plans/task` で `cc:WIP` 更新が成功した場合のみ実行に進む（失敗時は理由を表示）
+- [ ] Reviewチェックが完了するまで `cc:完了` 更新ができない（disabled + 未完了項目が表示される）
+- [ ] Reviewレポートが UI 上に残り、コピー可能（セッション内で再確認できる）
+- [ ] `bun run typecheck` と `bun test` が通る
+
+### 評価（Evals）
+- **tasks（シナリオ）**:
+  - Scenario S1: タスク未選択 → 実行できない → タスク選択で解消
+  - Scenario S2: Start Work → `cc:WIP` に更新成功 → 実行開始（409/422/400 は実行に進まず理由表示）
+  - Scenario S3: 実行完了 → Reviewへ遷移 → 未入力のまま `cc:完了` 不可 → 必須項目を埋めて完了できる
+  - Scenario S4: Reviewレポートが自動ドラフトされ、コピーできる
+- **graders（採点）**:
+  - outcome:
+    - `bun run typecheck`
+    - `bun test`
+  - transcript:
+    - タスク未選択のまま実行できない（抜け道なし）
+    - Review未完了のまま `cc:完了` にできない（抜け道なし）
+
+### Task 10.1: UIワークフロー状態の導入（ゲーティング） `[feature:workflow]` `pm:確認済` `priority:high`
+- [ ] AgentConsole に `sessionState`（idle/planned/working/needsReview/readyToComplete/completed）を導入
+- [ ] タスク未選択時は Execute/Start Work を disabled にし、理由を表示
+- [ ] 実行終了で `needsReview` に遷移し、Review導線を主導線にする（単一CTA）
+
+### Task 10.2: Start Work 主導線（`cc:WIP`→実行の一体化） `[feature:ux]` `pm:確認済` `priority:high`
+- [ ] Start Work を主要CTAに統一（迷わせない）
+- [ ] Start Work で `PATCH /api/plans/task` を呼び、成功したら実行開始（失敗なら実行しない）
+- [ ] 409/422/400 を UI で明示（「なぜ開始できないか」を隠さない）
+
+### Task 10.3: Reviewチェックリスト必須化 + Review成果物ドラフト `[feature:ux]` `pm:確認済` `priority:high`
+- [ ] Review必須項目（要約/確認手順）を導入し、未完了では `cc:完了` 更新を禁止
+- [ ] Reviewレポートを自動ドラフト（選択タスク名 + 実行ログ要点 + 承認履歴を埋める）
+- [ ] レポートをコピーできる導線を用意（セッション内で再確認できる）
+
+### Task 10.4: permissionMode を安全デフォルトへ寄せる（思想と挙動の整合） `[feature:security]` `pm:確認済` `priority:high`
+- [ ] `permissionMode` のデフォルトを `default` に変更（危険操作は承認フロー前提）
+- [ ] 速度が必要な場合の明示トグルを検討するなら、**デフォルトOFF**で追加（v1で必須ではない）
+
+### Task 10.5: 最小テスト + E2E手順の整備（CC-test） `[test]` `pm:確認済` `priority:medium`
+- [ ] タスク未選択ゲート / Review未完了ゲートの最小テストを追加
+- [ ] Evals（Scenario S1〜S4）の手順を README または Plans.md に追記（CC-test で再現可能に）
+
 ## 優先順位サマリー
 
 | Priority | タスク | 理由 |
 |----------|--------|------|
+| 🔴 High | 10.1, 10.2, 10.3, 10.4 | 有料価値の核（速度×統制 + Review成果物） |
 | 🔴 High | 8.1, 8.2, 8.3 | ハーネスの核心価値を可視化 |
 | 🟡 Medium | 8.4, 8.5, 8.6 | 体験向上・運用効率化 |
+| 🟡 Medium | 10.5 | 品質ゲート（抜け道が無いこと）をテストで担保 |
 | 🟢 Lower | 9.1, 9.2 | 拡張機能（2エージェント運用）|

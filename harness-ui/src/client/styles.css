@@ -5498,3 +5498,356 @@ body {
 .handoff-btn.complete-btn:hover:not(:disabled) {
   background-color: #7C3AED;
 }
+
+/* ================================================
+   Task 10: Workflow Gating & Review Panel Styles
+   ================================================ */
+
+/* Gating Notice (Task 10.1) */
+.agent-gating-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--warning-bg);
+  border: 1px solid var(--warning);
+  border-radius: var(--radius);
+  margin-top: 0.5rem;
+}
+
+.agent-gating-notice .gating-icon {
+  font-size: 1rem;
+}
+
+.agent-gating-notice .gating-text {
+  font-size: 0.8125rem;
+  color: var(--warning-foreground);
+}
+
+/* Start Work Error Display (Task 10.2) */
+.agent-start-work-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: #FEE2E2;
+  border: 1px solid #EF4444;
+  border-radius: var(--radius);
+  margin-top: 0.5rem;
+}
+
+.agent-start-work-error .error-icon {
+  font-size: 1rem;
+}
+
+.agent-start-work-error .error-text {
+  flex: 1;
+  font-size: 0.8125rem;
+  color: #991B1B;
+}
+
+.agent-start-work-error .error-dismiss {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: #991B1B;
+  padding: 0.25rem;
+}
+
+.agent-start-work-error .error-dismiss:hover {
+  color: #7F1D1D;
+}
+
+/* Review Panel Dialog (Task 10.3) */
+.review-panel-dialog {
+  background: var(--card);
+  border-radius: var(--radius);
+  width: 600px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.review-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: var(--secondary);
+  border-bottom: 1px solid var(--border);
+}
+
+.review-panel-header .review-panel-icon {
+  font-size: 1.5rem;
+}
+
+.review-panel-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--foreground);
+  margin: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.review-panel-content {
+  padding: 1.25rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Review Checklist */
+.review-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.review-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.review-field label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.review-field.required label::after {
+  content: " *";
+  color: var(--destructive);
+}
+
+.review-field textarea {
+  padding: 0.625rem;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  font-size: 0.8125rem;
+  font-family: inherit;
+  resize: vertical;
+  background: var(--input);
+  color: var(--foreground);
+}
+
+.review-field textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2);
+}
+
+.review-field textarea::placeholder {
+  color: var(--muted-foreground);
+}
+
+/* Review Report Preview */
+.review-report-preview {
+  margin-top: 1rem;
+  background: var(--muted);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.review-report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  background: var(--secondary);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.review-copy-btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.6875rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.review-copy-btn:hover {
+  background: #EA580C;
+}
+
+.review-report-content {
+  padding: 0.75rem;
+  font-size: 0.75rem;
+  font-family: monospace;
+  white-space: pre-wrap;
+  max-height: 150px;
+  overflow-y: auto;
+  color: var(--muted-foreground);
+}
+
+/* Review Gate Notice */
+.review-gate-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--warning-bg);
+  border: 1px solid var(--warning);
+  border-radius: var(--radius);
+  margin-top: 1rem;
+}
+
+.review-gate-notice .gate-icon {
+  font-size: 1rem;
+}
+
+.review-gate-notice .gate-text {
+  font-size: 0.8125rem;
+  color: var(--warning-foreground);
+}
+
+/* Review Panel Actions */
+.review-panel-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: var(--muted);
+  border-top: 1px solid var(--border);
+}
+
+.review-panel-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.review-panel-skip {
+  background: var(--muted);
+  color: var(--muted-foreground);
+  border: 1px solid var(--border);
+}
+
+.review-panel-skip:hover:not(:disabled) {
+  background: var(--secondary);
+}
+
+.review-panel-complete {
+  background: var(--success);
+  color: white;
+  border: none;
+}
+
+.review-panel-complete:hover:not(:disabled) {
+  background: #16A34A;
+}
+
+.review-panel-complete:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.review-panel-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Fix 1: Last Review Section - 完了後もレポート確認・コピー可能 */
+.last-review-section {
+  background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+  border: 1px solid #BBF7D0;
+  border-radius: 0.5rem;
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+}
+
+.last-review-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.last-review-icon {
+  font-size: 1rem;
+}
+
+.last-review-title {
+  flex: 1;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #166534;
+}
+
+.last-review-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.last-review-copy-btn,
+.last-review-clear-btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.6875rem;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.last-review-copy-btn {
+  background: #22C55E;
+  color: white;
+}
+
+.last-review-copy-btn:hover {
+  background: #16A34A;
+}
+
+.last-review-clear-btn {
+  background: transparent;
+  color: #6B7280;
+}
+
+.last-review-clear-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #374151;
+}
+
+.last-review-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.last-review-field {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.last-review-label {
+  flex-shrink: 0;
+  font-weight: 500;
+  color: #166534;
+  min-width: 4rem;
+}
+
+.last-review-value {
+  color: #374151;
+  word-break: break-word;
+  white-space: pre-wrap;
+}

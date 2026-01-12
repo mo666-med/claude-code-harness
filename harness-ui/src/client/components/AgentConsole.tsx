@@ -24,6 +24,9 @@ import type {
   GuardrailEvent,
   AgentRole,
   HandoffStatus,
+  SessionState,
+  ReviewReport,
+  ReviewChecklist,
 } from '../../shared/types.ts'
 
 // API base URL
@@ -80,10 +83,28 @@ export function AgentConsole({ onSessionChange }: AgentConsoleProps) {
   const [workflowMode, setWorkflowMode] = useState<WorkflowMode>('solo')
   const { plans, loading: plansLoading, refresh: refreshPlans } = usePlans(workflowMode, activeProject?.path)
   const [showPlansPanel, setShowPlansPanel] = useState(true)
-  const [completionTask, setCompletionTask] = useState<Task | null>(null)
-  const [showCompletionDialog, setShowCompletionDialog] = useState(false)
   const [isUpdatingTask, setIsUpdatingTask] = useState(false)
   const [taskUpdateError, setTaskUpdateError] = useState<string | null>(null)
+
+  // Session State for workflow gating (Task 10.1)
+  const [sessionState, setSessionState] = useState<SessionState>('idle')
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+
+  // Review Report state (Task 10.3)
+  const [reviewReport, setReviewReport] = useState<ReviewReport | null>(null)
+  const [reviewChecklist, setReviewChecklist] = useState<ReviewChecklist>({
+    summary: '',
+    verificationSteps: '',
+    executedCommands: '',
+    unresolvedIssues: '',
+  })
+  const [showReviewPanel, setShowReviewPanel] = useState(false)
+
+  // Fix 1: 完了後もReviewレポートを保持（セッション内で再確認可能）
+  const [lastReviewReport, setLastReviewReport] = useState<ReviewReport | null>(null)
+
+  // Start Work error state (Task 10.2)
+  const [startWorkError, setStartWorkError] = useState<string | null>(null)
 
   // Right sidebar state (Task 8.4-8.6)
   const [showRightSidebar, setShowRightSidebar] = useState(true)
@@ -258,8 +279,13 @@ export function AgentConsole({ onSessionChange }: AgentConsoleProps) {
     }))
   }, [pendingQuestion])
 
-  // Handle task selection - generate prompt template with guardrails
+  // Handle task selection - set sessionState to 'planned' and generate prompt template
   const handleTaskSelect = useCallback((task: Task) => {
+    // Update session state (Task 10.1)
+    setSelectedTask(task)
+    setSessionState('planned')
+    setStartWorkError(null)
+
     // Safe execution template that prevents runaway behavior and aligns with harness philosophy:
     // 1. Scope limitation: Only this specific task
     // 2. Plans.md protection: State updates via UI API only
@@ -296,8 +322,9 @@ export function AgentConsole({ onSessionChange }: AgentConsoleProps) {
   }, [])
 
   // Handle task completion - update marker with state transition validation
-  const handleTaskCompletion = useCallback(async (task: Task, newMarker: string) => {
-    if (!task.source || isUpdatingTask) return
+  // Fix 3: 戻り値で成功/失敗を返す（booleanを返す）
+  const handleTaskCompletion = useCallback(async (task: Task, newMarker: string): Promise<boolean> => {
+    if (!task.source || isUpdatingTask) return false
 
     setIsUpdatingTask(true)
     setTaskUpdateError(null)
@@ -317,7 +344,7 @@ export function AgentConsole({ onSessionChange }: AgentConsoleProps) {
 
       // Refresh plans data after successful update
       await refreshPlans()
-      setCompletionTask(null)
+      return true // 成功
     } catch (error) {
       if ((error as Error & { conflict?: TaskConflictError }).conflict) {
         const conflictError = (error as Error & { conflict: TaskConflictError }).conflict
@@ -328,20 +355,63 @@ export function AgentConsole({ onSessionChange }: AgentConsoleProps) {
       } else {
         setTaskUpdateError(error instanceof Error ? error.message : '更新に失敗しました')
       }
+      return false // 失敗
     } finally {
       setIsUpdatingTask(false)
     }
   }, [activeProject?.path, isUpdatingTask, refreshPlans, workflowMode, agentRole])
 
-  // Show completion dialog when execution completes (Task 8.1 修正: 先頭固定→ユーザー選択)
-  useEffect(() => {
-    if (currentSession?.status === 'completed' && plans?.work && plans.work.length > 0) {
-      // Show dialog for user to select which task to mark as complete
-      // Do NOT auto-select - let user choose explicitly
-      setShowCompletionDialog(true)
-      setCompletionTask(null) // Reset selection
+  // Generate Review Report draft from execution log (Task 10.3)
+  const generateReviewReport = useCallback(() => {
+    if (!selectedTask) return
+
+    // Extract summary from messages
+    const toolUses = messages.filter(m => m.type === 'tool_use')
+    const errors = messages.filter(m => m.type === 'error')
+    const approvals = guardrailEvents.filter(e => e.type === 'approved' || e.type === 'denied')
+
+    const executionLogSummary = [
+      `ツール使用: ${toolUses.length}回`,
+      toolUses.slice(0, 5).map(m => `- ${m.toolName}`).join('\n'),
+      errors.length > 0 ? `エラー: ${errors.length}件` : '',
+    ].filter(Boolean).join('\n')
+
+    const approvalHistory = approvals.map(e =>
+      `${e.type === 'approved' ? '✓' : '✕'} ${e.toolName}${e.reason ? `: ${e.reason}` : ''}`
+    )
+
+    const report: ReviewReport = {
+      taskId: selectedTask.id,
+      taskTitle: selectedTask.title,
+      checklist: reviewChecklist,
+      executionLogSummary,
+      approvalHistory,
+      createdAt: new Date().toISOString(),
+      isComplete: Boolean(reviewChecklist.summary.trim() && reviewChecklist.verificationSteps.trim()),
     }
-  }, [currentSession?.status, plans?.work])
+
+    setReviewReport(report)
+    setShowReviewPanel(true)
+  }, [selectedTask, messages, guardrailEvents, reviewChecklist])
+
+  // Check if Review is complete (Task 10.3)
+  const isReviewComplete = useMemo(() => {
+    return Boolean(reviewChecklist.summary.trim() && reviewChecklist.verificationSteps.trim())
+  }, [reviewChecklist])
+
+  // Transition to needsReview when execution completes (Task 10.1 + Task 10.3)
+  useEffect(() => {
+    if (currentSession?.status === 'completed' && sessionState === 'working') {
+      // Transition to needsReview state
+      setSessionState('needsReview')
+
+      // Generate review report draft
+      generateReviewReport()
+
+      // Show review panel instead of completion dialog
+      setShowReviewPanel(true)
+    }
+  }, [currentSession?.status, sessionState, generateReviewReport])
 
   // Skill suggestion keywords mapping (Task 8.3)
   const skillKeywords = useMemo(() => [
@@ -592,7 +662,8 @@ export function AgentConsole({ onSessionChange }: AgentConsoleProps) {
     })
   }
 
-  async function handleExecute() {
+  // Core execution logic (extracted for reuse by handleStartWork)
+  async function performExecution() {
     if (!prompt.trim() || isExecuting) return
 
     setIsExecuting(true)
@@ -620,13 +691,12 @@ export function AgentConsole({ onSessionChange }: AgentConsoleProps) {
       })
 
       // Step 3: Now call execute with the pre-registered sessionId
+      // Task 10.4: Use 'default' permissionMode for safe defaults (dangerous ops require approval)
       const request: AgentExecuteRequest = {
         prompt: convertedPrompt,
         workingDirectory: activeProject?.path,
         sessionId, // Pass the pre-generated sessionId
-        // Use acceptEdits to auto-approve file operations (Write, Edit)
-        // Our canUseTool callback handles AskUserQuestion and other tool approvals
-        permissionMode: 'acceptEdits',
+        permissionMode: 'default', // Task 10.4: Safe default (approval flow for dangerous operations)
       }
 
       const res = await fetch(`${API_BASE}/agent/execute`, {
@@ -643,11 +713,80 @@ export function AgentConsole({ onSessionChange }: AgentConsoleProps) {
       } else {
         addMessage('error', data.error || 'Execution failed')
         setIsExecuting(false)
+        // Revert session state on failure
+        if (selectedTask) {
+          setSessionState('planned')
+        } else {
+          setSessionState('idle')
+        }
       }
     } catch (error) {
       addMessage('error', error instanceof Error ? error.message : 'Network error')
       setIsExecuting(false)
+      // Revert session state on failure
+      if (selectedTask) {
+        setSessionState('planned')
+      } else {
+        setSessionState('idle')
+      }
     }
+  }
+
+  // Handle Execute button click (for direct execution without task selection)
+  async function handleExecute() {
+    // Task 10.1: Block execution without task selection (hard gate)
+    if (sessionState === 'idle') {
+      // This should not happen if UI is correctly gating, but provide fallback
+      setStartWorkError('タスクを選択してください')
+      return
+    }
+
+    setSessionState('working')
+    await performExecution()
+  }
+
+  // Handle Start Work - update to cc:WIP first, then execute (Task 10.2)
+  async function handleStartWork() {
+    if (!selectedTask || !prompt.trim() || isExecuting) return
+
+    setStartWorkError(null)
+
+    // If task already has cc:WIP marker, skip update and proceed to execution
+    const currentMarker = selectedTask.source?.marker
+    const needsWIPUpdate = currentMarker && !currentMarker.includes('WIP')
+
+    if (needsWIPUpdate && selectedTask.source) {
+      try {
+        // Step 1: Update marker to cc:WIP
+        await updateTaskMarker(
+          selectedTask.source.lineNumber,
+          selectedTask.source.originalLine,
+          currentMarker ?? 'cc:TODO',
+          'cc:WIP',
+          activeProject?.path,
+          workflowMode,
+          agentRole
+        )
+
+        // Refresh plans after successful update
+        await refreshPlans()
+      } catch (error) {
+        // Handle different error types (Task 10.2: 409/422/400 display)
+        if ((error as Error & { conflict?: boolean }).conflict) {
+          setStartWorkError('競合が検出されました。Plans.md を再読み込みしてください。')
+        } else if ((error as Error & { invalidTransition?: boolean }).invalidTransition) {
+          setStartWorkError(`状態遷移エラー: ${(error as Error).message}`)
+        } else {
+          setStartWorkError(error instanceof Error ? error.message : 'cc:WIP への更新に失敗しました')
+        }
+        // DO NOT proceed to execution
+        return
+      }
+    }
+
+    // Step 2: Update session state and proceed to execution
+    setSessionState('working')
+    await performExecution()
   }
 
   // Watch for session completion (status only, messages come via WebSocket)
@@ -728,8 +867,14 @@ export function AgentConsole({ onSessionChange }: AgentConsoleProps) {
 
   /**
    * Continue an existing session with a new prompt (multi-turn conversation)
+   * Fix 2 (A案): タスク未選択ではContinueも実行できない（hard block）
    */
   async function handleContinue() {
+    // Fix 2: Hard gate - タスク未選択では Continue も実行できない
+    if (!selectedTask) {
+      setStartWorkError('タスクを選択してください（Continueにもタスク選択が必要です）')
+      return
+    }
     if (!prompt.trim() || isExecuting || !currentSession) return
 
     setIsExecuting(true)
@@ -1054,7 +1199,7 @@ export function AgentConsole({ onSessionChange }: AgentConsoleProps) {
 
               <div className="agent-input-actions">
                 <span className="agent-input-hint">
-                  <kbd>⌘</kbd> + <kbd>Enter</kbd> to {currentSession ? 'continue' : 'execute'}
+                  <kbd>⌘</kbd> + <kbd>Enter</kbd> to {currentSession ? 'continue' : 'start work'}
                   {currentSession && <> | <kbd>Esc</kbd> to clear</>}
                 </span>
                 <div className="agent-action-buttons">
@@ -1069,15 +1214,25 @@ export function AgentConsole({ onSessionChange }: AgentConsoleProps) {
                       <span>New</span>
                     </button>
                   )}
+                  {/* Task 10.1 + 10.2: Start Work as main CTA with gating */}
                   <button
                     className="agent-execute-btn"
-                    onClick={currentSession && currentSession.status !== 'running' ? handleContinue : handleExecute}
-                    disabled={!prompt.trim() || isExecuting}
+                    onClick={currentSession && currentSession.status !== 'running' ? handleContinue : handleStartWork}
+                    disabled={
+                      !prompt.trim() ||
+                      isExecuting ||
+                      (sessionState === 'idle' && !selectedTask) // Task 10.1: Hard gate
+                    }
+                    title={
+                      sessionState === 'idle' && !selectedTask
+                        ? 'タスクを選択してください'
+                        : ''
+                    }
                   >
                     {isExecuting ? (
                       <>
                         <span className="agent-spinner" />
-                        <span>Executing...</span>
+                        <span>実行中...</span>
                       </>
                     ) : currentSession && currentSession.status !== 'running' ? (
                       <>
@@ -1087,12 +1242,34 @@ export function AgentConsole({ onSessionChange }: AgentConsoleProps) {
                     ) : (
                       <>
                         <span>▶</span>
-                        <span>Execute</span>
+                        <span>Start Work</span>
                       </>
                     )}
                   </button>
                 </div>
               </div>
+
+              {/* Task 10.1: Gating reason display */}
+              {sessionState === 'idle' && !selectedTask && (
+                <div className="agent-gating-notice">
+                  <span className="gating-icon">⚠️</span>
+                  <span className="gating-text">タスクを選択してから作業を開始してください</span>
+                </div>
+              )}
+
+              {/* Task 10.2: Start Work error display */}
+              {startWorkError && (
+                <div className="agent-start-work-error">
+                  <span className="error-icon">❌</span>
+                  <span className="error-text">{startWorkError}</span>
+                  <button
+                    className="error-dismiss"
+                    onClick={() => setStartWorkError(null)}
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Command Picker */}
@@ -1210,6 +1387,72 @@ export function AgentConsole({ onSessionChange }: AgentConsoleProps) {
               <div ref={messagesEndRef} />
             </div>
           </div>
+
+          {/* Fix 1: Last Review レポート表示（完了後も確認・コピー可能） */}
+          {lastReviewReport && !showReviewPanel && (
+            <div className="last-review-section">
+              <div className="last-review-header">
+                <span className="last-review-icon">📋</span>
+                <span className="last-review-title">Last Review: {lastReviewReport.taskTitle}</span>
+                <div className="last-review-actions">
+                  <button
+                    className="last-review-copy-btn"
+                    onClick={() => {
+                      const reportText = `## Review: ${lastReviewReport.taskTitle}
+
+### 変更概要
+${lastReviewReport.checklist.summary || '(未入力)'}
+
+### 確認手順
+${lastReviewReport.checklist.verificationSteps || '(未入力)'}
+
+### 実行コマンド
+${lastReviewReport.checklist.executedCommands || '(なし)'}
+
+### 実行ログ概要
+${lastReviewReport.executionLogSummary}
+
+### ツール承認履歴
+${lastReviewReport.approvalHistory.length > 0 ? lastReviewReport.approvalHistory.join('\n') : '(なし)'}
+
+### 未解決の課題
+${lastReviewReport.checklist.unresolvedIssues || '(なし)'}
+
+---
+Generated: ${lastReviewReport.createdAt}`
+                      navigator.clipboard.writeText(reportText)
+                    }}
+                    title="レポートをコピー"
+                  >
+                    📋 コピー
+                  </button>
+                  <button
+                    className="last-review-clear-btn"
+                    onClick={() => setLastReviewReport(null)}
+                    title="閉じる"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+              <div className="last-review-content">
+                <div className="last-review-field">
+                  <span className="last-review-label">概要:</span>
+                  <span className="last-review-value">{lastReviewReport.checklist.summary}</span>
+                </div>
+                <div className="last-review-field">
+                  <span className="last-review-label">確認:</span>
+                  <span className="last-review-value">{lastReviewReport.checklist.verificationSteps}</span>
+                </div>
+                {lastReviewReport.checklist.executedCommands && (
+                  <div className="last-review-field">
+                    <span className="last-review-label">コマンド:</span>
+                    <span className="last-review-value">{lastReviewReport.checklist.executedCommands}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
           {/* Right Sidebar - Task 8.4-8.6 */}
           {showRightSidebar && (
@@ -1719,34 +1962,110 @@ export function AgentConsole({ onSessionChange }: AgentConsoleProps) {
         </div>
       )}
 
-      {/* Task Completion Dialog - ユーザーがタスクを選択して完了マーク */}
-      {showCompletionDialog && plans?.work && plans.work.length > 0 && (
+      {/* Task 10.3: Review Panel - 必須項目入力 + Review 成果物 */}
+      {showReviewPanel && sessionState === 'needsReview' && selectedTask && (
         <div className="tool-approval-overlay">
-          <div className="task-completion-dialog">
-            <div className="task-completion-header">
-              <span className="task-completion-icon">✅</span>
-              <h3>完了するタスクを選択してください</h3>
+          <div className="review-panel-dialog">
+            <div className="review-panel-header">
+              <span className="review-panel-icon">📝</span>
+              <h3>Review: {selectedTask.title}</h3>
             </div>
-            <div className="task-completion-content">
-              {/* Task Selection List */}
-              <div className="task-selection-list">
-                {plans.work.map((task) => (
-                  <button
-                    key={task.id}
-                    className={`task-selection-item ${completionTask?.id === task.id ? 'selected' : ''}`}
-                    onClick={() => setCompletionTask(task)}
-                    disabled={isUpdatingTask}
-                  >
-                    <span className="task-selection-radio">
-                      {completionTask?.id === task.id ? '●' : '○'}
-                    </span>
-                    <span className="task-selection-title">{task.title}</span>
-                    {task.source?.marker && (
-                      <span className="task-completion-marker">{task.source.marker}</span>
-                    )}
-                  </button>
-                ))}
+            <div className="review-panel-content">
+              {/* Required Checklist Fields */}
+              <div className="review-checklist">
+                <div className="review-field required">
+                  <label htmlFor="review-summary">変更概要（必須）</label>
+                  <textarea
+                    id="review-summary"
+                    value={reviewChecklist.summary}
+                    onChange={(e) => setReviewChecklist((prev) => ({ ...prev, summary: e.target.value }))}
+                    placeholder="この作業で何を変更しましたか？"
+                    rows={3}
+                  />
+                </div>
+                <div className="review-field required">
+                  <label htmlFor="review-verification">確認手順（必須）</label>
+                  <textarea
+                    id="review-verification"
+                    value={reviewChecklist.verificationSteps}
+                    onChange={(e) => setReviewChecklist((prev) => ({ ...prev, verificationSteps: e.target.value }))}
+                    placeholder="どうやって動作確認しましたか？"
+                    rows={3}
+                  />
+                </div>
+                <div className="review-field">
+                  <label htmlFor="review-commands">実行コマンド</label>
+                  <textarea
+                    id="review-commands"
+                    value={reviewChecklist.executedCommands}
+                    onChange={(e) => setReviewChecklist((prev) => ({ ...prev, executedCommands: e.target.value }))}
+                    placeholder="typecheck, test などの実行結果"
+                    rows={2}
+                  />
+                </div>
+                <div className="review-field">
+                  <label htmlFor="review-issues">未解決の課題</label>
+                  <textarea
+                    id="review-issues"
+                    value={reviewChecklist.unresolvedIssues}
+                    onChange={(e) => setReviewChecklist((prev) => ({ ...prev, unresolvedIssues: e.target.value }))}
+                    placeholder="あれば記載"
+                    rows={2}
+                  />
+                </div>
               </div>
+
+              {/* Auto-generated Report Preview */}
+              {reviewReport && (
+                <div className="review-report-preview">
+                  <div className="review-report-header">
+                    <span>📋 Review レポート</span>
+                    <button
+                      className="review-copy-btn"
+                      onClick={() => {
+                        const reportText = `## Review: ${reviewReport.taskTitle}
+
+### 変更概要
+${reviewChecklist.summary || '(未入力)'}
+
+### 確認手順
+${reviewChecklist.verificationSteps || '(未入力)'}
+
+### 実行コマンド
+${reviewChecklist.executedCommands || '(なし)'}
+
+### 実行ログ概要
+${reviewReport.executionLogSummary}
+
+### ツール承認履歴
+${reviewReport.approvalHistory.length > 0 ? reviewReport.approvalHistory.join('\n') : '(なし)'}
+
+### 未解決の課題
+${reviewChecklist.unresolvedIssues || '(なし)'}
+
+---
+Generated: ${new Date().toISOString()}`
+                        navigator.clipboard.writeText(reportText)
+                      }}
+                      title="レポートをコピー"
+                    >
+                      📋 コピー
+                    </button>
+                  </div>
+                  <pre className="review-report-content">
+                    {reviewReport.executionLogSummary}
+                  </pre>
+                </div>
+              )}
+
+              {/* Completion Gate Notice */}
+              {!isReviewComplete && (
+                <div className="review-gate-notice">
+                  <span className="gate-icon">⚠️</span>
+                  <span className="gate-text">必須項目（変更概要・確認手順）を入力してください</span>
+                </div>
+              )}
+
               {taskUpdateError && (
                 <div className="task-completion-error">
                   <span>⚠️</span>
@@ -1754,52 +2073,72 @@ export function AgentConsole({ onSessionChange }: AgentConsoleProps) {
                 </div>
               )}
             </div>
-            <div className="task-completion-actions">
+            <div className="review-panel-actions">
               <button
-                className="task-completion-btn task-completion-skip"
+                className="review-panel-btn review-panel-skip"
                 onClick={() => {
-                  setShowCompletionDialog(false)
-                  setCompletionTask(null)
+                  setShowReviewPanel(false)
+                  setSessionState('planned')
                   setTaskUpdateError(null)
                 }}
                 disabled={isUpdatingTask}
               >
-                <span>スキップ</span>
+                <span>後で</span>
               </button>
-              {taskUpdateError && (
-                <button
-                  className="task-completion-btn task-completion-refresh"
-                  onClick={() => {
-                    refreshPlans()
-                    setCompletionTask(null)
-                    setTaskUpdateError(null)
-                  }}
-                >
-                  <span>再読み込み</span>
-                </button>
-              )}
-              {!taskUpdateError && completionTask && completionTask.source && (
-                <button
-                  className="task-completion-btn task-completion-done"
-                  onClick={async () => {
-                    await handleTaskCompletion(completionTask, workflowMode === 'solo' ? 'cc:完了' : 'cc:完了')
-                    setShowCompletionDialog(false)
-                  }}
-                  disabled={isUpdatingTask}
-                >
-                  {isUpdatingTask ? (
-                    <>
-                      <span className="agent-spinner" />
-                      <span>更新中...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>✓</span>
-                      <span>完了マーク</span>
-                    </>
-                  )}
-                </button>
-              )}
+              <button
+                className="review-panel-btn review-panel-complete"
+                onClick={async () => {
+                  if (!selectedTask?.source || !isReviewComplete) return
+
+                  // Fix 3: 戻り値で成功/失敗を判定
+                  const success = await handleTaskCompletion(selectedTask, 'cc:完了')
+                  if (success) {
+                    // Fix 1: 完了前にレポートを保存（セッション内で再確認可能）
+                    if (reviewReport) {
+                      const finalReport: ReviewReport = {
+                        ...reviewReport,
+                        checklist: { ...reviewChecklist },
+                        isComplete: true,
+                      }
+                      setLastReviewReport(finalReport)
+                    }
+
+                    setShowReviewPanel(false)
+                    setSessionState('completed')
+
+                    // Fix 2 (B案): セッションを閉じてContinueを押せなくする
+                    setCurrentSession(null)
+                    setMessages([])
+                    setPrompt('')
+
+                    // Reset for next task
+                    setSelectedTask(null)
+                    setReviewChecklist({
+                      summary: '',
+                      verificationSteps: '',
+                      executedCommands: '',
+                      unresolvedIssues: '',
+                    })
+                    setReviewReport(null)
+                    setSessionState('idle')
+                  }
+                  // 失敗時はパネルを閉じない・レポートも消さない（taskUpdateError が表示される）
+                }}
+                disabled={isUpdatingTask || !isReviewComplete}
+                title={!isReviewComplete ? '必須項目を入力してください' : ''}
+              >
+                {isUpdatingTask ? (
+                  <>
+                    <span className="agent-spinner" />
+                    <span>更新中...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>✓</span>
+                    <span>完了マーク</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>

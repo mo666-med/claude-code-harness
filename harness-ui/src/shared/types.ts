@@ -366,3 +366,43 @@ export interface HandoffStatus {
   /** Tasks currently being worked on (cc:WIP) */
   inProgressCount: number
 }
+
+// Session State Types (Task 10.1)
+/**
+ * UI workflow state for enforcing Plan→Work→Review cycle
+ * - idle: No task selected
+ * - planned: Task selected, ready to start work
+ * - working: Execution in progress
+ * - needsReview: Execution completed, Review required before completion
+ * - readyToComplete: Review completed, can mark as done
+ * - completed: Task marked as done
+ */
+export type SessionState = 'idle' | 'planned' | 'working' | 'needsReview' | 'readyToComplete' | 'completed'
+
+// Review Report Types (Task 10.3)
+export interface ReviewChecklist {
+  /** 変更概要（必須） */
+  summary: string
+  /** 確認手順（必須） */
+  verificationSteps: string
+  /** 実行したコマンド */
+  executedCommands?: string
+  /** 未解決の課題 */
+  unresolvedIssues?: string
+}
+
+export interface ReviewReport {
+  /** Task being reviewed */
+  taskId: string
+  taskTitle: string
+  /** Checklist completion status */
+  checklist: ReviewChecklist
+  /** Auto-generated execution log summary */
+  executionLogSummary: string
+  /** Tool approval history summary */
+  approvalHistory: string[]
+  /** Timestamp */
+  createdAt: string
+  /** Whether all required fields are filled */
+  isComplete: boolean
+}
