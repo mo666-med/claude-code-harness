@@ -7,6 +7,38 @@
 
 ## [Unreleased]
 
+## [2.7.14] - 2026-01-13
+
+### Added
+
+- **Review チェックリスト大幅強化（catnose チェックリスト準拠）**
+  - [catnose氏のWeb App Pre-Launch Checklist](https://catnose.me/notes/web-checklist) を参考に、ローンチ前レビューの網羅性を向上
+
+- **セキュリティレビュー拡張** (`security-review.md`)
+  - Cookie セキュリティ: HttpOnly, SameSite, Secure, Domain チェック
+  - レスポンスヘッダー: HSTS, X-Content-Type-Options, CSP, X-Frame-Options
+  - オープンリダイレクト防止: 未検証リダイレクトの検出
+  - ファイルアップロード検証: MIME, 拡張子, サイズ, パストラバーサル
+  - 決済セキュリティ: 冪等性キー, Webhook署名検証, 金額改ざん防止
+
+- **SEO/OGP レビュー新規追加** (`seo-review.md`)
+  - 基本メタタグ: title, description, canonical, viewport
+  - OGP: og:title, og:description, og:image, og:url
+  - Twitter Card: card, title, description, image
+  - クローラビリティ: robots.txt, sitemap.xml, noindex残存チェック
+  - HTTP ステータス: エラーページの正しいステータス返却
+
+- **品質レビュー拡張** (`quality-review.md`)
+  - クロスプラットフォーム: レスポンシブ, スクロールバー問題, 長文入力対応
+  - Web基盤: favicon, apple-touch-icon, lang属性, charset
+  - LocalStorage/Cookie管理: 有効期限, サードパーティCookie依存
+
+### Changed
+
+- **品質判定ゲート更新** (`SKILL.md`)
+  - SEO/OGP 重点レビュー条件を追加（src/pages/, public/, layout.tsx）
+  - クロスプラットフォーム重点レビュー条件を追加（*.css, tailwind）
+
 ## [2.7.12] - 2026-01-11
 
 ### Added

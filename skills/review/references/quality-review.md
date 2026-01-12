@@ -121,8 +121,73 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 
 ---
 
+### 4. クロスプラットフォーム
+
+| チェック | 問題 | 重大度 | 改善 |
+|---------|------|--------|------|
+| レスポンシブ未対応 | 固定幅（`width: 1200px`）、viewport meta 未設定 | 中 | `max-width` + メディアクエリ |
+| スクロールバー問題 | `100vw` 使用による横スクロール | 低 | `100%` または `calc(100vw - スクロールバー幅)` |
+| 長文入力未対応 | overflow/truncate 未設定で UI 崩れ | 低 | `overflow-hidden`, `text-overflow: ellipsis` |
+| フォント未指定 | system-ui/font-family 未設定 | 低 | システムフォントスタック指定 |
+| タッチターゲット | 小さすぎるボタン（< 44px） | 中 | 最小 44x44px |
+
+**検出パターン**:
+```css
+/* ❌ 問題: 固定幅 */
+.container { width: 1200px; }
+
+/* ✅ 改善: レスポンシブ */
+.container { max-width: 1200px; width: 100%; }
+
+/* ❌ 問題: 100vw（スクロールバーで崩れる） */
+.full-width { width: 100vw; }
+
+/* ✅ 改善 */
+.full-width { width: 100%; }
+```
+
+### 5. Web 基盤チェック
+
+| チェック | 問題 | 重大度 | 改善 |
+|---------|------|--------|------|
+| favicon 未設定 | ブラウザタブにアイコンなし | 低 | `<link rel="icon">` 追加 |
+| apple-touch-icon 未設定 | iOS ホーム画面追加時のアイコンなし | 低 | `<link rel="apple-touch-icon">` 追加 |
+| 404/5xx ページ | デフォルトエラーページ | 低 | カスタムエラーページ作成 |
+| lang 属性未設定 | `<html>` に lang なし | 低 | `<html lang="ja">` 追加 |
+| charset 未設定 | 文字化けリスク | 低 | `<meta charset="UTF-8">` 追加 |
+
+**検出パターン**:
+```html
+<!-- ❌ 問題: 基本設定なし -->
+<html>
+<head>
+  <title>My App</title>
+</head>
+
+<!-- ✅ 改善: 基本設定あり -->
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <title>My App</title>
+</head>
+```
+
+### 6. LocalStorage / Cookie 管理
+
+| チェック | 問題 | 重大度 | 改善 |
+|---------|------|--------|------|
+| 有効期限なし | 永続的なデータ保存 | 低 | 適切な有効期限設定（7日推奨） |
+| サードパーティ Cookie 依存 | ブロックされる可能性 | 中 | ファーストパーティへ移行 |
+| 機密情報の保存 | LocalStorage にトークン等 | 中 | HttpOnly Cookie へ移行 |
+
+---
+
 ## 注意事項
 
 - プロジェクトの既存スタイルを尊重する
 - 過度な改善提案は避ける
 - 優先度を付けて報告する
+- フレームワーク固有の機能を考慮する（Next.js App Router, Remix, etc.）

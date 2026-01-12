@@ -18,6 +18,7 @@ context: fork
 | **セキュリティ** | See [references/security-review.md](references/security-review.md) |
 | **パフォーマンス** | See [references/performance-review.md](references/performance-review.md) |
 | **アクセシビリティ** | See [references/accessibility-review.md](references/accessibility-review.md) |
+| **SEO/OGP** | See [references/seo-review.md](references/seo-review.md) |
 | **Codex 統合** | See [references/codex-integration.md](references/codex-integration.md) |
 
 ## 実行手順
@@ -80,6 +81,22 @@ context: fork
 | 大規模データ処理 | ページネーション検討 |
 | useEffect 乱用 | レンダリング最適化 |
 
+#### SEO/OGP 重点レビュー
+
+| パス | チェック項目 |
+|------|------------|
+| src/pages/, app/ | title, description, canonical |
+| public/ | robots.txt, sitemap.xml, OGP 画像 |
+| layout.tsx, _document.tsx | viewport, OGP タグ, Twitter Card |
+
+#### クロスプラットフォーム重点レビュー
+
+| パス | チェック項目 |
+|------|------------|
+| src/components/, app/ | レスポンシブ（固定幅チェック） |
+| *.css, *.scss, tailwind | 100vw 使用、overflow 設定 |
+| public/ | favicon, apple-touch-icon |
+
 #### 重点レビュー統合出力
 
 ```markdown
@@ -91,8 +108,10 @@ context: fork
 | カバレッジ | ⚠️ | src/utils/helpers.ts (テストなし) |
 | a11y | ✅ | - |
 | パフォーマンス | ✅ | - |
+| SEO/OGP | ⚠️ | app/layout.tsx (OGP 未設定) |
+| クロスプラットフォーム | ✅ | - |
 
-→ セキュリティ・カバレッジを重点的にレビュー
+→ セキュリティ・カバレッジ・SEO を重点的にレビュー
 ```
 
 ### Step 2: 過去のレビュー指摘検索（Memory-Enhanced）
