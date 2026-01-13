@@ -373,6 +373,51 @@ npx prettier --write src/
 > **次にやること:**
 > 「コミットして」または「次のフェーズへ」と言ってください。
 
+### Step 6: コミットガード連携（コミット前レビュー必須化）
+
+**レビュー結果が APPROVE の場合、コミットを許可する状態ファイルを生成します。**
+
+この機能により、レビューなしでコミットしようとするとブロックされます。
+
+**動作フロー**:
+```
+/harness-review 実行
+    ↓
+レビュー結果が APPROVE
+    ↓
+.claude/state/review-approved.json を生成
+    ↓
+git commit が許可される
+    ↓
+コミット成功後、review-approved.json をクリア
+    ↓
+次回のコミット前に再度レビューが必要
+```
+
+**状態ファイルの生成（APPROVE 時に自動実行）**:
+
+```bash
+# レビュー結果が APPROVE の場合、以下を実行
+mkdir -p .claude/state
+cat > .claude/state/review-approved.json << 'EOF'
+{
+  "judgment": "APPROVE",
+  "approved_at": "{{ISO 8601 timestamp}}",
+  "reviewed_files": ["{{changed_files}}"],
+  "review_summary": "{{summary}}"
+}
+EOF
+```
+
+**コミットガードを無効化したい場合**:
+
+`.claude-code-harness.config.yaml` に以下を追加:
+```yaml
+commit_guard: false
+```
+
+> 💡 **注意**: コミットガードを無効化すると、レビューなしでコミットできるようになります。品質保証のため、本番プロジェクトでは有効のままにすることを推奨します。
+
 ---
 
 ## レビュー観点の詳細

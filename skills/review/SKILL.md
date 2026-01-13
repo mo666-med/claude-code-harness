@@ -20,6 +20,7 @@ context: fork
 | **アクセシビリティ** | See [references/accessibility-review.md](references/accessibility-review.md) |
 | **SEO/OGP** | See [references/seo-review.md](references/seo-review.md) |
 | **Codex 統合** | See [references/codex-integration.md](references/codex-integration.md) |
+| **コミット判定** | See [references/commit-judgment-logic.md](references/commit-judgment-logic.md) |
 
 ## 実行手順
 
@@ -140,7 +141,46 @@ mem-search: concepts:gotcha "{変更箇所に関連するキーワード}"
 
 > **注**: Claude-mem が未設定の場合、このステップはスキップされます。
 
-## 並列サブエージェント起動（推奨）
+## レビューモードの選択
+
+レビュースキルは 2 つのモードで動作します:
+
+```
+設定確認: .claude-code-harness.config.yaml
+    ↓
+├── review.mode: default → Claude 単体レビュー
+└── review.mode: codex   → Codex 並列レビュー（8 エキスパート）
+```
+
+### Default モード（Claude 単体）
+
+Claude が直接レビューを実行。小〜中規模の変更に最適。
+
+### Codex モード（並列エキスパート）
+
+Codex MCP 経由で 8 つの専門エキスパートを並列呼び出し:
+
+| エキスパート | 観点 |
+|-------------|------|
+| Security | OWASP Top 10、認証、インジェクション |
+| Accessibility | WCAG 2.1 AA、セマンティック HTML |
+| Performance | N+1 クエリ、レンダリング、アルゴリズム |
+| Quality | 可読性、保守性、ベストプラクティス |
+| SEO | メタタグ、OGP、サイトマップ |
+| Architect | 設計、トレードオフ、スケーラビリティ |
+| Plan Reviewer | 計画の完全性、明確性、検証可能性 |
+| Scope Analyst | 要件分析、曖昧さ検出、リスク |
+
+**Codex モード有効化**:
+```bash
+/codex-mode on
+```
+
+**詳細**: [references/codex-integration.md](references/codex-integration.md)
+
+---
+
+## 並列サブエージェント起動（Default モード）
 
 以下の条件を**両方**満たす場合、Task tool で code-reviewer を並列起動:
 

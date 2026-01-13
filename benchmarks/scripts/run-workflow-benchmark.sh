@@ -313,30 +313,137 @@ run_workflow() {
     work_prompt="/claude-code-harness:core:work-ci"
     review_prompt="/claude-code-harness:core:harness-review-ci"
   else
-    # no-plugin: 同等の手動プロンプト
-    plan_prompt="以下の要件を分析し、実装計画を Plans.md に作成してください。各タスクには cc:TODO マーカーを付けてください。質問せずに進めてください。
+    # no-plugin: CI コマンドと同等の詳細プロンプト（公平な比較のため）
+    # 違いは「プラグイン基盤（hooks/skills/agents）の有無」のみ
 
-要件:
-$task_prompt"
+    plan_prompt="## 計画作成タスク（CI用・非対話）
 
-    work_prompt="Plans.md を読み、cc:TODO のタスクを順に実装してください。確認せずに進め、完了したタスクは cc:完了 に変更してください。"
+### 制約
+- AskUserQuestion 禁止: 質問せずに進める
+- WebSearch 禁止: 外部検索なしで進める
+- 確認プロンプト禁止: 自動で完了まで進める
 
-    review_prompt="実装した変更をレビューしてください。以下の形式で出力してください:
+### 入力要件
+$task_prompt
 
+### 実行手順
+1. 要件の解析: 上記の要件を抽出
+2. タスク分解: 実装可能な単位に分解（3-7個程度）
+3. Plans.md 生成: Plans.md に書き込み
+4. 完了出力: 生成したタスク数を報告
+
+### 出力形式
+Plans.md を以下の形式で生成:
+
+\`\`\`markdown
+## タスク一覧
+
+- [ ] タスク1の説明 \`cc:TODO\`
+- [ ] タスク2の説明 \`cc:TODO\`
+- [ ] タスク3の説明 \`cc:TODO\`
+\`\`\`
+
+### 成功基準
+- Plans.md が存在する
+- 3つ以上のタスクが cc:TODO マーカー付きで記載されている
+- 各タスクが実装可能な具体的な内容である"
+
+    work_prompt="## 実装実行タスク（CI用・非対話）
+
+### 制約
+- AskUserQuestion 禁止: 質問せずに進める
+- WebSearch 禁止: 外部検索なしで進める
+- 確認プロンプト禁止: 自動で完了まで進める
+- ビルド検証: 可能なら npm test / npm run build を実行
+
+### 実行手順
+1. Plans.md 読み込み: cc:TODO マーカーのタスクを抽出
+2. 順次実装: 各タスクを実装（ファイル作成/編集）
+3. マーカー更新: 完了したタスクを cc:完了 に変更
+4. ビルド検証: npm test または npm run build を実行（可能な場合）
+5. 完了出力: 実装結果のサマリーを報告
+
+### 出力形式
+\`\`\`
+## 実装結果
+
+### 完了タスク
+- [x] タスク1 \`cc:完了\`
+- [x] タスク2 \`cc:完了\`
+
+### 作成/変更ファイル
+- src/utils/helper.ts (新規)
+- src/index.ts (変更)
+
+### ビルド結果
+- テスト: X/X passed
+- ビルド: success/failure
+\`\`\`
+
+### 成功基準
+- 1つ以上のタスクが cc:完了 になっている
+- 実装したファイルが存在する"
+
+    review_prompt="## レビュー実行タスク（CI用・非対話）
+
+### 制約
+- AskUserQuestion 禁止: 質問せずに進める
+- WebSearch 禁止: 外部検索なしで進める
+- 確認プロンプト禁止: 自動で完了まで進める
+- 修正適用禁止: レビュー結果の報告のみ（修正は行わない）
+
+### 実行手順
+変更ファイルを検出してレビューする。
+
+### 出力形式（必須: 各指摘に Severity 行を含める）
+
+\`\`\`
 ## Review Result
+
 ### Summary
-- Files Reviewed: X
-- Total Issues: X
-- Critical: X
-- High: X
-- Medium: X
-- Low: X
+- Files Reviewed: 5
+- Total Issues: 3
+- Critical: 0
+- High: 1
+- Medium: 2
+- Low: 0
 
 ### Issues
-（各指摘に Severity: Critical/High/Medium/Low を付ける）
+
+#### Issue 1
+- File: src/utils/helper.ts
+- Line: 25
+- Severity: High
+- Category: Security
+- Description: 問題の説明
+- Suggestion: 修正案
+
+#### Issue 2
+- File: src/index.ts
+- Line: 42
+- Severity: Medium
+- Category: Quality
+- Description: 問題の説明
+- Suggestion: 修正案
 
 ### Pass/Fail
-- Result: PASS または FAIL"
+- Result: PASS または FAIL
+- Reason: 判定理由
+\`\`\`
+
+### Severity 定義
+| Severity | 基準 |
+|----------|------|
+| Critical | セキュリティ脆弱性、データ損失リスク |
+| High | 重大なバグ、パフォーマンス問題 |
+| Medium | コード品質、ベストプラクティス違反 |
+| Low | スタイル、軽微な改善点 |
+
+### 成功基準
+- レビュー結果が出力されている
+- 各指摘に Severity が付与されている
+- Summary セクションに集計がある
+- Pass/Fail 判定がある"
   fi
 
   # ワークフロー開始時刻

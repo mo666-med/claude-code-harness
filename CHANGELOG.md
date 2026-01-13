@@ -7,6 +7,62 @@
 
 ## [Unreleased]
 
+## [2.8.0] - 2026-01-13
+
+### Added
+
+- **Commit Guard（コミット前レビュー必須化）** - レビュー完了前の git commit をブロック
+  - PreToolUse フック: `git commit` 検出時にレビュー完了状態をチェック
+  - PostToolUse フック: コミット成功後にレビュー承認状態をクリア
+  - `/harness-review` で APPROVE 判定後に `.claude/state/review-approved.json` を生成
+  - 設定で無効化可能: `.claude-code-harness.config.yaml` に `commit_guard: false`
+
+- **Codex モード統合（フェーズ 27）** - Codex MCP を活用した PM 役の品質ゲート機能
+  - `/codex-mode` コマンド: Codex モードの ON/OFF 切り替え、エキスパート個別設定
+  - 8 つの専門エキスパートによる並列レビュー:
+    - Security Expert: OWASP Top 10、認証、インジェクション検出
+    - Accessibility Expert: WCAG 2.1 AA 準拠チェック
+    - Performance Expert: N+1 クエリ、レンダリング最適化
+    - Quality Expert: 可読性、保守性、ベストプラクティス
+    - SEO Expert: メタタグ、OGP、サイトマップ検証
+    - Architect Expert: 設計、トレードオフ、スケーラビリティ分析
+    - Plan Reviewer Expert: 計画の完全性、明確性、検証可能性
+    - Scope Analyst Expert: 要件分析、曖昧さ検出、リスク評価
+
+- **コミット判定ロジック** (`commit-judgment-logic.md`)
+  - APPROVE: Critical/High: 0、Medium ≤ 3
+  - REQUEST CHANGES: Critical: 0、High または Medium 複数
+  - REJECT: Critical ≥ 1
+  - 自動修正ループ: REQUEST CHANGES 時に Claude が修正 → 再レビュー（最大 3 回）
+
+- **7-Section エキスパートプロンプト形式**
+  - TASK, EXPECTED OUTCOME, CONTEXT, CONSTRAINTS, MUST DO, MUST NOT DO, OUTPUT FORMAT
+  - claude-delegator の設計パターンを参考に統一
+
+- **設定ファイルテンプレート拡張** (`.claude-code-harness.config.yaml.template`)
+  - `review.mode`: default / codex 切り替え
+  - `review.judgment`: 判定機能の ON/OFF、自動修正、リトライ回数
+  - `review.codex.experts`: 8 エキスパートの個別有効化/無効化
+
+- **Commit Guard テスト** (`tests/test-commit-guard.sh`)
+  - 10 項目のテストで Commit Guard 機能を検証
+  - PreToolUse ガード、PostToolUse クリーンアップ、フック統合、設定を網羅
+
+### Changed
+
+- **review スキル** (`skills/review/SKILL.md`)
+  - レビューモード選択セクション追加（Default / Codex）
+  - Codex モード時の 8 エキスパート並列呼び出しフロー説明
+  - コミット判定リファレンスリンク追加
+
+#### Before/After
+
+| Before | After |
+|--------|-------|
+| `/harness-review` は Claude 単体でレビュー | Codex モード時は 8 エキスパートが並列レビュー |
+| レビュー結果は人間が判断 | APPROVE/REQUEST CHANGES/REJECT の自動判定 |
+| 指摘事項は手動で修正 | REQUEST CHANGES 時は自動修正ループ |
+
 ## [2.7.16] - 2026-01-13
 
 ### Added

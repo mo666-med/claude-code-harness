@@ -24,6 +24,7 @@ TASK="plan-feature"
 MODE="with-plugin"
 WATCH_MODE=false
 SESSION_NAME="bench-test"
+ITERATIONS=1
 
 # ヘルプ
 show_help() {
@@ -33,12 +34,13 @@ show_help() {
 Usage: $0 [OPTIONS]
 
 OPTIONS:
-  --task <name>     テストするタスク（デフォルト: plan-feature）
-  --mode <mode>     with-plugin または no-plugin（デフォルト: with-plugin）
-  --watch           Tmux セッションを作成してモニタリング
-  --attach          既存セッションにアタッチ
-  --kill            セッションを終了
-  --help            このヘルプを表示
+  --task <name>       テストするタスク（デフォルト: plan-feature）
+  --mode <mode>       with-plugin または no-plugin（デフォルト: with-plugin）
+  --iterations <n>    試行回数（デフォルト: 1）
+  --watch             Tmux セッションを作成してモニタリング
+  --attach            既存セッションにアタッチ
+  --kill              セッションを終了
+  --help              このヘルプを表示
 
 EXAMPLES:
   # シンプル実行（結果を stdout に）
@@ -64,6 +66,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --mode)
       MODE="$2"
+      shift 2
+      ;;
+    --iterations)
+      ITERATIONS="$2"
       shift 2
       ;;
     --watch)
@@ -108,6 +114,7 @@ run_simple() {
   echo "========================================"
   echo "Task: $TASK"
   echo "Mode: $MODE"
+  echo "Iterations: $ITERATIONS"
   echo "========================================"
   echo ""
 
@@ -121,7 +128,7 @@ run_simple() {
     --task "$TASK" \
     $with_plugin_flag \
     --no-temp-home \
-    --iteration 1
+    --iterations "$ITERATIONS"
 
   echo ""
   echo "========================================"

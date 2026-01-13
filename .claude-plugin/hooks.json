@@ -111,6 +111,16 @@
         ]
       },
       {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/run-script.js\" posttooluse-commit-cleanup",
+            "timeout": 10
+          }
+        ]
+      },
+      {
         "matcher": "Skill|Task|SlashCommand",
         "hooks": [
           {

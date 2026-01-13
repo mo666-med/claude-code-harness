@@ -65,6 +65,7 @@ msg() {
       deny_sudo) echo "Blocked: sudo is not allowed via Claude Code hooks" ;;
       ask_git_push) echo "Confirm: git push requested ($arg)" ;;
       ask_rm_rf) echo "Confirm: rm -rf requested ($arg)" ;;
+      deny_git_commit_no_review) echo "Blocked: Run /harness-review before committing. After review approval, run git commit again." ;;
       *) echo "$key $arg" ;;
     esac
     return 0
@@ -78,6 +79,7 @@ msg() {
     deny_sudo) echo "ブロック: sudo はフック経由では許可していません" ;;
     ask_git_push) echo "確認: git push を実行しようとしています（command: $arg）" ;;
     ask_rm_rf) echo "確認: rm -rf を実行しようとしています（command: $arg）" ;;
+    deny_git_commit_no_review) echo "ブロック: コミット前に /harness-review を実行してください。レビュー後、再度 git commit を実行できます。" ;;
     *) echo "$key $arg" ;;
   esac
 }
@@ -364,6 +366,42 @@ if [ "$TOOL_NAME" = "Bash" ]; then
   if echo "$COMMAND" | grep -Eiq '(^|[[:space:]])sudo([[:space:]]|$)'; then
     emit_deny "$(msg deny_sudo)"
     exit 0
+  fi
+
+  # ===== Commit Guard: レビュー完了前のコミットをブロック =====
+  if echo "$COMMAND" | grep -Eiq '(^|[[:space:]])git[[:space:]]+commit([[:space:]]|$)'; then
+    REVIEW_STATE_FILE=".claude/state/review-approved.json"
+    COMMIT_GUARD_ENABLED="true"
+
+    # 設定ファイルで無効化されているかチェック
+    CONFIG_FILE=".claude-code-harness.config.yaml"
+    if [ -f "$CONFIG_FILE" ] && command -v grep >/dev/null 2>&1; then
+      if grep -q "commit_guard:[[:space:]]*false" "$CONFIG_FILE" 2>/dev/null; then
+        COMMIT_GUARD_ENABLED="false"
+      fi
+    fi
+
+    if [ "$COMMIT_GUARD_ENABLED" = "true" ]; then
+      # レビュー承認状態をチェック
+      REVIEW_APPROVED="false"
+      if [ -f "$REVIEW_STATE_FILE" ]; then
+        if command -v jq >/dev/null 2>&1; then
+          APPROVED_AT=$(jq -r '.approved_at // empty' "$REVIEW_STATE_FILE" 2>/dev/null)
+          JUDGMENT=$(jq -r '.judgment // empty' "$REVIEW_STATE_FILE" 2>/dev/null)
+          if [ -n "$APPROVED_AT" ] && [ "$JUDGMENT" = "APPROVE" ]; then
+            REVIEW_APPROVED="true"
+          fi
+        fi
+      fi
+
+      if [ "$REVIEW_APPROVED" = "false" ]; then
+        emit_deny "$(msg deny_git_commit_no_review)"
+        exit 0
+      fi
+
+      # コミット後に承認状態をクリア（次回コミット前に再レビューを要求）
+      # Note: これは PostToolUse で行うべきだが、ここでは警告のみ
+    fi
   fi
 
   if echo "$COMMAND" | grep -Eiq '(^|[[:space:]])git[[:space:]]+push([[:space:]]|$)'; then
