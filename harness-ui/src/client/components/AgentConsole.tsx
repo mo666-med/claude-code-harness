@@ -13,6 +13,9 @@ import { usePlans } from '../hooks/usePlans.ts'
 import { useHealth } from '../hooks/useHealth.ts'
 import { updateTaskMarker, fetchSSOT, type TaskConflictError } from '../lib/api.ts'
 import { convertSlashCommand } from '../lib/command-utils.ts'
+import { LedgerPanel } from './LedgerPanel.tsx'
+import { PolicySettings } from './PolicySettings.tsx'
+import { DeliverPanel } from './DeliverPanel.tsx'
 import type {
   AgentSession,
   AgentMessage,
@@ -27,6 +30,12 @@ import type {
   SessionState,
   ReviewReport,
   ReviewChecklist,
+  LedgerEvent,
+  PolicyConfig,
+  PolicyRule,
+  PolicyScope,
+  PathCategory,
+  OperationKind,
 } from '../../shared/types.ts'
 
 // API base URL
@@ -41,6 +50,10 @@ interface ToolApprovalRequest {
   toolUseId: string
   toolName: string
   toolInput: unknown
+  isProtected?: boolean
+  protectedReason?: string
+  policyCategory?: PathCategory
+  policyOperation?: OperationKind
 }
 
 interface AgentMessageEvent {
@@ -73,7 +86,7 @@ interface AgentConsoleProps {
 }
 
 type TabType = 'execute' | 'history'
-type SidebarTabType = 'plans' | 'ssot' | 'health' | 'guardrail'
+type SidebarTabType = 'plans' | 'ssot' | 'health' | 'guardrail' | 'ledger' | 'policy' | 'deliver'
 
 export function AgentConsole({ onSessionChange }: AgentConsoleProps) {
   const { activeProject } = useProject()
@@ -120,6 +133,16 @@ export function AgentConsole({ onSessionChange }: AgentConsoleProps) {
 
   // Guardrail events history (Task 8.5)
   const [guardrailEvents, setGuardrailEvents] = useState<GuardrailEvent[]>([])
+
+  // Ledger events (Phase 11)
+  const [ledgerEvents, setLedgerEvents] = useState<LedgerEvent[]>([])
+
+  // Policy config (Phase 11)
+  const [policyConfig, setPolicyConfig] = useState<PolicyConfig>({
+    preset: 'balanced',
+    rules: [],
+    updatedAt: new Date().toISOString(),
+  })
 
   // 2-Agent Role state (Task 9.1)
   const [agentRole, setAgentRole] = useState<AgentRole>('impl')
@@ -185,12 +208,44 @@ export function AgentConsole({ onSessionChange }: AgentConsoleProps) {
 
   // Note: WebSocket connection is now handled by connectAndRegister in handleExecute
 
-  // Handle tool approval decision (Task 8.5: track guardrail events)
+  // Helper: Infer operation kind from tool name (client-side)
+  const inferOperationKind = (toolName: string): OperationKind => {
+    if (toolName === 'Read' || toolName === 'Glob' || toolName === 'Grep' || toolName === 'LSP') {
+      return 'tool_read'
+    }
+    if (toolName === 'Write') return 'tool_write'
+    if (toolName === 'Edit') return 'tool_edit'
+    if (toolName === 'Bash' || toolName === 'Shell') return 'tool_bash'
+    return 'tool_read'
+  }
+
+  // Helper: Infer path category from file path (client-side)
+  const inferPathCategory = (filePath: string | undefined): PathCategory => {
+    if (!filePath) return 'other'
+    if (filePath.includes('Plans.md') || filePath.includes('.claude/memory/')) {
+      return 'protected'
+    }
+    if (filePath.match(/\.(json|yaml|yml|toml|ini|env|config)$/i) || filePath.includes('/config/')) {
+      return 'config'
+    }
+    if (filePath.match(/\.(test|spec)\.(ts|tsx|js|jsx)$/i) || filePath.includes('/test/')) {
+      return 'test'
+    }
+    if (filePath.match(/\.(md|rst|adoc)$/i) || filePath.includes('/docs/')) {
+      return 'docs'
+    }
+    if (filePath.match(/\.(ts|tsx|js|jsx|py|rb|go|rs|java|kt|swift|cpp|c|h)$/i)) {
+      return 'code'
+    }
+    return 'other'
+  }
+
+  // Handle tool approval decision (Task 8.5: track guardrail events + Phase 11: track ledger events)
   const handleApprovalDecision = useCallback((decision: 'allow' | 'deny', reason?: string) => {
     if (!pendingApproval || !wsRef.current) return
 
     // Track guardrail event (Task 8.5)
-    const event: GuardrailEvent = {
+    const guardrailEvent: GuardrailEvent = {
       id: `guardrail-${Date.now()}`,
       type: decision === 'allow' ? 'approved' : 'denied',
       toolName: pendingApproval.toolName,
@@ -198,7 +253,28 @@ export function AgentConsole({ onSessionChange }: AgentConsoleProps) {
       timestamp: new Date().toISOString(),
       reason,
     }
-    setGuardrailEvents((prev) => [event, ...prev].slice(0, 50)) // Keep last 50 events
+    setGuardrailEvents((prev) => [guardrailEvent, ...prev].slice(0, 50)) // Keep last 50 events
+
+    // Track ledger event (Phase 11)
+    const filePath = (pendingApproval.toolInput as { file_path?: string; filePath?: string })?.file_path ||
+                    (pendingApproval.toolInput as { file_path?: string; filePath?: string })?.filePath
+    const operation = pendingApproval.policyOperation ?? inferOperationKind(pendingApproval.toolName)
+    const category = pendingApproval.policyCategory ?? inferPathCategory(filePath)
+    
+    const ledgerEvent: LedgerEvent = {
+      id: `ledger-${Date.now()}`,
+      status: decision === 'allow' ? 'approved' : 'denied',
+      operation,
+      category,
+      toolName: pendingApproval.toolName,
+      filePath,
+      input: pendingApproval.toolInput,
+      timestamp: new Date().toISOString(),
+      reason,
+      sessionId: pendingApproval.sessionId,
+      taskId: selectedTask?.id,
+    }
+    setLedgerEvents((prev) => [ledgerEvent, ...prev].slice(0, 100)) // Keep last 100 events
 
     wsRef.current.send(JSON.stringify({
       type: 'tool_approval_response',
@@ -209,7 +285,7 @@ export function AgentConsole({ onSessionChange }: AgentConsoleProps) {
     }))
 
     setPendingApproval(null)
-  }, [pendingApproval])
+  }, [pendingApproval, selectedTask])
 
   // Fetch SSOT data when tab is active (Task 8.4)
   const loadSSOT = useCallback(async () => {
@@ -233,10 +309,11 @@ export function AgentConsole({ onSessionChange }: AgentConsoleProps) {
     }
   }, [sidebarTab, ssot, ssotLoading, loadSSOT])
 
-  // Track approval request as guardrail event (Task 8.5)
+  // Track approval request as guardrail event (Task 8.5) + ledger event (Phase 11)
   useEffect(() => {
     if (pendingApproval) {
-      const event: GuardrailEvent = {
+      // Guardrail event
+      const guardrailEvent: GuardrailEvent = {
         id: `guardrail-req-${Date.now()}`,
         type: 'approval_request',
         toolName: pendingApproval.toolName,
@@ -245,13 +322,39 @@ export function AgentConsole({ onSessionChange }: AgentConsoleProps) {
       }
       setGuardrailEvents((prev) => {
         // Avoid duplicates
-        if (prev.some(e => e.toolName === event.toolName && e.type === 'approval_request' && Date.now() - new Date(e.timestamp).getTime() < 1000)) {
+        if (prev.some(e => e.toolName === guardrailEvent.toolName && e.type === 'approval_request' && Date.now() - new Date(e.timestamp).getTime() < 1000)) {
           return prev
         }
-        return [event, ...prev].slice(0, 50)
+        return [guardrailEvent, ...prev].slice(0, 50)
+      })
+
+      // Ledger event (pending)
+      const filePath = (pendingApproval.toolInput as { file_path?: string; filePath?: string })?.file_path ||
+                      (pendingApproval.toolInput as { file_path?: string; filePath?: string })?.filePath
+      const operation = pendingApproval.policyOperation ?? inferOperationKind(pendingApproval.toolName)
+      const category = pendingApproval.policyCategory ?? inferPathCategory(filePath)
+      
+      const ledgerEvent: LedgerEvent = {
+        id: `ledger-req-${Date.now()}`,
+        status: 'pending',
+        operation,
+        category,
+        toolName: pendingApproval.toolName,
+        filePath,
+        input: pendingApproval.toolInput,
+        timestamp: new Date().toISOString(),
+        sessionId: pendingApproval.sessionId,
+        taskId: selectedTask?.id,
+      }
+      setLedgerEvents((prev) => {
+        // Avoid duplicates
+        if (prev.some(e => e.toolName === ledgerEvent.toolName && e.status === 'pending' && Date.now() - new Date(e.timestamp).getTime() < 1000)) {
+          return prev
+        }
+        return [ledgerEvent, ...prev].slice(0, 100)
       })
     }
-  }, [pendingApproval])
+  }, [pendingApproval, selectedTask])
 
   // Handle question answer submission
   const handleQuestionSubmit = useCallback(() => {
@@ -1490,6 +1593,30 @@ Generated: ${lastReviewReport.createdAt}`
                     <span className="sidebar-tab-badge">{guardrailEvents.length}</span>
                   )}
                 </button>
+                <button
+                  className={`sidebar-tab ${sidebarTab === 'ledger' ? 'active' : ''}`}
+                  onClick={() => setSidebarTab('ledger')}
+                  title="操作台帳"
+                >
+                  📊
+                  {ledgerEvents.filter(e => e.status === 'pending').length > 0 && (
+                    <span className="sidebar-tab-badge">{ledgerEvents.filter(e => e.status === 'pending').length}</span>
+                  )}
+                </button>
+                <button
+                  className={`sidebar-tab ${sidebarTab === 'policy' ? 'active' : ''}`}
+                  onClick={() => setSidebarTab('policy')}
+                  title="ポリシー設定"
+                >
+                  ⚙️
+                </button>
+                <button
+                  className={`sidebar-tab ${sidebarTab === 'deliver' ? 'active' : ''}`}
+                  onClick={() => setSidebarTab('deliver')}
+                  title="Deliver ワークフロー"
+                >
+                  🚀
+                </button>
               </div>
 
               {/* Sidebar Content */}
@@ -1814,6 +1941,98 @@ Generated: ${lastReviewReport.createdAt}`
                         ))}
                       </div>
                     )}
+                  </div>
+                )}
+
+                {/* Ledger Tab */}
+                {sidebarTab === 'ledger' && (
+                  <div className="sidebar-ledger">
+                    <LedgerPanel
+                      events={ledgerEvents}
+                      onApprove={(eventId) => {
+                        const event = ledgerEvents.find((e) => e.id === eventId)
+                        if (!event || event.status !== 'pending') return
+
+                        // Update ledger event
+                        setLedgerEvents((prev) =>
+                          prev.map((e) =>
+                            e.id === eventId ? { ...e, status: 'approved' as const } : e
+                          )
+                        )
+
+                        // If this corresponds to a pending approval, approve it
+                        if (pendingApproval && event.toolName === pendingApproval.toolName) {
+                          handleApprovalDecision('allow')
+                        }
+                      }}
+                      onDeny={(eventId, reason) => {
+                        const event = ledgerEvents.find((e) => e.id === eventId)
+                        if (!event || event.status !== 'pending') return
+
+                        // Update ledger event
+                        setLedgerEvents((prev) =>
+                          prev.map((e) =>
+                            e.id === eventId ? { ...e, status: 'denied' as const, reason } : e
+                          )
+                        )
+
+                        // If this corresponds to a pending approval, deny it
+                        if (pendingApproval && event.toolName === pendingApproval.toolName) {
+                          handleApprovalDecision('deny', reason)
+                        }
+                      }}
+                      onScopeApprove={(category, operation, scope) => {
+                        // Update policy config for scope approval
+                        const newRule: PolicyRule = {
+                          category,
+                          operation,
+                          behavior: 'allow',
+                          locked: false,
+                        }
+                        setPolicyConfig((prev) => ({
+                          ...prev,
+                          rules: [...prev.rules.filter((r) => !(r.category === category && r.operation === operation)), newRule],
+                        }))
+
+                        // Approve all pending events matching this scope
+                        setLedgerEvents((prev) =>
+                          prev.map((e) =>
+                            e.status === 'pending' && e.category === category && e.operation === operation
+                              ? { ...e, status: 'auto' as const }
+                              : e
+                          )
+                        )
+                      }}
+                    />
+                  </div>
+                )}
+
+                {/* Policy Tab */}
+                {sidebarTab === 'policy' && (
+                  <div className="sidebar-policy">
+                    <PolicySettings
+                      config={policyConfig}
+                      onConfigChange={(config) => {
+                        setPolicyConfig((prev) => ({ ...prev, ...config }))
+                        // TODO: Save to localStorage or server
+                      }}
+                    />
+                  </div>
+                )}
+
+                {/* Deliver Tab */}
+                {sidebarTab === 'deliver' && (
+                  <div className="sidebar-deliver">
+                    <DeliverPanel
+                      projectPath={activeProject?.path || ''}
+                      suggestedCommitMessage={
+                        selectedTask && reviewReport
+                          ? `feat: ${selectedTask.title}\n\n${reviewReport.checklist.summary}`
+                          : undefined
+                      }
+                      taskTitle={selectedTask?.title}
+                      reviewSummary={reviewReport?.checklist.summary}
+                    />
                   </div>
                 )}
               </div>

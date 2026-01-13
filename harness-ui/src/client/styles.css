@@ -5851,3 +5851,419 @@ body {
   word-break: break-word;
   white-space: pre-wrap;
 }
+
+/* Phase 11: Ledger Panel Styles */
+.ledger-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.ledger-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ledger-panel-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.ledger-status-summary {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+}
+
+.ledger-filters {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ledger-filters select {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  font-size: 0.875rem;
+}
+
+.ledger-events {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.ledger-empty {
+  text-align: center;
+  padding: 2rem;
+  color: var(--muted-foreground);
+}
+
+.ledger-event {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem;
+  background: var(--card);
+}
+
+.ledger-event-header {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.ledger-event-status {
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.ledger-event-operation,
+.ledger-event-category {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.ledger-event-time {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.ledger-event-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.ledger-event-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.ledger-approve-btn,
+.ledger-deny-btn,
+.ledger-scope-approve-btn {
+  padding: 0.375rem 0.75rem;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ledger-approve-btn {
+  background: var(--success);
+  color: white;
+}
+
+.ledger-deny-btn {
+  background: var(--destructive);
+  color: white;
+}
+
+.ledger-scope-approve-btn {
+  background: var(--primary);
+  color: white;
+}
+
+.ledger-scope-actions {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.ledger-scope-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ledger-scope-buttons button {
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+/* Phase 11: Policy Settings Styles */
+.policy-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+.policy-settings-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.policy-preset-section label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.policy-preset-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.policy-preset-buttons button {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.policy-preset-buttons button.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.policy-preset-description {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.policy-rules-section h4,
+.policy-git-section h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.policy-category-group {
+  margin-bottom: 1rem;
+}
+
+.policy-category-group h5 {
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.policy-rule-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.policy-rule-label {
+  font-size: 0.875rem;
+}
+
+.policy-locked-badge {
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--warning);
+}
+
+.policy-locked-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+}
+
+.policy-locked-behavior {
+  font-weight: 500;
+}
+
+.policy-locked-reason {
+  color: var(--muted-foreground);
+}
+
+.policy-rule-buttons {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.policy-rule-buttons button {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  background: var(--card);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.policy-rule-buttons button.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.policy-locked-notice {
+  padding: 0.75rem;
+  background: var(--warning-bg);
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  color: var(--warning-foreground);
+}
+
+/* Phase 11: Deliver Panel Styles */
+.deliver-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+.deliver-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.deliver-panel-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.deliver-panel-loading,
+.deliver-panel-error {
+  padding: 2rem;
+  text-align: center;
+}
+
+.deliver-preflight {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  background: var(--card);
+}
+
+.deliver-preflight h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.deliver-preflight-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.deliver-warning {
+  color: var(--warning);
+  font-weight: 500;
+}
+
+.deliver-section {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  background: var(--card);
+}
+
+.deliver-section h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.deliver-commit-message,
+.deliver-pr-title,
+.deliver-pr-body {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  font-family: inherit;
+  margin-bottom: 0.5rem;
+}
+
+.deliver-commit-btn,
+.deliver-push-btn,
+.deliver-pr-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--primary);
+  color: white;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.deliver-commit-btn:disabled,
+.deliver-push-btn:disabled,
+.deliver-pr-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.deliver-release-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.deliver-release-step {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.deliver-release-step input[type="checkbox"] {
+  margin-top: 0.25rem;
+}
+
+.deliver-release-step strong {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.deliver-required {
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--warning);
+}
+
+.deliver-command {
+  display: block;
+  margin-top: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--muted);
+  border-radius: 0.25rem;
+  font-family: monospace;
+  font-size: 0.75rem;
+}
+
+.deliver-error {
+  padding: 0.75rem;
+  background: var(--destructive);
+  color: white;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+}

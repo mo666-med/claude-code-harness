@@ -16,6 +16,7 @@ import usageRoutes from './routes/usage.ts'
 import projectsRoutes from './routes/projects.ts'
 import agentRoutes from './routes/agent.ts'
 import ssotRoutes from './routes/ssot.ts'
+import deliverRoutes from './routes/deliver.ts'
 import { initializeSession } from './services/projects.ts'
 import {
   registerWsConnection,
@@ -50,6 +51,7 @@ app.route('/api/usage', usageRoutes)
 app.route('/api/projects', projectsRoutes)
 app.route('/api/agent', agentRoutes)
 app.route('/api/ssot', ssotRoutes)
+app.route('/api/deliver', deliverRoutes)
 
 // API status endpoint
 app.get('/api/status', (c) => {

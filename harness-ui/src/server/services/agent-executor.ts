@@ -17,6 +17,7 @@ import type {
   AgentExecuteRequest,
   AgentToolApprovalResponse,
 } from '../../shared/types.ts'
+import { getDefaultPolicyEngine, inferPathCategory, inferOperationKind } from './policy-engine.ts'
 
 /**
  * Session history for multi-turn conversation support
@@ -316,36 +317,8 @@ export async function* executeAgent(
       },
     }
 
-    // Safe tools that don't require approval (read-only or low-risk tools)
-    // Note: Write, Edit, Bash are intentionally excluded - they require approval
-    const SAFE_TOOLS = new Set([
-      'Read', 'Glob', 'Grep',           // Read-only file operations
-      'Task', 'TodoWrite',              // Agent management
-      'WebFetch', 'WebSearch',          // Web access (read-only)
-      'LSP', 'MCPSearch',               // Code intelligence
-      'ListMcpResourcesTool', 'ReadMcpResourceTool',  // MCP read operations
-    ])
-
-    // Protected paths that always require approval regardless of permission mode
-    const PROTECTED_PATHS = [
-      'Plans.md',
-      '.claude/memory/',
-      '.claude/memory/decisions.md',
-      '.claude/memory/patterns.md',
-    ]
-
-    // Check if a path is protected
-    const isProtectedPath = (filePath: string | undefined): boolean => {
-      if (!filePath) return false
-      return PROTECTED_PATHS.some(
-        (protectedPath) =>
-          filePath.endsWith(protectedPath) ||
-          filePath.includes('/.claude/memory/')
-      )
-    }
-
-    // Dangerous tools that require approval (Write/Edit/Bash)
-    const DANGEROUS_TOOLS = new Set(['Write', 'Edit', 'Bash', 'NotebookEdit', 'Skill'])
+    // Get policy engine instance
+    const policyEngine = getDefaultPolicyEngine()
 
     // Always set up canUseTool callback - this ensures guardrails work even if WebSocket
     // connects after execution starts. We fetch wsHandler fresh each time it's needed.
@@ -358,58 +331,14 @@ export async function* executeAgent(
         // Fetch wsHandler fresh each time (not captured at start)
         const wsHandler = wsConnections.get(sessionId)
 
-        // Auto-approve safe tools (read-only operations)
-        if (SAFE_TOOLS.has(toolName)) {
-          console.log(`[canUseTool] Auto-approving safe tool: ${toolName}`)
-          return { behavior: 'allow' as const, updatedInput: input }
-        }
-
-        // Check for protected paths on Write/Edit operations
+        // Extract file path from input
         const filePath = (input as { file_path?: string; filePath?: string }).file_path ||
                         (input as { file_path?: string; filePath?: string }).filePath
-        if ((toolName === 'Write' || toolName === 'Edit') && isProtectedPath(filePath)) {
-          console.log(`[canUseTool] Protected path detected: ${filePath}, requiring explicit approval`)
-          // Force explicit approval for protected paths (Plans.md, .claude/memory/*)
-          if (wsHandler) {
-            wsHandler({
-              type: 'tool_approval_request',
-              sessionId,
-              toolUseId,
-              toolName,
-              toolInput: input,
-              isProtected: true,
-              protectedReason: `保護対象パス: ${filePath}`,
-            })
 
-            try {
-              const response = await requestToolApproval(sessionId, toolUseId, toolName, input, 60000)
-              if (response.decision === 'allow') {
-                return {
-                  behavior: 'allow' as const,
-                  updatedInput: (response.modifiedInput ?? input) as Record<string, unknown>,
-                }
-              } else {
-                return {
-                  behavior: 'deny' as const,
-                  message: response.reason ?? `保護対象パス (${filePath}) への変更が拒否されました`,
-                }
-              }
-            } catch {
-              return {
-                behavior: 'deny' as const,
-                message: `保護対象パス (${filePath}) への変更はタイムアウトしました`,
-              }
-            }
-          } else {
-            // No WebSocket - deny by default for protected paths
-            return {
-              behavior: 'deny' as const,
-              message: `保護対象パス (${filePath}) への変更にはUI承認が必要です`,
-            }
-          }
-        }
+        // Evaluate policy using PolicyEngine
+        const evaluation = policyEngine.evaluate(toolName, input, filePath)
 
-        // Special handling for AskUserQuestion - send to UI for user response
+        // Special handling for AskUserQuestion - always allow (handled separately)
         if (toolName === 'AskUserQuestion' && wsHandler) {
           console.log(`[canUseTool] AskUserQuestion detected! sessionId=${sessionId}, toolUseId=${toolUseId}`)
           console.log(`[canUseTool] AskUserQuestion input:`, JSON.stringify(input, null, 2))
@@ -443,15 +372,35 @@ export async function* executeAgent(
           }
         }
 
-        // If WebSocket is connected, send approval request via WebSocket
+        // Handle policy evaluation result
+        if (evaluation.behavior === 'allow') {
+          console.log(`[canUseTool] Policy allows: ${toolName}${filePath ? ` (${filePath})` : ''}`)
+          return { behavior: 'allow' as const, updatedInput: input }
+        }
+
+        if (evaluation.behavior === 'deny') {
+          console.log(`[canUseTool] Policy denies: ${toolName}${filePath ? ` (${filePath})` : ''}, reason: ${evaluation.reason}`)
+          return {
+            behavior: 'deny' as const,
+            message: evaluation.reason ?? `${toolName} の実行はポリシーにより拒否されました`,
+          }
+        }
+
+        // evaluation.behavior === 'ask' - require UI approval
+        console.log(`[canUseTool] Policy requires approval: ${toolName}${filePath ? ` (${filePath})` : ''}`)
+
         if (wsHandler) {
-          // Send tool approval request to UI
+          // Send tool approval request to UI (with policy context)
           wsHandler({
             type: 'tool_approval_request',
             sessionId,
             toolUseId,
             toolName,
             toolInput: input,
+            isProtected: evaluation.locked,
+            protectedReason: evaluation.reason,
+            policyCategory: inferPathCategory(filePath),
+            policyOperation: inferOperationKind(toolName),
           })
 
           // Wait for approval response
@@ -472,7 +421,7 @@ export async function* executeAgent(
             // Timeout or error - deny by default
             return {
               behavior: 'deny' as const,
-              message: 'Tool approval timed out',
+              message: evaluation.reason ?? 'Tool approval timed out',
             }
           }
         }
@@ -493,17 +442,12 @@ export async function* executeAgent(
           }
         }
 
-        // No WebSocket and no handler - deny dangerous tools, allow others
-        if (DANGEROUS_TOOLS.has(toolName)) {
-          console.log(`[canUseTool] Denying dangerous tool without UI approval: ${toolName}`)
-          return {
-            behavior: 'deny' as const,
-            message: `${toolName} の実行にはUI承認が必要です（WebSocket未接続）`,
-          }
+        // No WebSocket and no handler - deny if policy requires ask
+        console.log(`[canUseTool] No WebSocket handler, denying ask-required tool: ${toolName}`)
+        return {
+          behavior: 'deny' as const,
+          message: evaluation.reason ?? `${toolName} の実行にはUI承認が必要です（WebSocket未接続）`,
         }
-
-        // Default: allow non-dangerous tools
-        return { behavior: 'allow' as const, updatedInput: input }
       },
     }
 

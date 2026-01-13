@@ -406,3 +406,288 @@ export interface ReviewReport {
   /** Whether all required fields are filled */
   isComplete: boolean
 }
+
+// Policy-Driven Guardrails Types (Phase 11)
+/**
+ * Policy preset modes for approval granularity
+ * - strict: Most operations require approval
+ * - balanced: Sensitive operations require approval
+ * - fast: Most operations auto-approved (except locked rules)
+ */
+export type PolicyPreset = 'strict' | 'balanced' | 'fast'
+
+/**
+ * Scope for policy application
+ * - once: Single operation only
+ * - task: Current task (until completion)
+ * - session: Current session (until reset)
+ * - project: Project-wide (persisted)
+ */
+export type PolicyScope = 'once' | 'task' | 'session' | 'project'
+
+/**
+ * Path category for policy evaluation
+ * - protected: Always requires approval (Plans.md, .claude/memory/**)
+ * - config: Configuration files (.json, .yaml, .env, etc.)
+ * - code: Source code files (.ts, .tsx, .js, .jsx, etc.)
+ * - test: Test files (*.test.ts, *.spec.ts, etc.)
+ * - docs: Documentation files (.md, .txt, etc.)
+ * - other: Other files
+ */
+export type PathCategory = 'protected' | 'config' | 'code' | 'test' | 'docs' | 'other'
+
+/**
+ * Operation kind for policy evaluation
+ * - tool_read: Read-only tool operations (Read, Glob, Grep, etc.)
+ * - tool_write: Write tool operations (Write)
+ * - tool_edit: Edit tool operations (Edit)
+ * - tool_bash: Bash/command execution (Bash)
+ * - git_commit: Git commit operations
+ * - git_push: Git push operations
+ * - git_pr: Git PR creation
+ * - git_release: Release operations
+ */
+export type OperationKind =
+  | 'tool_read'
+  | 'tool_write'
+  | 'tool_edit'
+  | 'tool_bash'
+  | 'git_commit'
+  | 'git_push'
+  | 'git_pr'
+  | 'git_release'
+
+/**
+ * Policy behavior for operations
+ * - allow: Auto-approve (no UI confirmation)
+ * - ask: Require UI approval
+ * - deny: Block operation
+ */
+export type PolicyBehavior = 'allow' | 'ask' | 'deny'
+
+/**
+ * Policy rule: category × operation × behavior + locked flag
+ */
+export interface PolicyRule {
+  /** Path category */
+  category: PathCategory
+  /** Operation kind */
+  operation: OperationKind
+  /** Behavior (allow/ask/deny) */
+  behavior: PolicyBehavior
+  /** Whether this rule is locked (cannot be changed by user) */
+  locked: boolean
+  /** Reason for locking (shown in UI) */
+  lockedReason?: string
+}
+
+/**
+ * Policy configuration (preset + custom rules)
+ */
+export interface PolicyConfig {
+  /** Active preset */
+  preset: PolicyPreset
+  /** Custom rules (override preset defaults) */
+  rules: PolicyRule[]
+  /** Last updated timestamp */
+  updatedAt: string
+}
+
+/**
+ * Ledger event status
+ * - pending: Waiting for user decision
+ * - approved: User approved
+ * - denied: User denied
+ * - auto: Auto-approved by policy
+ */
+export type LedgerEventStatus = 'pending' | 'approved' | 'denied' | 'auto'
+
+/**
+ * Ledger event: tracks all tool and git operations for audit
+ */
+export interface LedgerEvent {
+  /** Unique event ID */
+  id: string
+  /** Event status */
+  status: LedgerEventStatus
+  /** Operation kind */
+  operation: OperationKind
+  /** Path category */
+  category: PathCategory
+  /** Tool name (for tool operations) */
+  toolName?: string
+  /** File path (if applicable) */
+  filePath?: string
+  /** Git branch (for git operations) */
+  gitBranch?: string
+  /** Operation input/details */
+  input: unknown
+  /** Timestamp */
+  timestamp: string
+  /** User decision reason (if denied or modified) */
+  reason?: string
+  /** Session ID */
+  sessionId?: string
+  /** Task ID (if applicable) */
+  taskId?: string
+}
+
+/**
+ * Deliver workflow preflight information
+ */
+export interface DeliverPreflight {
+  /** Current branch */
+  branch: string
+  /** Whether working directory is dirty */
+  dirty: boolean
+  /** Staged files count */
+  stagedCount: number
+  /** Unstaged files count */
+  unstagedCount: number
+  /** Commits ahead of remote */
+  ahead: number
+  /** Commits behind remote */
+  behind: number
+  /** Remote branch name */
+  remoteBranch?: string
+  /** Whether force push would be required */
+  requiresForcePush: boolean
+  /** Whether this is main/master branch */
+  isMainBranch: boolean
+  /** Suggested commit message (from task/review) */
+  suggestedCommitMessage?: string
+}
+
+/**
+ * Deliver commit request
+ */
+export interface DeliverCommitRequest {
+  /** Commit message */
+  message: string
+  /** Whether to skip hooks */
+  skipHooks?: boolean
+}
+
+/**
+ * Deliver commit response
+ */
+export interface DeliverCommitResponse {
+  /** Success status */
+  success: boolean
+  /** Commit hash */
+  commitHash?: string
+  /** Error message */
+  error?: string
+}
+
+/**
+ * Deliver push request
+ */
+export interface DeliverPushRequest {
+  /** Branch to push */
+  branch: string
+  /** Whether to force push (requires explicit approval) */
+  force?: boolean
+  /** Remote name (default: origin) */
+  remote?: string
+}
+
+/**
+ * Deliver push response
+ */
+export interface DeliverPushResponse {
+  /** Success status */
+  success: boolean
+  /** Error message */
+  error?: string
+}
+
+/**
+ * Deliver PR request (GitHub)
+ */
+export interface DeliverPRRequest {
+  /** PR title */
+  title: string
+  /** PR body */
+  body: string
+  /** Base branch (default: main) */
+  base?: string
+  /** Head branch (default: current branch) */
+  head?: string
+  /** Draft PR */
+  draft?: boolean
+}
+
+/**
+ * Deliver PR response
+ */
+export interface DeliverPRResponse {
+  /** Success status */
+  success: boolean
+  /** PR URL */
+  prUrl?: string
+  /** PR number */
+  prNumber?: number
+  /** Error message */
+  error?: string
+  /** Whether gh CLI is available */
+  ghAvailable?: boolean
+}
+
+/**
+ * Release template step
+ */
+export interface ReleaseStep {
+  /** Step ID */
+  id: string
+  /** Step title */
+  title: string
+  /** Step description */
+  description: string
+  /** Whether step is required */
+  required: boolean
+  /** Whether step is completed */
+  completed: boolean
+  /** Step command (if applicable) */
+  command?: string
+}
+
+/**
+ * Release template (project-specific)
+ */
+export interface ReleaseTemplate {
+  /** Template name */
+  name: string
+  /** Template description */
+  description: string
+  /** Steps to complete */
+  steps: ReleaseStep[]
+  /** Version bump type */
+  versionBump?: 'major' | 'minor' | 'patch'
+}
+
+/**
+ * Deliver release request
+ */
+export interface DeliverReleaseRequest {
+  /** Release version */
+  version: string
+  /** Release notes */
+  notes: string
+  /** Template to use (if available) */
+  template?: string
+}
+
+/**
+ * Deliver release response
+ */
+export interface DeliverReleaseResponse {
+  /** Success status */
+  success: boolean
+  /** Release URL */
+  releaseUrl?: string
+  /** Error message */
+  error?: string
+  /** Available templates */
+  templates?: ReleaseTemplate[]
+}
