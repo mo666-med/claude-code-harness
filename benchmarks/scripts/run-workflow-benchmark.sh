@@ -27,6 +27,7 @@ TRACE_MODE=true
 API_KEY="${ANTHROPIC_API_KEY:-}"
 API_KEY_FILE=""
 TIMEOUT=300
+USE_TEMP_HOME=true  # CI用。ローカルでは false にして既存セッションを使用
 
 # ヘルプ表示
 show_help() {
@@ -47,6 +48,7 @@ OPTIONS:
   --api-key <key>     ANTHROPIC_API_KEY
   --api-key-file <p>  APIキーをファイルから読み込む
   --timeout <sec>     各ステップのタイムアウト秒数（デフォルト: 300）
+  --no-temp-home      一時HOMEを使わず既存セッション（OAuth）を使用（ローカル用）
   --no-trace          trace を無効化
   --help              このヘルプを表示
 
@@ -99,6 +101,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --no-trace)
       TRACE_MODE=false
+      shift
+      ;;
+    --no-temp-home)
+      USE_TEMP_HOME=false
       shift
       ;;
     --help)
@@ -268,16 +274,27 @@ run_workflow() {
   echo "Iteration: $ITERATION"
   echo "========================================"
 
-  # 一時 HOME ディレクトリを作成
-  local temp_home=$(mktemp -d)
-  mkdir -p "$temp_home/.claude"
-  echo "一時 HOME: $temp_home"
+  # HOME ディレクトリ設定
+  local temp_home
+  local cleanup_home=false
 
-  # 認証設定
-  if [[ -n "$API_KEY" ]]; then
-    export ANTHROPIC_API_KEY="$API_KEY"
-  elif [[ -f "$HOME/.claude/.credentials.json" ]]; then
-    cp "$HOME/.claude/.credentials.json" "$temp_home/.claude/"
+  if [[ "$USE_TEMP_HOME" == "true" ]]; then
+    # CI用: 一時 HOME を作成
+    temp_home=$(mktemp -d)
+    mkdir -p "$temp_home/.claude"
+    cleanup_home=true
+    echo "一時 HOME: $temp_home"
+
+    # 認証設定
+    if [[ -n "$API_KEY" ]]; then
+      export ANTHROPIC_API_KEY="$API_KEY"
+    elif [[ -f "$HOME/.claude/.credentials.json" ]]; then
+      cp "$HOME/.claude/.credentials.json" "$temp_home/.claude/"
+    fi
+  else
+    # ローカル用: 既存の HOME（OAuth セッション）を使用
+    temp_home="$HOME"
+    echo "既存 HOME を使用（OAuth セッション）"
   fi
 
   # テストプロジェクトをリセット
@@ -291,10 +308,10 @@ run_workflow() {
   local plan_prompt work_prompt review_prompt
 
   if [[ "$WITH_PLUGIN" == "true" ]]; then
-    # with-plugin: CI専用コマンドを使用
-    plan_prompt="/plan-with-agent-ci $task_prompt"
-    work_prompt="/work-ci"
-    review_prompt="/harness-review-ci"
+    # with-plugin: CI専用コマンドを使用（完全修飾名で指定）
+    plan_prompt="/claude-code-harness:core:plan-with-agent-ci $task_prompt"
+    work_prompt="/claude-code-harness:core:work-ci"
+    review_prompt="/claude-code-harness:core:harness-review-ci"
   else
     # no-plugin: 同等の手動プロンプト
     plan_prompt="以下の要件を分析し、実装計画を Plans.md に作成してください。各タスクには cc:TODO マーカーを付けてください。質問せずに進めてください。
@@ -379,7 +396,8 @@ $task_prompt"
   # CI専用コマンドが使われたか検出（with-plugin の transcript grader）
   local used_ci_commands=false
   if [[ "$WITH_PLUGIN" == "true" && -f "$plan_trace" ]]; then
-    if grep -q 'plan-with-agent-ci\|work-ci\|harness-review-ci' "$plan_trace" "$work_trace" "$review_trace" 2>/dev/null; then
+    # 完全修飾名またはショートネームで検出
+    if grep -qE 'claude-code-harness:core:(plan-with-agent|work|harness-review)-ci|/(plan-with-agent|work|harness-review)-ci' "$plan_trace" "$work_trace" "$review_trace" 2>/dev/null; then
       used_ci_commands=true
     fi
   fi
@@ -423,8 +441,10 @@ EOF
   echo "推定コスト: \$${estimated_cost}"
   echo "========================================"
 
-  # クリーンアップ
-  rm -rf "$temp_home"
+  # クリーンアップ（一時HOMEの場合のみ）
+  if [[ "$cleanup_home" == "true" ]]; then
+    rm -rf "$temp_home"
+  fi
 }
 
 # メイン実行

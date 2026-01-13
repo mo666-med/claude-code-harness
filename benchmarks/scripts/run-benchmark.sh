@@ -300,7 +300,9 @@ run_benchmark() {
       # コスト概算（Claude 3.5 Sonnet 基準: input=$3/MTok, output=$15/MTok）
       # 注意: これは推定値であり、実際のコストとは異なる場合があります
       if [[ "$input_tokens" -gt 0 || "$output_tokens" -gt 0 ]]; then
-        estimated_cost=$(echo "scale=4; ($input_tokens * 0.000003) + ($output_tokens * 0.000015)" | bc 2>/dev/null || echo "0.0000")
+        # bc は ".023601" のように先頭0を省略することがあり JSON として不正になるため、awkで正規化する
+        estimated_cost_raw=$(echo "($input_tokens * 0.000003) + ($output_tokens * 0.000015)" | bc 2>/dev/null || echo "0")
+        estimated_cost=$(echo "$estimated_cost_raw" | awk '{printf "%.4f", $1}')
       fi
     fi
   fi

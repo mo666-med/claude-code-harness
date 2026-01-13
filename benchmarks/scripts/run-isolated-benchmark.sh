@@ -24,6 +24,7 @@ PLUGIN_PATH=""
 ITERATIONS=1
 TRACE_MODE=true
 API_KEY="${ANTHROPIC_API_KEY:-}"
+API_KEY_FILE=""
 
 # ヘルプ表示
 show_help() {
@@ -41,6 +42,7 @@ OPTIONS:
   --plugin-path <p>   プラグインのパス（デフォルト: このリポジトリ）
   --iterations <n>    実行回数（デフォルト: 1）
   --api-key <key>     ANTHROPIC_API_KEY（環境変数優先）
+  --api-key-file <p>  APIキーをファイルから読み込む（1行目）。コマンド履歴/ログにキーを残したくない場合に推奨
   --no-trace          trace を無効化
   --help              このヘルプを表示
 
@@ -85,6 +87,10 @@ while [[ $# -gt 0 ]]; do
       API_KEY="$2"
       shift 2
       ;;
+    --api-key-file)
+      API_KEY_FILE="$2"
+      shift 2
+      ;;
     --no-trace)
       TRACE_MODE=false
       shift
@@ -100,6 +106,16 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+# APIキーをファイルから読み込む（ログにキーを埋め込まないため）
+if [[ -n "$API_KEY_FILE" ]]; then
+  if [[ ! -f "$API_KEY_FILE" ]]; then
+    echo "Error: --api-key-file のファイルが見つかりません: $API_KEY_FILE" >&2
+    exit 1
+  fi
+  # 1行目のみ使用（改行/CRを除去）
+  API_KEY="$(head -n 1 "$API_KEY_FILE" | tr -d '\r\n' | xargs)"
+fi
 
 # バリデーション
 if [[ -z "$TASK" ]]; then
@@ -237,6 +253,23 @@ run_isolated_benchmark() {
     fi
   fi
 
+  # 認証エラーは「計測不能」なので早期停止（無意味な結果JSONを量産しない）
+  if [[ "$exit_code" -ne 0 ]]; then
+    if grep -q 'authentication_error' "$output_file" 2>/dev/null || \
+       grep -q 'OAuth token has expired' "$output_file" 2>/dev/null || \
+       grep -q 'Please run /login' "$output_file" 2>/dev/null; then
+      echo ""
+      echo "🚫 認証エラー: Claude Code CLI のトークンが無効/期限切れです。"
+      echo "  対処:"
+      echo "  - ローカル: 'claude' を起動 → /login（または 'claude login'）で更新"
+      echo "  - CI: GitHub Secrets に ANTHROPIC_API_KEY を設定（サブスク認証ファイルは使えない）"
+      echo ""
+      echo "  詳細: $output_file"
+      rm -rf "$temp_home"
+      exit 1
+    fi
+  fi
+
   # 終了時刻
   local end_time=$(date +%s.%N)
   local duration=$(echo "$end_time - $start_time" | bc)
@@ -257,11 +290,17 @@ run_isolated_benchmark() {
   local cost_assumption="sonnet_3_5_input_3_per_mtok_output_15_per_mtok"
 
   if [[ "$TRACE_MODE" == "true" && -f "$trace_file" ]]; then
-    tool_use_count=$(grep -c '"type":"tool_use"' "$trace_file" 2>/dev/null || echo "0")
-    task_tool_use_count=$(grep -c '"name":"Task"' "$trace_file" 2>/dev/null || echo "0")
-    subagent_type_count=$(grep -c '"subagent_type"' "$trace_file" 2>/dev/null || echo "0")
+    # grep -c は「マッチ0件」でも exit=1 になり得るため、|| true で握りつぶして値だけ使う
+    tool_use_count=$(grep -c '"type":"tool_use"' "$trace_file" 2>/dev/null || true)
+    task_tool_use_count=$(grep -c '"name":"Task"' "$trace_file" 2>/dev/null || true)
+    subagent_type_count=$(grep -c '"subagent_type"' "$trace_file" 2>/dev/null || true)
     # プラグイン由来のエージェントが呼ばれたかチェック
-    plugin_detected=$(grep -c 'claude-harness:' "$trace_file" 2>/dev/null || echo "0")
+    plugin_detected=$(grep -c 'claude-harness:' "$trace_file" 2>/dev/null || true)
+
+    tool_use_count=${tool_use_count:-0}
+    task_tool_use_count=${task_tool_use_count:-0}
+    subagent_type_count=${subagent_type_count:-0}
+    plugin_detected=${plugin_detected:-0}
 
     # トークン使用量の抽出（stream-json の usage フィールドから）
     if command -v jq &> /dev/null; then
@@ -271,7 +310,9 @@ run_isolated_benchmark() {
       # コスト概算（Claude 3.5 Sonnet 基準: input=$3/MTok, output=$15/MTok）
       # 注意: これは推定値であり、実際のコストとは異なる場合があります
       if [[ "$input_tokens" -gt 0 || "$output_tokens" -gt 0 ]]; then
-        estimated_cost=$(echo "scale=4; ($input_tokens * 0.000003) + ($output_tokens * 0.000015)" | bc 2>/dev/null || echo "0.0000")
+        # bc は ".023601" のように先頭0を省略することがあり JSON として不正になるため、awkで正規化する
+        estimated_cost_raw=$(echo "($input_tokens * 0.000003) + ($output_tokens * 0.000015)" | bc 2>/dev/null || echo "0")
+        estimated_cost=$(echo "$estimated_cost_raw" | awk '{printf "%.4f", $1}')
       fi
     fi
   fi
