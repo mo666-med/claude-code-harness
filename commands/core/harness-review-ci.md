@@ -1,6 +1,7 @@
 ---
 description: CI用・非対話のレビュー実行（ベンチマーク専用）
 description-en: CI-only non-interactive review (benchmark use)
+user-invocable: false
 ---
 
 # /harness-review-ci - CI専用レビュー実行

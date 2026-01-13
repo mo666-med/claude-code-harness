@@ -1,6 +1,7 @@
 ---
 description: CI用・非対話の計画作成（ベンチマーク専用）
 description-en: CI-only non-interactive planning (benchmark use)
+user-invocable: false
 ---
 
 # /plan-with-agent-ci - CI専用計画作成

@@ -7,6 +7,14 @@
 
 ## [Unreleased]
 
+## [2.8.1] - 2026-01-13
+
+### Changed
+
+- **CI専用コマンドを `/` 一覧から非表示に**
+  - `harness-review-ci`, `plan-with-agent-ci`, `work-ci` に `user-invocable: false` を追加
+  - ベンチマーク専用コマンドがユーザーの `/` 補完に表示されなくなった
+
 ## [2.8.0] - 2026-01-13
 
 ### Added

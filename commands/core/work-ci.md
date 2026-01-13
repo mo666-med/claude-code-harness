@@ -1,6 +1,7 @@
 ---
 description: CI用・非対話の実装実行（ベンチマーク専用）
 description-en: CI-only non-interactive implementation (benchmark use)
+user-invocable: false
 ---
 
 # /work-ci - CI専用実装実行
