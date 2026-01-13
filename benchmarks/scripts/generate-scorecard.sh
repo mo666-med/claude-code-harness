@@ -534,6 +534,7 @@ def main():
     os_name, os_version = get_os_info()
     meta = {
         "suite_version": "v1",
+        "suite_id": "workflow-v1",
         "harness_version": get_harness_version(plugin_root),
         "harness_commit": get_harness_commit(plugin_root),
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),

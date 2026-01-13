@@ -1,45 +1,48 @@
 # タスク: impl-refactor
 
 ## 概要
-既存のコードをリファクタリングする。
+レガシーコードを計画的にリファクタリング・レビューする。
 
-## テスト対象機能
-- `/work` コマンド
-- コード分析能力
-- 安全なリファクタリング
-
-## 前提条件
-`src/legacy/user-service.js` が存在すること
+## ワークフローモード
+このタスクは Plan → Work → Review の3ステップで評価されます。
 
 ## プロンプト
 
 ```
-src/legacy/user-service.js を TypeScript に変換し、リファクタリングしてください。
+レガシー JavaScript コードを TypeScript にリファクタリングしてください。
 
 要件:
-1. JavaScript → TypeScript 変換
-2. 適切な型定義の追加
-3. エラーハンドリングの改善
-4. 関数の分割（1関数1責務）
+- JavaScript → TypeScript 変換
+- 適切な型定義の追加（interface/type）
+- エラーハンドリングの改善（try-catch）
+- 関数の分割（1関数1責務）
+
+対象: src/legacy/user-service.js がある場合はそれを変換
+ない場合は、サンプルのレガシーコードを作成してからリファクタリング
 
 出力先: src/services/user-service.ts
 ```
 
 ## 期待される出力
-- `src/services/user-service.ts` が作成される
-- 型定義が追加されている
-- try-catch が適切に配置されている
-- 関数が適切に分割されている
+
+### Plan ステップ
+- リファクタリング計画が Plans.md に追加される
+
+### Work ステップ
+- TypeScript ファイルが作成される
+- 型定義・エラー処理が追加される
+
+### Review ステップ
+- リファクタリング品質の指摘が Severity 付きで出力される
 
 ## 成功基準
 | 基準 | 条件 |
 |------|------|
 | ファイル作成 | TypeScript ファイルが存在 |
 | 型定義 | interface/type が定義されている |
-| エラー処理 | try-catch が存在 |
-| 関数分割 | 元より関数数が増加 |
+| レビュー | Severity 付きの出力がある |
 
 ## 測定ポイント
-- リファクタリング完了までの時間
+- 全ステップの合計時間
 - 編集操作の回数
-- 生成されたコード行数
+- 検出された問題数

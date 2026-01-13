@@ -96,13 +96,20 @@ def grade_plan_feature(project_dir: str) -> List[Check]:
     checks.append(Check(name="plans_file_exists", status="pass", details=plans_rel))
     txt = read_text(plans_path)
 
-    # "- [ ] " をタスクとしてカウント（Plans.md の形式に寄せる）
-    tasks = re.findall(r"(?m)^\s*-\s*\[\s*\]\s+.+$", txt)
+    # タスク数をカウント（フォーマット差異に耐える）
+    #
+    # - no-plugin（素の Claude Code）は `- [ ] ...` のチェックボックスを作りがち
+    # - harness ありは `#### cc:TODO ...` のようなステータス見出しを作りがち
+    #
+    # どちらも「具体的な作業項目が3つ以上ある」を満たすべきなので、両方を許容する。
+    checkbox_tasks = re.findall(r"(?m)^\s*[-*]\s*\[\s*[xX ]\s*\]\s+.+$", txt)
+    cc_todo_headings = re.findall(r"(?mi)^\s*#{1,6}\s+cc:TODO\b.+$", txt)
+    task_items = checkbox_tasks if checkbox_tasks else cc_todo_headings
     checks.append(
         Check(
             name="checkbox_task_count>=3",
-            status="pass" if len(tasks) >= 3 else "fail",
-            details=f"found={len(tasks)}",
+            status="pass" if len(task_items) >= 3 else "fail",
+            details=f"used={'checkbox' if checkbox_tasks else 'cc:TODO'} found={len(task_items)} (checkbox={len(checkbox_tasks)}, cc_todo={len(cc_todo_headings)})",
         )
     )
 
@@ -613,6 +620,87 @@ def grade_skill_routing(project_dir: str, output_file: Optional[str], trace_file
     return checks
 
 
+def grade_workflow_mode(project_dir: str, output_file: Optional[str], trace_file: Optional[str]) -> List[Check]:
+    """Workflow mode: Plan -> Work -> Review の3ステップ完走を採点"""
+    checks: List[Check] = []
+
+    # 1. Plans.md の存在チェック
+    plans_path = file_exists(project_dir, "Plans.md")
+    if plans_path:
+        checks.append(Check(name="plans_exists", status="pass"))
+        plans_txt = read_text(plans_path)
+        # タスクマーカーの存在
+        has_tasks = ("cc:TODO" in plans_txt) or ("cc:完了" in plans_txt) or ("[ ]" in plans_txt) or ("[x]" in plans_txt.lower())
+        checks.append(
+            Check(
+                name="plans_has_tasks",
+                status="pass" if has_tasks else "fail",
+            )
+        )
+    else:
+        checks.append(Check(name="plans_exists", status="fail", details="missing: Plans.md"))
+
+    # 2. 実装ファイルの存在チェック（src/ 配下にファイルがあるか）
+    src_dir = os.path.join(project_dir, "src")
+    if os.path.isdir(src_dir):
+        ts_files = []
+        for root, dirs, files in os.walk(src_dir):
+            ts_files.extend([f for f in files if f.endswith(".ts") or f.endswith(".tsx")])
+        checks.append(
+            Check(
+                name="impl_files_created",
+                status="pass" if len(ts_files) > 0 else "fail",
+                details=f"ts_files={len(ts_files)}",
+            )
+        )
+    else:
+        checks.append(Check(name="impl_files_created", status="fail", details="no src/ directory"))
+
+    # 3. レビュー出力の Severity チェック
+    if output_file and os.path.isfile(output_file):
+        out_txt = read_text(output_file)
+        checks.append(Check(name="review_output_exists", status="pass"))
+
+        # Severity ラベルの検出
+        sev_hits = re.findall(r"(?i)\bSeverity:\s*(Critical|High|Medium|Low)\b", out_txt)
+        checks.append(
+            Check(
+                name="review_has_severity",
+                status="pass" if len(sev_hits) > 0 else "fail",
+                details=f"severity_count={len(sev_hits)}",
+            )
+        )
+
+        # Pass/Fail 判定の検出
+        has_result = ("Result:" in out_txt) or ("PASS" in out_txt) or ("FAIL" in out_txt)
+        checks.append(
+            Check(
+                name="review_has_result",
+                status="pass" if has_result else "fail",
+                required=False,
+            )
+        )
+    else:
+        checks.append(Check(name="review_output_exists", status="fail", details="no review output"))
+
+    # 4. CI専用コマンドの使用チェック（transcript から）
+    if trace_file and os.path.isfile(trace_file):
+        trace_txt = read_text(trace_file)
+        used_ci_cmd = any(cmd in trace_txt for cmd in ["plan-with-agent-ci", "work-ci", "harness-review-ci"])
+        checks.append(
+            Check(
+                name="used_ci_commands",
+                status="pass" if used_ci_cmd else "fail",
+                required=False,
+                details=f"ci_commands_detected={used_ci_cmd}",
+            )
+        )
+    else:
+        checks.append(Check(name="used_ci_commands", status="skip", required=False, details="no trace"))
+
+    return checks
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(
         description="Benchmark task grader - evaluates task completion based on outcome/transcript checks",
@@ -630,15 +718,20 @@ Supported tasks:
   multi-file-refactor Multi-file refactoring with types/errors
   skill-routing       Skill evaluation flow with impl/test/review
 
+Workflow mode (--workflow-mode):
+  Grades the 3-step Plan -> Work -> Review workflow completion.
+
 Example:
   grade-task.sh --task plan-feature --project-dir ./test-project
   grade-task.sh --task review-security --project-dir ./test-project --output-file review.txt
+  grade-task.sh --task plan-feature --project-dir ./test-project --workflow-mode
 """
     )
     ap.add_argument("--task", required=True, help="Task name to grade")
     ap.add_argument("--project-dir", required=True, help="Path to the test project directory")
     ap.add_argument("--output-file", help="Path to task output file (for review tasks)")
     ap.add_argument("--trace-file", help="Path to trace file (for parallelism detection)")
+    ap.add_argument("--workflow-mode", action="store_true", help="Grade as workflow mode (Plan->Work->Review)")
     args = ap.parse_args()
 
     task = args.task
@@ -648,10 +741,14 @@ Example:
         "project_dir": project_dir,
         "output_file": args.output_file,
         "trace_file": args.trace_file,
+        "workflow_mode": args.workflow_mode,
     }
 
     try:
-        if task == "plan-feature":
+        # Workflow mode: 3ステップ完走の統一採点
+        if args.workflow_mode:
+            checks = grade_workflow_mode(project_dir, args.output_file, args.trace_file)
+        elif task == "plan-feature":
             checks = grade_plan_feature(project_dir)
         elif task == "impl-utility":
             checks = grade_impl_utility(project_dir)

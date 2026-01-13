@@ -249,18 +249,18 @@ command -v jq python3 bc
 export ANTHROPIC_API_KEY="sk-..."
 # または claude login 済み
 
+# （推奨）キーをコマンド履歴やログに残したくない場合:
+# echo "sk-..." > ~/.anthropic_api_key && chmod 600 ~/.anthropic_api_key
+
 # 3. スイート実行（with-plugin）
+TRIALS=3
 for task in plan-feature impl-utility impl-test impl-refactor review-security review-quality multi-file-refactor skill-routing; do
-  for i in 1 2 3; do
-    ./benchmarks/scripts/run-isolated-benchmark.sh --task "$task" --with-plugin
-  done
+  ./benchmarks/scripts/run-isolated-benchmark.sh --task "$task" --with-plugin --iterations "$TRIALS"
 done
 
 # 4. スイート実行（no-plugin）
 for task in plan-feature impl-utility impl-test impl-refactor review-security review-quality multi-file-refactor skill-routing; do
-  for i in 1 2 3; do
-    ./benchmarks/scripts/run-isolated-benchmark.sh --task "$task"
-  done
+  ./benchmarks/scripts/run-isolated-benchmark.sh --task "$task" --iterations "$TRIALS"
 done
 
 # 5. Scorecard 生成

@@ -109,14 +109,12 @@ jobs:
             echo "=========================================="
             echo "Running: $task (with-plugin)"
             echo "=========================================="
-            for i in $(seq 1 "$INPUT_TRIALS"); do
-              echo "Trial $i/$INPUT_TRIALS"
-              bash benchmarks/scripts/run-isolated-benchmark.sh \
-                --task "$task" \
-                --with-plugin \
-                --iterations 1 \
-                || echo "Warning: Trial $i failed for $task (with-plugin)"
-            done
+            echo "Iterations: $INPUT_TRIALS"
+            bash benchmarks/scripts/run-workflow-benchmark.sh \
+              --task "$task" \
+              --with-plugin \
+              --iterations "$INPUT_TRIALS" \
+              || echo "Warning: Benchmark failed for $task (with-plugin)"
           done
 
       - name: Run benchmarks (no-plugin)
@@ -131,13 +129,11 @@ jobs:
             echo "=========================================="
             echo "Running: $task (no-plugin)"
             echo "=========================================="
-            for i in $(seq 1 "$INPUT_TRIALS"); do
-              echo "Trial $i/$INPUT_TRIALS"
-              bash benchmarks/scripts/run-isolated-benchmark.sh \
-                --task "$task" \
-                --iterations 1 \
-                || echo "Warning: Trial $i failed for $task (no-plugin)"
-            done
+            echo "Iterations: $INPUT_TRIALS"
+            bash benchmarks/scripts/run-workflow-benchmark.sh \
+              --task "$task" \
+              --iterations "$INPUT_TRIALS" \
+              || echo "Warning: Benchmark failed for $task (no-plugin)"
           done
 
       - name: Generate scorecard

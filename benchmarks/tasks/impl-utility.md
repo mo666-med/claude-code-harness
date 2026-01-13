@@ -1,46 +1,45 @@
 # タスク: impl-utility
 
 ## 概要
-ユーティリティ関数を実装する。
+ユーティリティ関数を計画・実装・レビューする。
 
-## テスト対象機能
-- `/work` コマンド
-- コード生成能力
-- ファイル作成/編集
+## ワークフローモード
+このタスクは Plan → Work → Review の3ステップで評価されます。
 
 ## プロンプト
 
 ```
-src/utils/string-helpers.ts に以下のユーティリティ関数を実装してください。
+文字列操作のユーティリティ関数を実装してください。
 
-1. truncate(str: string, maxLength: number): string
-   - 文字列を指定長で切り詰め、末尾に "..." を付ける
-   - maxLength より短い場合はそのまま返す
+要件:
+- truncate(str, maxLength): 文字列を指定長で切り詰め "..." を付ける
+- slugify(str): URL用スラッグに変換（小文字化、スペース→ハイフン）
+- capitalize(str): 最初の文字を大文字にする
 
-2. slugify(str: string): string
-   - 文字列をURL用スラッグに変換
-   - 小文字化、スペースをハイフンに、特殊文字を除去
-
-3. capitalize(str: string): string
-   - 最初の文字を大文字にする
-
-TypeScript で型安全に実装してください。
+技術スタック: TypeScript
+出力先: src/utils/string-helpers.ts
 ```
 
 ## 期待される出力
+
+### Plan ステップ
+- Plans.md に 3-5 個のタスクが追加される
+
+### Work ステップ
 - `src/utils/string-helpers.ts` が作成される
 - 3つの関数が実装される
-- 適切な型定義がある
+
+### Review ステップ
+- 型定義・エラー処理の指摘が Severity 付きで出力される
 
 ## 成功基準
 | 基準 | 条件 |
 |------|------|
 | ファイル作成 | string-helpers.ts が存在 |
 | 関数数 | 3つの関数が定義 |
-| 型定義 | TypeScript の型が適切 |
-| エラーなし | tsc でエラーが出ない |
+| レビュー | Severity 付きの出力がある |
 
 ## 測定ポイント
-- 実装完了までの時間
-- ツール呼び出し回数（Write, Edit）
-- コード行数
+- 全ステップの合計時間
+- ツール呼び出し回数
+- 検出された問題数

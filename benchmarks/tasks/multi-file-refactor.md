@@ -1,56 +1,56 @@
 # タスク: multi-file-refactor
 
 ## 概要
-複数ファイルにまたがるリファクタリング。
+複数ファイルにまたがるリファクタリングを計画・実装・レビューする。
+
+## ワークフローモード
+このタスクは Plan → Work → Review の3ステップで評価されます。
 並列処理の効果が顕著に出るタスク。
-
-## テスト対象機能
-- `/work` コマンド
-- 並列ファイル編集
-- コード分析と変換
-
-## 前提条件
-複数のレガシーファイルが存在すること
 
 ## プロンプト
 
 ```
-以下のレガシーコードを全てモダンなTypeScriptにリファクタリングしてください。
-可能であれば並列で処理してください。
+ユーザーサービスの完全なリファクタリングを実施してください。
 
-対象:
-1. src/legacy/user-service.js → src/services/user.service.ts
-   - ES6+ 構文に変換
-   - async/await パターンに変換
-   - 型定義を追加
-
-2. 新規作成: src/types/user.types.ts
+要件:
+1. 型定義ファイル: src/types/user.types.ts
    - User, CreateUserDTO, UpdateUserDTO インターフェース
 
-3. 新規作成: src/errors/user.errors.ts
+2. エラークラス: src/errors/user.errors.ts
    - UserNotFoundError, ValidationError クラス
 
-4. 新規作成: src/services/__tests__/user.service.test.ts
+3. サービス本体: src/services/user.service.ts
+   - CRUD 操作
+   - async/await パターン
+   - 適切なエラーハンドリング
+
+4. テスト: src/services/__tests__/user.service.test.ts
    - 主要メソッドのユニットテスト
 
-全ファイル間で整合性を保ってください。
+全ファイル間で整合性を保ってください。可能であれば並列で処理してください。
 ```
 
 ## 期待される出力
-- 4つのファイルが作成/更新される
-- 型定義が適切に分離されている
-- カスタムエラークラスが定義されている
-- テストファイルが作成されている
+
+### Plan ステップ
+- 4ファイルの作成計画が Plans.md に追加される
+
+### Work ステップ
+- 4つのファイルが作成される
+- 型定義・エラークラス・サービス・テストが整合
+
+### Review ステップ
+- 各ファイルの品質問題が Severity 付きで出力される
 
 ## 成功基準
 | 基準 | 条件 |
 |------|------|
-| ファイル数 | 4ファイル以上 |
-| 型定義 | interfaceが定義 |
-| エラークラス | Errorを継承 |
-| テスト | describe/itが存在 |
+| ファイル数 | 4ファイル以上作成 |
+| 型定義 | interface が定義 |
+| テスト | describe/it が存在 |
+| レビュー | Severity 付きの出力がある |
 
 ## 測定ポイント
-- リファクタリング完了時間
-- 並列処理の有無
+- 全ステップの合計時間
+- 並列処理の有無（Task tool 使用）
 - 生成されたコード行数
