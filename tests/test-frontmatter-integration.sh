@@ -61,7 +61,7 @@ test_template_frontmatter_exists() {
     "rules/coding-standards.md.template"
     "rules/testing.md.template"
     "rules/plans-management.md.template"
-    "rules/ui-debugging-dev-browser.md.template"
+    "rules/ui-debugging-agent-browser.md.template"
     "memory/decisions.md.template"
     "memory/patterns.md.template"
   )

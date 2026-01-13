@@ -38,7 +38,7 @@ REQUIRED_TEMPLATES=(
   "templates/rules/coding-standards.md.template"
   "templates/rules/plans-management.md.template"
   "templates/rules/testing.md.template"
-  "templates/rules/ui-debugging-dev-browser.md.template"
+  "templates/rules/ui-debugging-agent-browser.md.template"
 )
 
 for template in "${REQUIRED_TEMPLATES[@]}"; do

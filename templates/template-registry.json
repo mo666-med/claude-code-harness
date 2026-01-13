@@ -44,10 +44,10 @@
       "description": "Plans.md管理ルール",
       "tracked": true
     },
-    "rules/ui-debugging-dev-browser.md.template": {
-      "output": ".claude/rules/ui-debugging-dev-browser.md",
-      "templateVersion": "2.5.23",
-      "description": "UI デバッグルール",
+    "rules/ui-debugging-agent-browser.md.template": {
+      "output": ".claude/rules/ui-debugging-agent-browser.md",
+      "templateVersion": "2.7.13",
+      "description": "UI デバッグルール（agent-browser 優先）",
       "tracked": true
     },
     "rules/test-quality.md.template": {

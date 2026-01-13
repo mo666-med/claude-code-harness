@@ -7,6 +7,45 @@
 
 ## [Unreleased]
 
+## [2.7.16] - 2026-01-13
+
+### Added
+
+- **agent-browser 優先使用の仕組み（Phase 26）**
+  - `vercel-labs/agent-browser` を UI デバッグの第一選択肢として位置づけ
+  - AI 向けスナップショット（`@e1`, `@e2` 要素参照）による効率的なブラウザ操作
+
+- **dev-browser スキル新規追加** (`skills/dev-browser/`)
+  - ブラウザ自動化に特化したスキル
+  - 「ページを開いて」「クリックして」「スクリーンショット」などのトリガーで自動起動
+  - 詳細リファレンス: `browser-automation.md`, `ai-snapshot-workflow.md`
+
+- **PreToolUse フック: MCP ブラウザツール使用時の提案**
+  - Chrome DevTools MCP / Playwright MCP 使用時に agent-browser を推奨
+  - `hookSpecificOutput` 形式で追加コンテキストを提供
+  - ブロックなし（情報提供のみ）
+
+- **ui-debugging-agent-browser.md ルールテンプレート**
+  - 旧 `ui-debugging-dev-browser.md` を置き換え
+  - agent-browser の使用ガイドを含む
+
+### Changed
+
+- **docs/OPTIONAL_PLUGINS.md**: dev-browser から agent-browser に更新
+- **skills/troubleshoot/SKILL.md**: UI デバッグセクションを agent-browser 中心に更新
+- **hooks.json**: Playwright matcher を両パターン対応（`mcp__playwright__*` / `mcp__plugin_playwright_playwright__*`）
+
+### Removed
+
+- `templates/rules/ui-debugging-dev-browser.md.template`（agent-browser 版に置き換え）
+
+#### Before/After
+
+| Before | After |
+|--------|-------|
+| dev-browser ルールテンプレート（実際は未使用） | agent-browser を第一選択肢として明確化 |
+| MCP ブラウザツールをそのまま使用 | PreToolUse フックで agent-browser を推奨 |
+
 ## [2.7.14] - 2026-01-13
 
 ### Added
@@ -1326,8 +1365,9 @@ Observation recorded: 10946-10951 ✅
 - **v0.4.0**: Claude Rules、Plugin Hooks、Named Sessions 対応
 - **v0.3.0**: 初期リリース（Plan → Work → Review サイクル）
 
-[Unreleased]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.12...HEAD
+[Unreleased]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.16...HEAD
 [2.7.12]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.11...v2.7.12
+[2.7.16]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.15...v2.7.16
 [2.7.11]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.10...v2.7.11
 [2.7.10]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.9...v2.7.10
 [2.7.9]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.8...v2.7.9

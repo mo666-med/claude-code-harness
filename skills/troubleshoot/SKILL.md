@@ -75,12 +75,22 @@ npm ls --depth=0
 
 UIの不具合は、**画面で再現して観測→修正→再検証**するのが最短です。
 
-1. **dev-browser が導入済みなら最優先で使う**
-   - 対象URLで再現 → DOM/コンソール/ネットワークを根拠に原因を絞る
+1. **agent-browser を最優先で使う**（インストール: `npm install -g agent-browser`）
+   ```bash
+   # ページを開いてスナップショット取得
+   agent-browser open https://example.com/target-page
+   agent-browser snapshot -i -c
+
+   # 要素参照でクリック・入力
+   agent-browser click @e1
+   agent-browser fill @e2 "test"
+   ```
+   - 対象URLで再現 → スナップショット/コンソールを根拠に原因を絞る
    - ソースコード（UI/状態管理/API/バリデーション）を確認して修正
    - 同じ手順で再現しないことを確認
    - 参考: `docs/OPTIONAL_PLUGINS.md`
-2. **dev-browser が使えない場合のフォールバック**
+2. **agent-browser が使えない場合のフォールバック**
+   - MCP ブラウザツール（chrome-devtools, playwright）
    - 再現手順（URL/手順/期待値/実際）
    - スクリーンショット/動画
    - コンソールログ/ネットワークログ
