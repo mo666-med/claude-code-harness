@@ -178,44 +178,50 @@ git diff --name-only HEAD~5 2>/dev/null || find . -name "*.ts" -o -name "*.tsx" 
 4. `/harness-review accessibility` を実行 → `Ctrl+B` でバックグラウンドへ
 5. 各サブエージェントが完了すると自動的に通知されます
 
-**Task tool による並列起動（Codex 有効時は5つ同時呼び出し）:**
+**モード別の並列実行:**
+
+#### Default モード（`review.mode: default`）- Task tool で code-reviewer を4並列起動
 
 ```
 🔍 並列レビュー開始...
 
-Task tool #1:
-  description: "Security review"
-  subagent_type: "code-reviewer"
-  prompt: "セキュリティ観点でレビュー。対象: {changed_files}
-          チェック項目: 環境変数管理、入力バリデーション、SQL/XSS対策"
+Task tool #1: subagent_type="code-reviewer" → セキュリティ観点
+Task tool #2: subagent_type="code-reviewer" → パフォーマンス観点
+Task tool #3: subagent_type="code-reviewer" → 品質観点
+Task tool #4: subagent_type="code-reviewer" → アクセシビリティ観点
 
-Task tool #2:
-  description: "Performance review"
-  subagent_type: "code-reviewer"
-  prompt: "パフォーマンス観点でレビュー。対象: {changed_files}
-          チェック項目: 再レンダリング、N+1クエリ、メモ化"
-
-Task tool #3:
-  description: "Quality review"
-  subagent_type: "code-reviewer"
-  prompt: "コード品質観点でレビュー。対象: {changed_files}
-          チェック項目: 型安全性、エラーハンドリング、命名規則"
-
-Task tool #4:
-  description: "Accessibility review"
-  subagent_type: "code-reviewer"
-  prompt: "アクセシビリティ観点でレビュー。対象: {changed_files}
-          チェック項目: セマンティックHTML、alt、キーボード操作"
-
-Task tool #5（codex.enabled: true の場合のみ）:
-  description: "Codex second opinion"
-  subagent_type: "code-reviewer"
-  prompt: "Codex MCP 経由でセカンドオピニオンを取得。対象: {changed_files}
-          日本語でコードレビューを行い、問題点と改善提案を出力"
-
-→ 4〜5つのサブエージェントが並列実行
+→ 4つのサブエージェントが並列実行
 → 結果を統合して総合評価を出力
 ```
+
+#### Codex モード（`review.mode: codex`）- 必要なエキスパートのみ MCP 並列実行
+
+**⚠️ 重要: 1回の呼び出しで複数エキスパートをまとめないこと**
+
+```
+🔍 Codex 並列レビュー開始...
+
+1. 呼び出すエキスパートを判定（全部ではなく必要なもののみ）:
+   - 設定で enabled: false → 除外
+   - CLI/バックエンド → Accessibility, SEO 除外
+   - ドキュメントのみ変更 → Quality, Architect, Plan Reviewer, Scope Analyst を優先
+
+2. 有効なエキスパートの experts/*.md からプロンプトを個別に読み込む
+
+3. 有効なエキスパートのみ mcp__codex__codex を1レスポンス内で並列実行:
+   例: Webフロントエンドでコード変更あり → 6エキスパート並列
+   mcp__codex__codex({prompt: security-expert.md})
+   mcp__codex__codex({prompt: accessibility-expert.md})
+   mcp__codex__codex({prompt: performance-expert.md})
+   mcp__codex__codex({prompt: quality-expert.md})
+   mcp__codex__codex({prompt: seo-expert.md})
+   mcp__codex__codex({prompt: architect-expert.md})
+
+→ 必要なエキスパートのみ並列実行（コスト最適化）
+→ 各エキスパートの結果を統合して判定
+```
+
+**詳細**: `skills/codex-review/references/codex-parallel-review.md`
 
 レビュー観点：
 

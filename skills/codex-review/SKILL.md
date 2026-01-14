@@ -25,12 +25,38 @@ OpenAI Codex CLI を MCP サーバーとして Claude Code に統合し、コー
 |------|------|
 | **MCP セットアップ** | See [references/codex-mcp-setup.md](references/codex-mcp-setup.md) |
 | **レビュー統合** | See [references/codex-review-integration.md](references/codex-review-integration.md) |
+| **最大8並列レビュー** | See [references/codex-parallel-review.md](references/codex-parallel-review.md) |
 
 ## 実行手順
 
 1. ユーザーのリクエストを分類
 2. 上記の「機能詳細」から適切な参照ファイルを読む
 3. その内容に従って設定またはレビューを実行
+
+### ⚠️ 並列レビュー時の必須ルール
+
+**Codex モード（`review.mode: codex`）でのレビュー実行時**:
+
+1. **呼び出すエキスパートを判定**（全部ではなく必要なもののみ）:
+   - 設定で `enabled: false` → 除外
+   - CLI/バックエンド → Accessibility, SEO 除外
+   - ドキュメントのみ変更 → Quality, Architect, Plan Reviewer, Scope Analyst を優先（Security, Performance は除外可）
+2. 有効なエキスパートの `references/experts/*.md` から **プロンプトを個別に読み込む**
+3. 有効なエキスパートのみ **MCP 呼び出しを1つのレスポンス内で並列実行**
+4. 絶対に1回の呼び出しで複数観点をまとめない
+
+```
+✅ 正しい（6エキスパート有効の場合）:
+   mcp__codex__codex({prompt: security-expert.md})
+   mcp__codex__codex({prompt: performance-expert.md})
+   mcp__codex__codex({prompt: quality-expert.md})
+   ... (有効なもののみ並列)
+
+❌ 間違い:
+   mcp__codex__codex({prompt: "セキュリティとパフォーマンスと品質をレビューして"})
+```
+
+**詳細**: [references/codex-parallel-review.md](references/codex-parallel-review.md)
 
 ---
 
@@ -40,10 +66,9 @@ Codex MCP サーバーが登録されると、以下のツールが利用可能�
 
 | ツール | 用途 |
 |-------|------|
-| `mcp__codex__query` | Codex にプロンプトを送信 |
-| `mcp__codex__review` | コードレビューを依頼 |
+| `mcp__codex__codex` | Codex にプロンプトを送信してレビューを依頼 |
 
-> **注**: ツール名は `codex mcp-server` の実装に依存します。
+> **注**: このツール名は `codex mcp-server` の実装に依存します。
 
 ---
 

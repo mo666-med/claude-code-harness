@@ -237,9 +237,9 @@ if [ "$TOOL_NAME" = "Write" ] || [ "$TOOL_NAME" = "Edit" ]; then
     case "$path" in
       .claude/*) return 0 ;;
     esac
-    # docs/, templates/ は常に除外
+    # docs/, templates/, benchmarks/ は常に除外
     case "$path" in
-      docs/*|templates/*) return 0 ;;
+      docs/*|templates/*|benchmarks/*) return 0 ;;
     esac
     return 1
   }

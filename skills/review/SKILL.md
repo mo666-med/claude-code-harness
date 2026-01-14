@@ -158,18 +158,38 @@ Claude が直接レビューを実行。小〜中規模の変更に最適。
 
 ### Codex モード（並列エキスパート）
 
-Codex MCP 経由で 8 つの専門エキスパートを並列呼び出し:
+Codex MCP 経由で**最大 8 つの専門エキスパート**を **個別に並列呼び出し**（不要なエキスパートは除外）:
 
-| エキスパート | 観点 |
-|-------------|------|
-| Security | OWASP Top 10、認証、インジェクション |
-| Accessibility | WCAG 2.1 AA、セマンティック HTML |
-| Performance | N+1 クエリ、レンダリング、アルゴリズム |
-| Quality | 可読性、保守性、ベストプラクティス |
-| SEO | メタタグ、OGP、サイトマップ |
-| Architect | 設計、トレードオフ、スケーラビリティ |
-| Plan Reviewer | 計画の完全性、明確性、検証可能性 |
-| Scope Analyst | 要件分析、曖昧さ検出、リスク |
+| エキスパート | 観点 | プロンプトファイル |
+|-------------|------|-------------------|
+| Security | OWASP Top 10、認証、インジェクション | `experts/security-expert.md` |
+| Accessibility | WCAG 2.1 AA、セマンティック HTML | `experts/accessibility-expert.md` |
+| Performance | N+1 クエリ、レンダリング、アルゴリズム | `experts/performance-expert.md` |
+| Quality | 可読性、保守性、ベストプラクティス | `experts/quality-expert.md` |
+| SEO | メタタグ、OGP、サイトマップ | `experts/seo-expert.md` |
+| Architect | 設計、トレードオフ、スケーラビリティ | `experts/architect-expert.md` |
+| Plan Reviewer | 計画の完全性、明確性、検証可能性 | `experts/plan-reviewer-expert.md` |
+| Scope Analyst | 要件分析、曖昧さ検出、リスク | `experts/scope-analyst-expert.md` |
+
+#### ⚠️ Codex モード実行時の必須ルール
+
+**絶対に1回の MCP 呼び出しで複数エキスパートをまとめないこと。**
+
+```
+✅ 正しい: 8回の MCP 呼び出しを1つのレスポンス内で並列実行
+❌ 間違い: 1回の呼び出しで「全観点をレビューして」と依頼
+```
+
+**実行手順**:
+1. **呼び出すエキスパートを判定**（全部ではなく必要なもののみ）:
+   - 設定で `enabled: false` → 除外
+   - CLI/バックエンド → Accessibility, SEO 除外
+   - ドキュメントのみ変更 → Quality, Architect, Plan Reviewer, Scope Analyst を優先（Security, Performance は除外可）
+2. 有効なエキスパートの `experts/*.md` からプロンプトを **個別に読み込む**
+3. 有効なエキスパートのみ `mcp__codex__codex` を **1つのレスポンス内で並列実行**
+4. 各結果を統合して判定
+
+**詳細**: [codex-review/references/codex-parallel-review.md](../codex-review/references/codex-parallel-review.md)
 
 **Codex モード有効化**:
 ```bash

@@ -13,6 +13,58 @@ Change history for claude-code-harness.
 
 ---
 
+## [2.8.2] - 2026-01-14
+
+### 🎯 What's Changed for You
+
+**Codex parallel review now enforces individual MCP calls and smart expert filtering.**
+
+#### Before/After
+
+| Before | After |
+|--------|-------|
+| Experts might be combined in single MCP call | MANDATORY rules enforce individual parallel calls |
+| Always called 8 experts | Smart filtering: only relevant experts for project type |
+| Inconsistent tool names in docs | Unified to `mcp__codex__codex` |
+
+### Fixed
+
+- **MCP tool name** unified to `mcp__codex__codex` across all docs
+- **"8 experts" → "up to 8 experts"** to clarify filtering applies
+- **Document-only change rules** unified (Quality, Architect, Plan Reviewer, Scope Analyst priority)
+- **MANDATORY parallel call rules** added to prevent expert consolidation
+
+### Changed
+
+- Expert filtering now considers:
+  - Config-based (`enabled: false` → skip)
+  - Project type (CLI/Backend → skip Accessibility, SEO)
+  - Change content (docs only → skip Security, Performance)
+
+---
+
+## [2.8.1] - 2026-01-13
+
+### 🎯 What's Changed for You
+
+**CI-only commands are now hidden from `/` completion.**
+
+- `harness-review-ci`, `plan-with-agent-ci`, `work-ci` now have `user-invocable: false`
+
+---
+
+## [2.8.0] - 2026-01-13
+
+### 🎯 What's Changed for You
+
+**Commit Guard + Codex Mode integration for quality gates.**
+
+- **Commit Guard**: Blocks `git commit` until review is approved
+- **Codex Mode**: 8 expert parallel reviews via MCP
+- **Auto-judgment**: APPROVE/REQUEST CHANGES/REJECT with auto-fix loop
+
+---
+
 ## [2.7.12] - 2026-01-11
 
 ### 🎯 What's Changed for You

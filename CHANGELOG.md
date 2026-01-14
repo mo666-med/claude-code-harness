@@ -7,6 +7,23 @@
 
 ## [Unreleased]
 
+## [2.8.2] - 2026-01-14
+
+### Fixed
+
+- **Codex 並列レビューの導線強化**
+  - MCP ツール名を `mcp__codex__codex` に統一（不整合を修正）
+  - 「8 エキスパート」を「最大 8 エキスパート」に表記統一（フィルタリング仕様を明確化）
+  - ドキュメントのみ変更時の優先エキスパートルールを統一（Quality, Architect, Plan Reviewer, Scope Analyst）
+  - 並列呼び出し必須ルール（MANDATORY セクション）を追加し、複数エキスパートの1回 MCP 呼び出しを明示的に禁止
+
+### Changed
+
+- **エキスパートフィルタリング仕様の明確化**
+  - 設定ベースフィルタリング（`enabled: false` → 除外）
+  - プロジェクト種別フィルタリング（CLI/バックエンド → Accessibility, SEO 除外）
+  - 変更内容フィルタリング（ドキュメントのみ → Security, Performance 除外可）
+
 ## [2.8.1] - 2026-01-13
 
 ### Changed
@@ -1429,7 +1446,10 @@ Observation recorded: 10946-10951 ✅
 - **v0.4.0**: Claude Rules、Plugin Hooks、Named Sessions 対応
 - **v0.3.0**: 初期リリース（Plan → Work → Review サイクル）
 
-[Unreleased]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.16...HEAD
+[Unreleased]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.8.2...HEAD
+[2.8.2]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.8.1...v2.8.2
+[2.8.1]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.8.0...v2.8.1
+[2.8.0]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.16...v2.8.0
 [2.7.12]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.11...v2.7.12
 [2.7.16]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.15...v2.7.16
 [2.7.11]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.10...v2.7.11
