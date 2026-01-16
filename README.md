@@ -9,9 +9,37 @@ English | [日本語](README.ja.md)
 A development harness that runs Claude Code in an autonomous "Plan → Work → Review" cycle,
 systematically preventing **confusion, sloppiness, accidents, and forgetfulness**.
 
-[![Version: 2.8.2](https://img.shields.io/badge/version-2.8.2-blue.svg)](VERSION)
+[![Version: 2.9.0](https://img.shields.io/badge/version-2.9.0-blue.svg)](VERSION)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE.md)
 [![Harness Score](https://img.shields.io/badge/harness_score-92%2F100-brightgreen.svg)](#scoring-criteria)
+
+---
+
+## What's New in v2.9
+
+### Full-Cycle Parallel Automation (v2.9.0)
+
+**Run `/work --full` for automated implement → self-review → improve → commit cycles**
+
+```bash
+/work --full --parallel 3
+```
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--full` | Enable full-cycle mode | false |
+| `--parallel N` | Parallel worker count | 1 |
+| `--isolation` | `lock` / `worktree` | lock |
+| `--commit-strategy` | `task` / `phase` / `all` | task |
+| `--deploy` | Auto-deploy after commit | false |
+
+**4-Phase Architecture**:
+1. **Phase 1**: Dependency graph → Parallel task-workers → Self-review
+2. **Phase 2**: Codex 8-parallel cross-review
+3. **Phase 3**: Conflict resolution → Final build verification → Conventional Commit
+4. **Phase 4**: Deploy (optional, with safety gate)
+
+See [docs/PARALLEL_FULL_CYCLE.md](docs/PARALLEL_FULL_CYCLE.md) for details.
 
 ---
 

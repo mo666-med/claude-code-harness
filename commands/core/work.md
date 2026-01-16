@@ -14,12 +14,326 @@ Plans.md の計画を実行し、実際のコードを生成します。
 - 「**まず動くところまで作って**」→ 最小の動作確認までを先に通します
 - 「**全部まとめてやって**」→ 並列実行で一気に処理します
 - 「**途中から再開したい**」→ 進行中（cc:WIP）や依頼中（pm:依頼中）を拾って再開
+- 「**フルサイクルで**」→ `--full` モード（実装→レビュー→commit）
 
 ## できること（成果物）
 
 - Plans.md のタスクを**並列実行で効率的に**実装
 - 途中で詰まったら原因切り分け→修正→再検証まで回す
 - **2-Agent の場合**: pm:依頼中 のタスクを優先的に処理
+- **--full モード**: 実装→セルフレビュー→クロスレビュー→commit の完全自動化
+
+---
+
+## 🚀 --full モード（フルサイクル自動化）
+
+`/work --full` で「実装→セルフレビュー→改善→commit」を自動で回します。
+
+### オプション一覧
+
+| オプション | 説明 | デフォルト |
+|-----------|------|-----------|
+| `--full` | フルサイクル実行 | false |
+| `--parallel N` | 並列数指定 | 1 |
+| `--isolation` | lock / worktree | lock |
+| `--commit-strategy` | task / phase / all | task |
+| `--deploy` | commit 後に deploy | false |
+| `--max-iterations` | 改善ループ上限 | 3 |
+| `--skip-cross-review` | Phase 2 スキップ | false |
+
+### --isolation オプション
+
+| 値 | 動作 | 推奨 |
+|-----|------|------|
+| `lock` | 同一worktree + ファイルロック | 小〜中規模タスク |
+| `worktree` | git worktree分離 + pnpmで容量節約 | 大規模タスク、真の並列ビルド |
+
+### --full モードのフロー
+
+```
+/work --full --parallel 3
+    ↓
+┌─────────────────────────────────────────────────────────┐
+│ Phase 1: 並列実装 + セルフレビュー                       │
+├─────────────────────────────────────────────────────────┤
+│  [task-worker A] 実装→セルフレビュー→修正（最大3回）    │
+│  [task-worker B] 実装→セルフレビュー→修正              │
+│  [task-worker C] 実装→セルフレビュー→修正              │
+│                                                         │
+│  各ワーカーが commit_ready を返すまで自律的にループ     │
+└─────────────────────────────────────────────────────────┘
+    ↓ 全員「commit_ready」を待つ
+┌─────────────────────────────────────────────────────────┐
+│ Phase 2: クロスレビュー（Codex 8並列）                  │
+├─────────────────────────────────────────────────────────┤
+│  Codex 8並列エキスパートレビュー                        │
+│  ※セルフレビューでは見落とす問題を検出                 │
+│  ※追加指摘あり → 該当タスクを Phase 1 へ戻す           │
+└─────────────────────────────────────────────────────────┘
+    ↓
+┌─────────────────────────────────────────────────────────┐
+│ Phase 3: 統合 Commit                                    │
+├─────────────────────────────────────────────────────────┤
+│  ├── コンフリクト検出・解消                             │
+│  ├── 最終ビルド検証                                     │
+│  └── Conventional Commit で commit                      │
+└─────────────────────────────────────────────────────────┘
+    ↓
+┌─────────────────────────────────────────────────────────┐
+│ Phase 4: Deploy（--deploy 指定時のみ）                  │
+└─────────────────────────────────────────────────────────┘
+```
+
+### --commit-strategy の動作
+
+| 値 | 動作 |
+|-----|------|
+| `task` | 各タスク完了時に個別 commit |
+| `phase` | フェーズ完了時にまとめて commit |
+| `all` | 全タスク + クロスレビュー完了後に 1 commit |
+
+### エスカレーション
+
+task-worker が 3回修正しても問題が解決しない場合、親に集約してユーザーに一括確認します。
+
+```
+⚠️ エスカレーション（2件）
+
+タスクA: 型 'unknown' を 'User' に変換できません
+  → 提案: User 型の定義を確認するか、型ガードを追加
+
+タスクB: テスト 'should validate email' が失敗
+  → 提案: 正規表現パターンを修正
+
+どう対応しますか？
+1. 提案を適用して続行
+2. スキップして次へ
+3. 手動で修正する
+```
+
+---
+
+## 📐 --full モード詳細実装
+
+### Phase 1: 依存グラフ構築と並列起動
+
+**依存グラフ構築ロジック**:
+
+```
+Plans.md のタスクを解析:
+    ↓
+1. タスクごとに対象ファイルを抽出
+    ↓
+2. ファイル依存関係を判定
+   ├── 同一ファイル編集 → 直列
+   ├── import 依存あり → 直列
+   └── 独立 → 並列可能
+    ↓
+3. 依存グラフを構築
+    ↓
+4. 並列実行グループを決定
+```
+
+**判定ルール**:
+
+| 条件 | 判定 | 処理 |
+|------|------|------|
+| 同一ファイルを複数タスクが編集 | 競合 | 直列実行 |
+| タスクAの出力がタスクBの入力 | 依存 | A→B 順序で実行 |
+| 互いに独立 | 並列可能 | 同一グループ |
+
+**task-worker 起動**:
+
+```
+並列グループごとに:
+    ↓
+Task tool で task-worker を起動:
+  - subagent_type: "task-worker"
+  - run_in_background: true
+  - prompt: {
+      task: "タスク説明",
+      files: ["対象ファイル"],
+      max_iterations: 3,
+      review_depth: "standard"
+    }
+    ↓
+起動したタスクIDを収集
+```
+
+**結果収集**:
+
+```
+全 task-worker の完了を待機:
+    ↓
+TaskOutput で結果を収集:
+  - status: commit_ready | needs_escalation | failed
+  - changes: [{file, action}]
+  - self_review: {quality, security, performance, compatibility}
+    ↓
+needs_escalation があれば集約 → ユーザーに一括確認
+```
+
+**進捗表示**:
+
+```
+📊 Phase 1 進捗: 2/5 完了
+
+├── [worker-1] Header.tsx ✅ commit_ready (35秒)
+├── [worker-2] Footer.tsx ✅ commit_ready (28秒)
+├── [worker-3] Sidebar.tsx ⏳ セルフレビュー中...
+├── [worker-4] Utils.ts ⏳ 実装中...
+└── [worker-5] Types.ts 🔜 待機中（依存: Utils.ts）
+```
+
+### Phase 2: クロスレビュー実行
+
+**前提条件**:
+- Phase 1 の全タスクが `commit_ready` を返した
+- `--skip-cross-review` が指定されていない
+
+**実行フロー**:
+
+```
+Phase 1 完了判定:
+    ↓
+Codex 8並列レビューを起動:
+  - /harness-review --codex-only
+  - 8つのエキスパート観点で同時レビュー
+    ↓
+追加指摘の抽出:
+  - Critical/Major の問題があれば該当タスクを Phase 1 へ戻す
+  - Minor は記録のみ（commit 可能）
+    ↓
+問題なし → Phase 3 へ
+```
+
+**レビュー観点（8並列）**:
+
+| # | エキスパート | 観点 |
+|---|-------------|------|
+| 1 | Security | 脆弱性、認証、入力検証 |
+| 2 | Performance | N+1、メモリリーク、レンダリング |
+| 3 | Maintainability | 可読性、命名、構造 |
+| 4 | Compatibility | API互換性、回帰リスク |
+| 5 | Accessibility | a11y、キーボード操作 |
+| 6 | Type Safety | 型定義、any回避 |
+| 7 | Error Handling | エラー処理、フォールバック |
+| 8 | Best Practices | フレームワーク規約、パターン |
+
+### Phase 3: 統合 Commit
+
+**コンフリクト検出・解消**:
+
+```
+--isolation=lock の場合:
+  - git diff でファイル変更を確認
+  - 同一行への競合があれば警告 → ユーザー確認
+
+--isolation=worktree の場合:
+  - 各 worktree のブランチをマージ
+  - 3-way merge で自動解消を試行
+  - 解消不可なら手動介入を依頼
+```
+
+**最終ビルド検証**:
+
+```
+pnpm build（または npm run build）
+    ↓
+成功 → commit へ
+失敗 → エラー分析 → 自動修正試行（最大3回）
+```
+
+**Conventional Commit 生成**:
+
+```
+変更内容を分析:
+    ↓
+適切なプレフィックスを選択:
+  - feat: 新機能
+  - fix: バグ修正
+  - refactor: リファクタリング
+  - docs: ドキュメント
+    ↓
+commit メッセージ生成:
+  feat(components): add Header, Footer, Sidebar components
+
+  - Add responsive Header with navigation
+  - Add Footer with copyright and links
+  - Add collapsible Sidebar for mobile
+
+  Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
+**戦略別の commit 実行**:
+
+| 戦略 | 動作 | 適切なケース |
+|------|------|-------------|
+| `task` | タスクごとに個別 commit | 変更履歴を細かく残したい |
+| `phase` | フェーズごとにまとめて commit | 論理的な単位でまとめたい |
+| `all` | 全完了後に 1 commit | 機能単位で 1 commit にしたい |
+
+### Phase 4: Deploy（オプション）
+
+**前提条件**:
+- `--deploy` フラグが指定されている
+- Phase 3 の commit が成功している
+
+**安全ゲート**:
+
+```
+Deploy 前チェック:
+    ↓
+1. 本番環境の検出
+   ├── Vercel: VERCEL_ENV=production
+   ├── Netlify: CONTEXT=production
+   └── カスタム: DEPLOY_ENV=production
+    ↓
+2. 安全確認プロンプト
+   ⚠️ 本番環境へのデプロイを実行しますか？
+   - ブランチ: main
+   - 変更ファイル: 5件
+   - 最終テスト: ✅ 通過
+
+   [y/N]
+    ↓
+3. デプロイ実行
+   └── deploy スキルを呼び出し
+```
+
+**デプロイ実行**:
+
+```
+Skill tool で deploy スキルを起動:
+  - skill: "claude-code-harness:deploy"
+    ↓
+デプロイコマンド実行:
+  ├── Vercel: vercel --prod
+  ├── Netlify: netlify deploy --prod
+  └── カスタム: npm run deploy
+    ↓
+結果確認:
+  - デプロイURL
+  - ビルド時間
+  - ステータス
+```
+
+**結果レポート**:
+
+```
+🚀 Deploy 完了
+
+| 項目 | 値 |
+|------|-----|
+| 環境 | production |
+| URL | https://my-app.vercel.app |
+| ビルド時間 | 45秒 |
+| ステータス | ✅ 成功 |
+
+変更内容:
+- feat(components): add Header, Footer, Sidebar
+- 5 files changed, 320 insertions(+)
+```
 
 ---
 

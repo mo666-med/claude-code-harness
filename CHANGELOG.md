@@ -7,6 +7,66 @@
 
 ## [Unreleased]
 
+## [2.9.0] - 2026-01-16
+
+### Added
+
+- **task-worker 統合（フェーズ 32）** - `/work --full` で「実装→セルフレビュー→改善→commit」のフルサイクルを並列自動化
+  - 新規エージェント `agents/task-worker.md`: 単一タスクの実装→セルフレビュー→検証を自己完結で回す
+    - 4 観点セルフレビュー（品質/セキュリティ/パフォーマンス/互換性）
+    - 最大 3 回の自己修正ループ
+    - `commit_ready` / `needs_escalation` / `failed` のステータス返却
+  - `/work` コマンド拡張（7 つの新オプション）:
+    - `--full`: フルサイクル実行モード
+    - `--parallel N`: 並列数指定（デフォルト 1、上限 5）
+    - `--isolation lock|worktree`: ファイルロック or git worktree 分離
+    - `--commit-strategy task|phase|all`: commit タイミング戦略
+    - `--deploy`: commit 後に本番デプロイ（安全ゲート付き）
+    - `--max-iterations`: 改善ループ上限（デフォルト 3）
+    - `--skip-cross-review`: Phase 2 スキップ
+
+- **4 フェーズ並列実行アーキテクチャ**:
+  - **Phase 1**: 依存グラフ構築 → task-worker 並列起動 → セルフレビュー
+  - **Phase 2**: Codex 8 並列クロスレビュー（Critical/Major 検出時は Phase 1 へフィードバック）
+  - **Phase 3**: コンフリクト検出・解消 → 最終ビルド検証 → Conventional Commit
+  - **Phase 4**: Deploy（オプション、安全ゲート付き）
+
+- **commit_ready 基準の明文化**:
+  - セルフレビュー全観点で Critical/Major 指摘なし
+  - ビルドコマンド成功（exit code 0）
+  - 該当テスト成功（または該当テストなし）
+  - 既存テストの回帰なし
+  - 品質ガードレール違反なし
+
+- **出力スキーマの拡充**（Codex レビュー反映）:
+  - `build_log`: ビルド失敗時のエラーメッセージ
+  - `test_log`: テスト失敗時の詳細（テスト名、アサーションエラー）
+  - `escalation_reason` に `test_failed_3x`, `review_failed_3x` 追加
+
+- **files: "auto" 判定ルールの明文化**:
+  - Plans.md からのパス抽出 → キーワード検索 → ディレクトリ推定
+  - 安全制限: 最大10ファイル、機密ファイル除外
+
+- **worktree + pnpm 統合オプション**:
+  - `--isolation=worktree` で git worktree 分離
+  - pnpm 使用時はシンボリックリンクで容量節約（+54MB/worktree）
+  - 並列ビルド/テストが可能（完全分離）
+
+### Changed
+
+- **エスカレーション戦略の改善**:
+  - 並列実行時のエスカレーションを親に集約
+  - ユーザーへの一括確認プロンプト
+
+#### Before/After
+
+| Before | After |
+|--------|-------|
+| `/work` で1タスクずつ順次実行 | `/work --full --parallel 3` で並列フルサイクル |
+| レビューは別コマンドで手動実行 | 各 task-worker がセルフレビューを自律実行 |
+| commit は手動 | `commit_ready` 判定後に自動 commit |
+| 同一ワークスペースでの競合リスク | `--isolation=worktree` で完全分離可能 |
+
 ## [2.8.2] - 2026-01-14
 
 ### Fixed
