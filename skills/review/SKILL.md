@@ -115,6 +115,50 @@ context: fork
 → セキュリティ・カバレッジ・SEO を重点的にレビュー
 ```
 
+#### LSP ベースの影響分析（推奨）
+
+変更レビュー時に LSP ツールで影響範囲を確認:
+
+| 変更タイプ | LSP 操作 | 確認内容 |
+|-----------|---------|---------|
+| 関数シグネチャ変更 | findReferences | 全呼び出し元が対応済みか |
+| 型定義変更 | findReferences | 使用箇所での型互換性 |
+| API 変更 | incomingCalls | 影響を受けるエンドポイント |
+
+**レビューフロー**:
+1. 変更ファイルを特定
+2. `LSP.findReferences` で影響範囲を列挙
+3. 影響を受けるファイルも含めてレビュー
+
+**使用例**:
+```
+# 1. 変更された関数の参照箇所を確認
+LSP operation=findReferences filePath="src/api/user.ts" line=42 character=15
+
+# 2. 関数の呼び出し階層を確認
+LSP operation=incomingCalls filePath="src/api/user.ts" line=42 character=15
+
+# 3. 型定義の使用箇所を確認
+LSP operation=findReferences filePath="src/types/api.ts" line=10 character=12
+```
+
+**出力例**:
+```markdown
+🔍 LSP 影響分析結果
+
+変更: updateUserProfile() のシグネチャ変更
+
+影響を受ける箇所:
+├── src/pages/profile.tsx:89 ⚠️ 引数更新必要
+├── src/pages/settings.tsx:145 ⚠️ 引数更新必要
+├── tests/user.test.ts:67 ✅ 更新済み
+└── src/api/admin.ts:23 ⚠️ 引数更新必要
+
+→ 3箇所で引数の更新が必要
+```
+
+> **注**: LSP サーバーが設定されている言語でのみ動作します。
+
 ### Step 2: 過去のレビュー指摘検索（Memory-Enhanced）
 
 Claude-mem が有効な場合、レビュー開始前に過去の類似指摘を検索:

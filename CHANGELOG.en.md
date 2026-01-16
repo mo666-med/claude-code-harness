@@ -13,6 +13,66 @@ Change history for claude-code-harness.
 
 ---
 
+## [2.9.1] - 2026-01-16
+
+### 🎯 What's Changed for You
+
+**Claude Code 2.1.x compatibility: smarter hooks, LSP guidance, and lightweight subagent init.**
+
+#### Before/After
+
+| Before | After |
+|--------|-------|
+| Quality rules only checked at review time | Quality guidelines injected during file edits via `additionalContext` |
+| Subagents had same init overhead as main agent | Subagents get lightweight init (faster task-worker execution) |
+| Manual code navigation for impact analysis | LSP guidance in impl/review skills (findReferences, goToDefinition) |
+| Short hook timeouts caused failures | Extended timeouts for long-running hooks (up to 120s) |
+
+### Added
+
+- **PreToolUse additionalContext**: Injects quality guidelines when editing files
+  - Test files → test-quality.md rules (no test tampering)
+  - Source files → implementation-quality.md rules
+- **SessionStart agent_type**: Subagents skip full initialization
+- **LSP guidance**: impl/review skills now recommend LSP for code analysis
+- **Compatibility docs**: `docs/CLAUDE_CODE_COMPATIBILITY.md` with version matrix
+
+### Changed
+
+- **Hook timeouts extended** (for Claude Code v2.1.3+):
+  - usage-tracker: 10s → 30s
+  - auto-test-runner: 30s → 120s
+  - session-summary: 30s → 60s
+  - auto-cleanup-hook: 30s → 60s
+- **MCP auto mode** (v2.1.7+): Removed explicit MCPSearch calls from cursor-mem skill
+
+---
+
+## [2.9.0] - 2026-01-16
+
+### 🎯 What's Changed for You
+
+**Full-cycle parallel automation: implement → self-review → improve → commit in one command.**
+
+#### Before/After
+
+| Before | After |
+|--------|-------|
+| `/work` executes tasks one at a time | `/work --full --parallel 3` runs full cycle in parallel |
+| Review was a separate manual step | Each task-worker self-reviews autonomously |
+| Commits were manual | Auto-commit after `commit_ready` judgment |
+| Same workspace risked file conflicts | `--isolation=worktree` for complete separation |
+
+### Added
+
+- **task-worker integration (Phase 32)**: `/work --full` automates implement → self-review → improve → commit
+  - New agent `agents/task-worker.md` with 4-point self-review
+  - 7 new options for `/work`: `--full`, `--parallel N`, `--isolation`, `--commit-strategy`, `--deploy`, `--max-iterations`, `--skip-cross-review`
+- **4-phase parallel execution**: Dependency graph → task-workers → Codex cross-review → Commit
+- **commit_ready criteria**: No Critical/Major issues, build success, tests pass
+
+---
+
 ## [2.8.2] - 2026-01-14
 
 ### 🎯 What's Changed for You

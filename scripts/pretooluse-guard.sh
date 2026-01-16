@@ -126,28 +126,38 @@ fi
 emit_decision() {
   local decision="$1"
   local reason="$2"
+  local additional_context="${3:-}"
 
   if command -v jq >/dev/null 2>&1; then
-    jq -nc --arg decision "$decision" --arg reason "$reason" \
-      '{hookSpecificOutput:{hookEventName:"PreToolUse", permissionDecision:$decision, permissionDecisionReason:$reason}}'
+    if [ -n "$additional_context" ]; then
+      jq -nc --arg decision "$decision" --arg reason "$reason" --arg ctx "$additional_context" \
+        '{hookSpecificOutput:{hookEventName:"PreToolUse", permissionDecision:$decision, permissionDecisionReason:$reason, additionalContext:$ctx}}'
+    else
+      jq -nc --arg decision "$decision" --arg reason "$reason" \
+        '{hookSpecificOutput:{hookEventName:"PreToolUse", permissionDecision:$decision, permissionDecisionReason:$reason}}'
+    fi
     return 0
   fi
 
   if command -v python3 >/dev/null 2>&1; then
-    DECISION="$decision" REASON="$reason" python3 - <<'PY'
+    DECISION="$decision" REASON="$reason" ADDITIONAL_CONTEXT="$additional_context" python3 - <<'PY'
 import json, os
-print(json.dumps({
+output = {
   "hookSpecificOutput": {
     "hookEventName": "PreToolUse",
     "permissionDecision": os.environ.get("DECISION", ""),
     "permissionDecisionReason": os.environ.get("REASON", ""),
   }
-}))
+}
+ctx = os.environ.get("ADDITIONAL_CONTEXT", "")
+if ctx:
+    output["hookSpecificOutput"]["additionalContext"] = ctx
+print(json.dumps(output))
 PY
     return 0
   fi
 
-  # Fallback: omit reason to avoid JSON escaping issues.
+  # Fallback: omit reason and additionalContext to avoid JSON escaping issues.
   printf '%s' "{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"${decision}\"}}"
 }
 
@@ -160,6 +170,54 @@ emit_deny() {
   emit_decision "deny" "$1"
 }
 emit_ask() { emit_decision "ask" "$1"; }
+
+# ===== additionalContext ガイドライン生成 (Claude Code v2.1.9+) =====
+# Write/Edit 操作時にファイルパスに応じたガイドラインを返す
+
+TEST_QUALITY_GUIDELINE="【テスト品質ガイドライン】
+- it.skip() / test.skip() への変更禁止
+- アサーションの削除・緩和禁止
+- eslint-disable コメントの追加禁止"
+
+IMPL_QUALITY_GUIDELINE="【実装品質ガイドライン】
+- テスト期待値のハードコード禁止
+- スタブ・モック・空実装禁止
+- 意味のあるロジックを実装すること"
+
+# ファイルパスに応じたガイドラインを返す
+# 引数: $1 = ファイルパス（相対または絶対）
+# 戻り値: ガイドライン文字列（該当なしの場合は空）
+get_guideline_for_path() {
+  local path="$1"
+
+  # テストファイルパターン
+  case "$path" in
+    tests/*|test/*|__tests__/*|*.spec.ts|*.spec.tsx|*.spec.js|*.spec.jsx|*.test.ts|*.test.tsx|*.test.js|*.test.jsx)
+      echo "$TEST_QUALITY_GUIDELINE"
+      return 0
+      ;;
+  esac
+
+  # 実装ファイルパターン
+  case "$path" in
+    src/*.ts|src/*.tsx|src/*.js|src/*.jsx|lib/*.ts|lib/*.tsx|lib/*.js|lib/*.jsx)
+      echo "$IMPL_QUALITY_GUIDELINE"
+      return 0
+      ;;
+  esac
+
+  # 該当なし
+  echo ""
+}
+
+# additionalContext 付きで approve を出力
+emit_approve_with_context() {
+  local context="$1"
+  if [ -n "$context" ]; then
+    emit_decision "" "" "$context"
+  fi
+  # 空の context の場合は何も出力しない（デフォルト動作）
+}
 
 is_path_traversal() {
   local p="$1"
@@ -354,6 +412,13 @@ LSPツールを使って変更の影響範囲を把握してから、再度 Writ
         fi
       fi
     fi
+  fi
+
+  # ===== additionalContext 出力 (Claude Code v2.1.9+) =====
+  # すべてのガードを通過した場合、ファイルパスに応じたガイドラインを返す
+  GUIDELINE="$(get_guideline_for_path "$REL_PATH")"
+  if [ -n "$GUIDELINE" ]; then
+    emit_approve_with_context "$GUIDELINE"
   fi
 
   exit 0

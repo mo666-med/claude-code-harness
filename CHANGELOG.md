@@ -7,6 +7,34 @@
 
 ## [Unreleased]
 
+## [2.9.1] - 2026-01-16
+
+### Added
+
+- **Claude Code 2.1.x 互換性対応（フェーズ 33）**
+  - **PreToolUse additionalContext 活用**: ファイル編集時に品質ガイドラインを動的注入
+    - テストファイル編集時: `test-quality.md` の改ざん禁止ルール
+    - 実装ファイル編集時: `implementation-quality.md` の品質ルール
+  - **SessionStart agent_type 対応**: サブエージェントを軽量初期化
+    - メインエージェント: フル初期化（Plans.md 状態表示、claude-mem コンテキスト）
+    - サブエージェント: 軽量初期化（タスク固有情報のみ）
+  - **LSP 活用ガイドライン**: impl/review スキルに LSP ベースのコード解析手順を追加
+    - `goToDefinition`: 実装パターンの把握
+    - `findReferences`: 影響範囲の完全把握
+    - `hover`: 型情報・ドキュメントの確認
+  - **互換性ドキュメント**: `docs/CLAUDE_CODE_COMPATIBILITY.md` を新規作成
+    - Harness と Claude Code のバージョン対応表
+
+### Changed
+
+- **Hook タイムアウト延長**（Claude Code v2.1.3 の 10 分延長に対応）:
+  - `usage-tracker`: 10秒 → 30秒
+  - `auto-test-runner`: 30秒 → 120秒
+  - `session-summary`: 30秒 → 60秒
+  - `auto-cleanup-hook`: 30秒 → 60秒
+
+- **MCP auto mode 対応**（v2.1.7+）: cursor-mem スキルから MCPSearch 明示呼び出しを削除
+
 ## [2.9.0] - 2026-01-16
 
 ### Added
@@ -1506,7 +1534,9 @@ Observation recorded: 10946-10951 ✅
 - **v0.4.0**: Claude Rules、Plugin Hooks、Named Sessions 対応
 - **v0.3.0**: 初期リリース（Plan → Work → Review サイクル）
 
-[Unreleased]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.8.2...HEAD
+[Unreleased]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.9.1...HEAD
+[2.9.1]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.9.0...v2.9.1
+[2.9.0]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.8.2...v2.9.0
 [2.8.2]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.8.1...v2.8.2
 [2.8.1]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.8.0...v2.8.1
 [2.8.0]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.16...v2.8.0

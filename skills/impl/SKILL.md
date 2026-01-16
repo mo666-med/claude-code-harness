@@ -129,6 +129,36 @@ def slugify(text: str) -> str:
 2. とりあえず作り始める
 ```
 
+### Step 1: LSP 活用ガイドライン
+
+実装前に LSP ツールで既存コードを理解することを推奨:
+
+| LSP 操作 | 活用場面 | 効果 |
+|---------|---------|------|
+| goToDefinition | 既存関数の実装を確認 | パターン把握 |
+| findReferences | 影響範囲の事前調査 | 破壊的変更防止 |
+| hover | 型情報・JSDoc 確認 | 正しいインターフェース |
+
+**実装フロー**:
+1. `LSP.goToDefinition` で関連コードを確認
+2. `LSP.findReferences` で影響範囲を把握
+3. 実装
+4. `LSP.diagnostics` でエラーチェック
+
+**使用例**:
+```
+# 1. 関連関数の実装を確認
+LSP operation=goToDefinition filePath="src/utils/auth.ts" line=25 character=10
+
+# 2. 影響範囲を調査
+LSP operation=findReferences filePath="src/utils/auth.ts" line=25 character=10
+
+# 3. 型情報を確認
+LSP operation=hover filePath="src/types/user.ts" line=15 character=12
+```
+
+> **注**: LSP サーバーが設定されている言語でのみ動作します。
+
 ### Step 2: 過去の実装パターン検索（Memory-Enhanced）
 
 Claude-mem が有効な場合、実装前に過去の類似パターンを検索:

@@ -126,7 +126,7 @@
           {
             "type": "command",
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/run-script.js\" usage-tracker",
-            "timeout": 10
+            "timeout": 30
           }
         ]
       },
@@ -146,7 +146,7 @@
           {
             "type": "command",
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/run-script.js\" auto-cleanup-hook",
-            "timeout": 30
+            "timeout": 60
           },
           {
             "type": "command",
@@ -156,7 +156,7 @@
           {
             "type": "command",
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/run-script.js\" auto-test-runner",
-            "timeout": 30
+            "timeout": 120
           },
           {
             "type": "command",
@@ -182,7 +182,7 @@
           {
             "type": "command",
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/run-script.js\" session-summary",
-            "timeout": 30
+            "timeout": 60
           },
           {
             "type": "prompt",
