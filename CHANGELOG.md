@@ -7,6 +7,22 @@
 
 ## [Unreleased]
 
+## [2.9.2] - 2026-01-16
+
+### Added
+
+- **Phase 33 完全実装**
+  - **SESSION_ID 活用（33.2）**: `${CLAUDE_SESSION_ID}` を session-log.md に統合、セッション追跡強化
+  - **plansDirectory 設定（33.4）**: Plans.md の配置場所をカスタマイズ可能に（デフォルト: ルート）
+  - **context_window 表示（33.8）**: `/sync-status` にコンテキスト使用率ガイドライン追加（70%超過警告）
+  - **Nested Skills 設計文書（33.9）**: `docs/NESTED_SKILLS_DESIGN.md` で将来のスキル階層整理を設計
+  - **code-reviewer LSP パターン**: `agents/code-reviewer.md` に LSP ベースの影響分析ステップ追加
+
+### Changed
+
+- **README 更新**: Claude Code v2.1.6+ 要件を明記、互換性ドキュメントへのリンク追加
+- **hooks-editing.md 更新**: Hook timeout 延長ガイドラインを追加
+
 ## [2.9.1] - 2026-01-16
 
 ### Added
@@ -1534,7 +1550,8 @@ Observation recorded: 10946-10951 ✅
 - **v0.4.0**: Claude Rules、Plugin Hooks、Named Sessions 対応
 - **v0.3.0**: 初期リリース（Plan → Work → Review サイクル）
 
-[Unreleased]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.9.1...HEAD
+[Unreleased]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.9.2...HEAD
+[2.9.2]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.9.1...v2.9.2
 [2.9.1]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.9.0...v2.9.1
 [2.9.0]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.8.2...v2.9.0
 [2.8.2]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.8.1...v2.8.2

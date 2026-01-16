@@ -13,6 +13,36 @@ Change history for claude-code-harness.
 
 ---
 
+## [2.9.2] - 2026-01-16
+
+### 🎯 What's Changed for You
+
+**Phase 33 complete: SESSION_ID tracking, customizable Plans.md location, context usage monitoring.**
+
+#### Before/After
+
+| Before | After |
+|--------|-------|
+| No session tracking in logs | `${CLAUDE_SESSION_ID}` integrated into session-log.md |
+| Plans.md fixed at project root | Customizable via `plansDirectory` setting |
+| No context usage visibility | `/sync-status` shows usage with 70% warning threshold |
+| LSP patterns only in skills | `agents/code-reviewer.md` includes LSP impact analysis |
+
+### Added
+
+- **SESSION_ID integration**: Track sessions across logs for better debugging
+- **plansDirectory setting**: Move Plans.md to `.claude/memory/` if desired
+- **context_window guidance**: Clear thresholds (green/yellow/red) in `/sync-status`
+- **Nested Skills design doc**: `docs/NESTED_SKILLS_DESIGN.md` for future restructuring
+- **code-reviewer LSP**: Step 2.5 with `findReferences`, `goToDefinition`, `hover`
+
+### Changed
+
+- **README**: Added Claude Code v2.1.6+ requirement with compatibility link
+- **hooks-editing.md**: Extended timeout guidelines documented
+
+---
+
 ## [2.9.1] - 2026-01-16
 
 ### 🎯 What's Changed for You

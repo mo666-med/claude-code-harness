@@ -9,7 +9,7 @@
 Claude Code を「Plan → Work → Review」の自律サイクルで運用し、
 **迷い・雑さ・事故・忘却** を仕組みで防ぐ開発ハーネスです。
 
-[![Version: 2.9.0](https://img.shields.io/badge/version-2.9.0-blue.svg)](VERSION)
+[![Version: 2.9.2](https://img.shields.io/badge/version-2.9.2-blue.svg)](VERSION)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE.md)
 [![Harness Score](https://img.shields.io/badge/harness_score-92%2F100-brightgreen.svg)](#採点基準)
 
@@ -138,6 +138,11 @@ bun run cursor:install -- user
 ---
 
 ## 5分で始める
+
+### 動作要件
+
+- **Claude Code v2.1.6+** (全機能の利用に推奨)
+- バージョン互換性の詳細: [docs/CLAUDE_CODE_COMPATIBILITY.md](docs/CLAUDE_CODE_COMPATIBILITY.md)
 
 ### Step 1: インストール（コピペでOK）
 

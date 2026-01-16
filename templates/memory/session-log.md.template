@@ -10,11 +10,11 @@ _harness_version: "2.5.27"
 
 ## Index
 
-- {{DATE}}: （要約を1行で）
+- {{DATE}} (session: {{SESSION_ID}}): （要約を1行で）
 
 ---
 
-## セッション: {{DATE}}
+## セッション: {{DATE}} (session: {{SESSION_ID}})
 
 ### 実行したこと
 

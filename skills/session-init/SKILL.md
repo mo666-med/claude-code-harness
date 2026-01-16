@@ -139,6 +139,7 @@ Plans.md から以下を抽出：
 
 **日時**: {{YYYY-MM-DD HH:MM}}
 **ブランチ**: {{branch}}
+**セッションID**: ${CLAUDE_SESSION_ID}
 
 ---
 

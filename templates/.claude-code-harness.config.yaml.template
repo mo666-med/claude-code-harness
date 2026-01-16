@@ -4,6 +4,10 @@
 # This file lets you customize cleanup thresholds.
 # If omitted, default values are used.
 
+# Plans.md の配置場所（デフォルト: "." = プロジェクトルート）
+# 例: ".claude/memory" にすると SSOT と統一配置
+plansDirectory: "."
+
 cleanup:
   plans:
     archive_after_days: 7
