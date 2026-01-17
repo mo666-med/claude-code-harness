@@ -13,6 +13,148 @@ Change history for claude-code-harness.
 
 ---
 
+## [2.9.2] - 2026-01-16
+
+### 🎯 What's Changed for You
+
+**Phase 33 complete: SESSION_ID tracking, customizable Plans.md location, context usage monitoring.**
+
+#### Before/After
+
+| Before | After |
+|--------|-------|
+| No session tracking in logs | `${CLAUDE_SESSION_ID}` integrated into session-log.md |
+| Plans.md fixed at project root | Customizable via `plansDirectory` setting |
+| No context usage visibility | `/sync-status` shows usage with 70% warning threshold |
+| LSP patterns only in skills | `agents/code-reviewer.md` includes LSP impact analysis |
+
+### Added
+
+- **SESSION_ID integration**: Track sessions across logs for better debugging
+- **plansDirectory setting**: Move Plans.md to `.claude/memory/` if desired
+- **context_window guidance**: Clear thresholds (green/yellow/red) in `/sync-status`
+- **Nested Skills design doc**: `docs/NESTED_SKILLS_DESIGN.md` for future restructuring
+- **code-reviewer LSP**: Step 2.5 with `findReferences`, `goToDefinition`, `hover`
+
+### Changed
+
+- **README**: Added Claude Code v2.1.6+ requirement with compatibility link
+- **hooks-editing.md**: Extended timeout guidelines documented
+
+---
+
+## [2.9.1] - 2026-01-16
+
+### 🎯 What's Changed for You
+
+**Claude Code 2.1.x compatibility: smarter hooks, LSP guidance, and lightweight subagent init.**
+
+#### Before/After
+
+| Before | After |
+|--------|-------|
+| Quality rules only checked at review time | Quality guidelines injected during file edits via `additionalContext` |
+| Subagents had same init overhead as main agent | Subagents get lightweight init (faster task-worker execution) |
+| Manual code navigation for impact analysis | LSP guidance in impl/review skills (findReferences, goToDefinition) |
+| Short hook timeouts caused failures | Extended timeouts for long-running hooks (up to 120s) |
+
+### Added
+
+- **PreToolUse additionalContext**: Injects quality guidelines when editing files
+  - Test files → test-quality.md rules (no test tampering)
+  - Source files → implementation-quality.md rules
+- **SessionStart agent_type**: Subagents skip full initialization
+- **LSP guidance**: impl/review skills now recommend LSP for code analysis
+- **Compatibility docs**: `docs/CLAUDE_CODE_COMPATIBILITY.md` with version matrix
+
+### Changed
+
+- **Hook timeouts extended** (for Claude Code v2.1.3+):
+  - usage-tracker: 10s → 30s
+  - auto-test-runner: 30s → 120s
+  - session-summary: 30s → 60s
+  - auto-cleanup-hook: 30s → 60s
+- **MCP auto mode** (v2.1.7+): Removed explicit MCPSearch calls from cursor-mem skill
+
+---
+
+## [2.9.0] - 2026-01-16
+
+### 🎯 What's Changed for You
+
+**Full-cycle parallel automation: implement → self-review → improve → commit in one command.**
+
+#### Before/After
+
+| Before | After |
+|--------|-------|
+| `/work` executes tasks one at a time | `/work --full --parallel 3` runs full cycle in parallel |
+| Review was a separate manual step | Each task-worker self-reviews autonomously |
+| Commits were manual | Auto-commit after `commit_ready` judgment |
+| Same workspace risked file conflicts | `--isolation=worktree` for complete separation |
+
+### Added
+
+- **task-worker integration (Phase 32)**: `/work --full` automates implement → self-review → improve → commit
+  - New agent `agents/task-worker.md` with 4-point self-review
+  - 7 new options for `/work`: `--full`, `--parallel N`, `--isolation`, `--commit-strategy`, `--deploy`, `--max-iterations`, `--skip-cross-review`
+- **4-phase parallel execution**: Dependency graph → task-workers → Codex cross-review → Commit
+- **commit_ready criteria**: No Critical/Major issues, build success, tests pass
+
+---
+
+## [2.8.2] - 2026-01-14
+
+### 🎯 What's Changed for You
+
+**Codex parallel review now enforces individual MCP calls and smart expert filtering.**
+
+#### Before/After
+
+| Before | After |
+|--------|-------|
+| Experts might be combined in single MCP call | MANDATORY rules enforce individual parallel calls |
+| Always called 8 experts | Smart filtering: only relevant experts for project type |
+| Inconsistent tool names in docs | Unified to `mcp__codex__codex` |
+
+### Fixed
+
+- **MCP tool name** unified to `mcp__codex__codex` across all docs
+- **"8 experts" → "up to 8 experts"** to clarify filtering applies
+- **Document-only change rules** unified (Quality, Architect, Plan Reviewer, Scope Analyst priority)
+- **MANDATORY parallel call rules** added to prevent expert consolidation
+
+### Changed
+
+- Expert filtering now considers:
+  - Config-based (`enabled: false` → skip)
+  - Project type (CLI/Backend → skip Accessibility, SEO)
+  - Change content (docs only → skip Security, Performance)
+
+---
+
+## [2.8.1] - 2026-01-13
+
+### 🎯 What's Changed for You
+
+**CI-only commands are now hidden from `/` completion.**
+
+- `harness-review-ci`, `plan-with-agent-ci`, `work-ci` now have `user-invocable: false`
+
+---
+
+## [2.8.0] - 2026-01-13
+
+### 🎯 What's Changed for You
+
+**Commit Guard + Codex Mode integration for quality gates.**
+
+- **Commit Guard**: Blocks `git commit` until review is approved
+- **Codex Mode**: 8 expert parallel reviews via MCP
+- **Auto-judgment**: APPROVE/REQUEST CHANGES/REJECT with auto-fix loop
+
+---
+
 ## [2.7.12] - 2026-01-11
 
 ### 🎯 What's Changed for You

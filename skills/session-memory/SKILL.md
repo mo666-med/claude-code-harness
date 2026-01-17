@@ -57,8 +57,11 @@ user-invocable: false
 
 ### session-log.md
 
+各セッション記録には `${CLAUDE_SESSION_ID}` 環境変数を活用してセッションIDを付与します。
+これにより、セッション間のトレーサビリティが向上します。
+
 ```markdown
-## セッション: 2024-01-15 14:30
+## セッション: 2024-01-15 14:30 (session: abc123def)
 
 ### 実行したタスク
 - [x] ユーザー認証機能の実装
@@ -75,6 +78,9 @@ user-invocable: false
 - ログアウト機能が未実装
 - パスワードリセットも必要
 ```
+
+> **Note**: `${CLAUDE_SESSION_ID}` は Claude Code が自動設定する環境変数です。
+> セッションごとに一意のIDが割り当てられ、ログの追跡や問題調査に役立ちます。
 
 ### decisions.md
 

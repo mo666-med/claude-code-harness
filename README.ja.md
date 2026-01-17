@@ -9,9 +9,38 @@
 Claude Code を「Plan → Work → Review」の自律サイクルで運用し、
 **迷い・雑さ・事故・忘却** を仕組みで防ぐ開発ハーネスです。
 
-[![Version: 2.7.17](https://img.shields.io/badge/version-2.7.17-blue.svg)](VERSION)
+[![Version: 2.9.2](https://img.shields.io/badge/version-2.9.2-blue.svg)](VERSION)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE.md)
 [![Harness Score](https://img.shields.io/badge/harness_score-92%2F100-brightgreen.svg)](#採点基準)
+
+---
+
+## v2.9 の新機能 | What's New in v2.9
+
+### フルサイクル並列自動化（v2.9.0）| Full-Cycle Parallel Automation
+
+**`/work --full` で「実装→セルフレビュー→改善→commit」を自動化**
+*Run `/work --full` for automated implement → self-review → improve → commit cycles*
+
+```bash
+/work --full --parallel 3
+```
+
+| オプション | 説明 | デフォルト |
+|-----------|------|-----------|
+| `--full` | フルサイクル実行 | false |
+| `--parallel N` | 並列数指定 | 1 |
+| `--isolation` | `lock` / `worktree` | lock |
+| `--commit-strategy` | `task` / `phase` / `all` | task |
+| `--deploy` | commit 後にデプロイ | false |
+
+**4フェーズアーキテクチャ**:
+1. **Phase 1**: 依存グラフ構築 → task-worker 並列起動 → セルフレビュー
+2. **Phase 2**: Codex 8並列クロスレビュー
+3. **Phase 3**: コンフリクト解消 → 最終ビルド検証 → Conventional Commit
+4. **Phase 4**: Deploy（オプション、安全ゲート付き）
+
+詳細: [docs/PARALLEL_FULL_CYCLE.md](docs/PARALLEL_FULL_CYCLE.md)
 
 ---
 
@@ -109,6 +138,11 @@ bun run cursor:install -- user
 ---
 
 ## 5分で始める
+
+### 動作要件
+
+- **Claude Code v2.1.6+** (全機能の利用に推奨)
+- バージョン互換性の詳細: [docs/CLAUDE_CODE_COMPATIBILITY.md](docs/CLAUDE_CODE_COMPATIBILITY.md)
 
 ### Step 1: インストール（コピペでOK）
 

@@ -19,6 +19,36 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VERSION=$(cat "$SCRIPT_DIR/../VERSION" 2>/dev/null || echo "unknown")
 echo -e "\033[0;36m[claude-code-harness v${VERSION}]\033[0m Session initialized" >&2
 
+# ===== stdin から JSON 入力を読み取り =====
+INPUT=""
+if [ -t 0 ]; then
+  : # stdin が TTY の場合は入力なし
+else
+  INPUT=$(cat 2>/dev/null || true)
+fi
+
+# ===== agent_type 判定（Claude Code v2.1.2+） =====
+AGENT_TYPE=""
+if [ -n "$INPUT" ]; then
+  if command -v jq >/dev/null 2>&1; then
+    AGENT_TYPE="$(echo "$INPUT" | jq -r '.agent_type // empty' 2>/dev/null)"
+  fi
+fi
+
+# サブエージェント時は軽量初期化（早期 return）
+# - プラグインキャッシュ同期をスキップ
+# - Skills Gate 初期化をスキップ
+# - Plans.md チェックをスキップ
+# - テンプレート更新チェックをスキップ
+# - 新規ルールファイルチェックをスキップ
+# - 古いフック設定検出をスキップ
+if [ "$AGENT_TYPE" = "subagent" ]; then
+  cat <<EOF
+{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"[subagent] 軽量初期化完了"}}
+EOF
+  exit 0
+fi
+
 # ===== Hook 使用状況記録 =====
 if [ -x "$SCRIPT_DIR/record-usage.js" ] && command -v node >/dev/null 2>&1; then
   node "$SCRIPT_DIR/record-usage.js" hook session-init 2>/dev/null &

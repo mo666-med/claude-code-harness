@@ -7,6 +7,127 @@
 
 ## [Unreleased]
 
+## [2.9.2] - 2026-01-16
+
+### Added
+
+- **Phase 33 完全実装**
+  - **SESSION_ID 活用（33.2）**: `${CLAUDE_SESSION_ID}` を session-log.md に統合、セッション追跡強化
+  - **plansDirectory 設定（33.4）**: Plans.md の配置場所をカスタマイズ可能に（デフォルト: ルート）
+  - **context_window 表示（33.8）**: `/sync-status` にコンテキスト使用率ガイドライン追加（70%超過警告）
+  - **Nested Skills 設計文書（33.9）**: `docs/NESTED_SKILLS_DESIGN.md` で将来のスキル階層整理を設計
+  - **code-reviewer LSP パターン**: `agents/code-reviewer.md` に LSP ベースの影響分析ステップ追加
+
+### Changed
+
+- **README 更新**: Claude Code v2.1.6+ 要件を明記、互換性ドキュメントへのリンク追加
+- **hooks-editing.md 更新**: Hook timeout 延長ガイドラインを追加
+
+## [2.9.1] - 2026-01-16
+
+### Added
+
+- **Claude Code 2.1.x 互換性対応（フェーズ 33）**
+  - **PreToolUse additionalContext 活用**: ファイル編集時に品質ガイドラインを動的注入
+    - テストファイル編集時: `test-quality.md` の改ざん禁止ルール
+    - 実装ファイル編集時: `implementation-quality.md` の品質ルール
+  - **SessionStart agent_type 対応**: サブエージェントを軽量初期化
+    - メインエージェント: フル初期化（Plans.md 状態表示、claude-mem コンテキスト）
+    - サブエージェント: 軽量初期化（タスク固有情報のみ）
+  - **LSP 活用ガイドライン**: impl/review スキルに LSP ベースのコード解析手順を追加
+    - `goToDefinition`: 実装パターンの把握
+    - `findReferences`: 影響範囲の完全把握
+    - `hover`: 型情報・ドキュメントの確認
+  - **互換性ドキュメント**: `docs/CLAUDE_CODE_COMPATIBILITY.md` を新規作成
+    - Harness と Claude Code のバージョン対応表
+
+### Changed
+
+- **Hook タイムアウト延長**（Claude Code v2.1.3 の 10 分延長に対応）:
+  - `usage-tracker`: 10秒 → 30秒
+  - `auto-test-runner`: 30秒 → 120秒
+  - `session-summary`: 30秒 → 60秒
+  - `auto-cleanup-hook`: 30秒 → 60秒
+
+- **MCP auto mode 対応**（v2.1.7+）: cursor-mem スキルから MCPSearch 明示呼び出しを削除
+
+## [2.9.0] - 2026-01-16
+
+### Added
+
+- **task-worker 統合（フェーズ 32）** - `/work --full` で「実装→セルフレビュー→改善→commit」のフルサイクルを並列自動化
+  - 新規エージェント `agents/task-worker.md`: 単一タスクの実装→セルフレビュー→検証を自己完結で回す
+    - 4 観点セルフレビュー（品質/セキュリティ/パフォーマンス/互換性）
+    - 最大 3 回の自己修正ループ
+    - `commit_ready` / `needs_escalation` / `failed` のステータス返却
+  - `/work` コマンド拡張（7 つの新オプション）:
+    - `--full`: フルサイクル実行モード
+    - `--parallel N`: 並列数指定（デフォルト 1、上限 5）
+    - `--isolation lock|worktree`: ファイルロック or git worktree 分離
+    - `--commit-strategy task|phase|all`: commit タイミング戦略
+    - `--deploy`: commit 後に本番デプロイ（安全ゲート付き）
+    - `--max-iterations`: 改善ループ上限（デフォルト 3）
+    - `--skip-cross-review`: Phase 2 スキップ
+
+- **4 フェーズ並列実行アーキテクチャ**:
+  - **Phase 1**: 依存グラフ構築 → task-worker 並列起動 → セルフレビュー
+  - **Phase 2**: Codex 8 並列クロスレビュー（Critical/Major 検出時は Phase 1 へフィードバック）
+  - **Phase 3**: コンフリクト検出・解消 → 最終ビルド検証 → Conventional Commit
+  - **Phase 4**: Deploy（オプション、安全ゲート付き）
+
+- **commit_ready 基準の明文化**:
+  - セルフレビュー全観点で Critical/Major 指摘なし
+  - ビルドコマンド成功（exit code 0）
+  - 該当テスト成功（または該当テストなし）
+  - 既存テストの回帰なし
+  - 品質ガードレール違反なし
+
+- **出力スキーマの拡充**（Codex レビュー反映）:
+  - `build_log`: ビルド失敗時のエラーメッセージ
+  - `test_log`: テスト失敗時の詳細（テスト名、アサーションエラー）
+  - `escalation_reason` に `test_failed_3x`, `review_failed_3x` 追加
+
+- **files: "auto" 判定ルールの明文化**:
+  - Plans.md からのパス抽出 → キーワード検索 → ディレクトリ推定
+  - 安全制限: 最大10ファイル、機密ファイル除外
+
+- **worktree + pnpm 統合オプション**:
+  - `--isolation=worktree` で git worktree 分離
+  - pnpm 使用時はシンボリックリンクで容量節約（+54MB/worktree）
+  - 並列ビルド/テストが可能（完全分離）
+
+### Changed
+
+- **エスカレーション戦略の改善**:
+  - 並列実行時のエスカレーションを親に集約
+  - ユーザーへの一括確認プロンプト
+
+#### Before/After
+
+| Before | After |
+|--------|-------|
+| `/work` で1タスクずつ順次実行 | `/work --full --parallel 3` で並列フルサイクル |
+| レビューは別コマンドで手動実行 | 各 task-worker がセルフレビューを自律実行 |
+| commit は手動 | `commit_ready` 判定後に自動 commit |
+| 同一ワークスペースでの競合リスク | `--isolation=worktree` で完全分離可能 |
+
+## [2.8.2] - 2026-01-14
+
+### Fixed
+
+- **Codex 並列レビューの導線強化**
+  - MCP ツール名を `mcp__codex__codex` に統一（不整合を修正）
+  - 「8 エキスパート」を「最大 8 エキスパート」に表記統一（フィルタリング仕様を明確化）
+  - ドキュメントのみ変更時の優先エキスパートルールを統一（Quality, Architect, Plan Reviewer, Scope Analyst）
+  - 並列呼び出し必須ルール（MANDATORY セクション）を追加し、複数エキスパートの1回 MCP 呼び出しを明示的に禁止
+
+### Changed
+
+- **エキスパートフィルタリング仕様の明確化**
+  - 設定ベースフィルタリング（`enabled: false` → 除外）
+  - プロジェクト種別フィルタリング（CLI/バックエンド → Accessibility, SEO 除外）
+  - 変更内容フィルタリング（ドキュメントのみ → Security, Performance 除外可）
+
 ## [2.8.1] - 2026-01-13
 
 ### Changed
@@ -1429,7 +1550,13 @@ Observation recorded: 10946-10951 ✅
 - **v0.4.0**: Claude Rules、Plugin Hooks、Named Sessions 対応
 - **v0.3.0**: 初期リリース（Plan → Work → Review サイクル）
 
-[Unreleased]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.16...HEAD
+[Unreleased]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.9.2...HEAD
+[2.9.2]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.9.1...v2.9.2
+[2.9.1]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.9.0...v2.9.1
+[2.9.0]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.8.2...v2.9.0
+[2.8.2]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.8.1...v2.8.2
+[2.8.1]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.8.0...v2.8.1
+[2.8.0]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.16...v2.8.0
 [2.7.12]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.11...v2.7.12
 [2.7.16]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.15...v2.7.16
 [2.7.11]: https://github.com/Chachamaru127/claude-code-harness/compare/v2.7.10...v2.7.11

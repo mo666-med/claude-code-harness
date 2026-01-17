@@ -78,10 +78,12 @@ HARNESS_PATH="/path/to/claude-code-harness"
 ユーザー: 「認証方式の選定理由を確認したい」
 
 Cursor（Composer）:
-mcp__claude-mem__search を使用
+→ 直接 mcp__claude-mem__search を呼び出し（auto mode により自動有効化）
 → クエリ: "認証 JWT Supabase 選定理由"
 → 過去の決定記録（decisions）を取得
 ```
+
+> **v2.1.7+**: MCP auto mode がデフォルト有効のため、MCPSearch による事前検索は不要です。
 
 ### 気付きの記録
 
@@ -89,7 +91,7 @@ mcp__claude-mem__search を使用
 ユーザー: 「この実装パターンを記録しておいて」
 
 Cursor（Composer）:
-mcp__claude-mem__add_observations を使用
+→ 直接 mcp__claude-mem__add_observations を呼び出し
 → タイプ: pattern
 → タグ: source:cursor, review, best-practice
 → 内容: 実装パターンの説明
@@ -122,6 +124,19 @@ Claude CodeとCursorで統一されたタグ体系を使用します：
 1. **Cursor（PM役）**: 設計判断やレビュー結果を記録
 2. **Claude Code（実装役）**: 過去の判断を参照しながら実装
 3. **双方向検索**: どちらからでも過去の記録を検索可能
+
+## 🔄 Claude Code 2.1.7+ 対応
+
+MCP tool search の auto mode がデフォルト有効になりました。
+
+**変更点**:
+- MCPSearch による明示的なツール検索は不要
+- MCP ツールは直接呼び出し可能
+- 初回呼び出し時に自動的にツールが有効化される
+
+**互換性**:
+- Claude Code 2.1.6 以前: MCPSearch を先に実行
+- Claude Code 2.1.7+: 直接呼び出し可能
 
 ## ⚠️ 注意事項
 

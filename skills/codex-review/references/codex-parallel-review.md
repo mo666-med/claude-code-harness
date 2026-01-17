@@ -4,7 +4,7 @@ Codex モード時に複数のエキスパートを並列で呼び出すため�
 
 ## 概要
 
-Codex モードでは、Claude がオーケストレーターとして 8 つのエキスパートを MCP 経由で並列呼び出しします。
+Codex モードでは、Claude がオーケストレーターとして**最大 8 つのエキスパート**を MCP 経由で並列呼び出しします（プロジェクト種別・変更内容に応じて不要なエキスパートは除外）。
 
 ```
 Claude (オーケストレーター)
@@ -21,6 +21,53 @@ Claude (オーケストレーター)
     ↓
 結果統合 → コミット判定
 ```
+
+---
+
+## ⚠️ 並列呼び出し必須ルール（MANDATORY）
+
+**このルールは絶対に守ること。違反した場合、レビュー品質が大幅に低下します。**
+
+### 禁止事項
+
+| 禁止 | 理由 |
+|------|------|
+| ❌ 1回の MCP 呼び出しで複数エキスパートをまとめる | 各エキスパートの専門性が薄まる |
+| ❌ 「セキュリティとパフォーマンスと品質を見て」と1回で依頼 | 観点が混在し、深い分析ができない |
+| ❌ experts/*.md を読まずに汎用プロンプトを送る | 専門家プロンプトの知見が活かされない |
+
+### 必須事項
+
+| 必須 | 方法 |
+|------|------|
+| ✅ 各エキスパートを **個別の MCP 呼び出し** で実行 | `mcp__codex__codex` を8回呼び出し |
+| ✅ experts/*.md から **個別にプロンプトを読み込む** | `security-expert.md` → Security 呼び出し → `accessibility-expert.md` → Accessibility 呼び出し... |
+| ✅ **1つのレスポンス内で8つの MCP 呼び出しを並列実行** | Claude の並列ツール呼び出し機能を使用 |
+
+### 正しい実行パターン
+
+```
+1. 設定とプロジェクト種別から有効なエキスパートを判定
+2. 有効なエキスパートのみ、1つのレスポンス内で同時に実行:
+
+mcp__codex__codex({prompt: security-expert.md の内容})
+mcp__codex__codex({prompt: performance-expert.md の内容})
+mcp__codex__codex({prompt: quality-expert.md の内容})
+... (有効なもののみ)
+
+→ 必要なエキスパートのみ並列実行
+→ 無関係な観点はスキップしてコスト削減
+```
+
+### なぜ分けるのか
+
+| 1回でまとめた場合 | 8回に分けた場合 |
+|------------------|-----------------|
+| 各観点が2-3行で浅い | 各観点が詳細に分析される |
+| 重要な問題を見落とす | 専門家視点で漏れなく検出 |
+| 「問題なし」で終わりやすい | 具体的な改善提案が出る |
+
+---
 
 ## 実行フロー
 
@@ -50,17 +97,79 @@ review:
 git diff --name-only HEAD~1
 ```
 
-### Step 3: エキスパートプロンプトの準備
+### Step 3: 呼び出すエキスパートの判定（フィルタリング）
 
-各エキスパートに送信するプロンプトを `experts/*.md` から読み込み、以下を置換:
+**全エキスパートを毎回呼ぶのではなく、必要なもののみ選択する。**
+
+#### 3.1 設定ベースのフィルタリング
+
+`.claude-code-harness.config.yaml` で `false` のエキスパートは除外:
+
+```yaml
+experts:
+  security: true       # ✅ 呼び出す
+  accessibility: false # ❌ スキップ
+  performance: true    # ✅ 呼び出す
+  ...
+```
+
+#### 3.2 プロジェクト種別による自動除外
+
+| プロジェクト種別 | 自動除外するエキスパート |
+|-----------------|------------------------|
+| CLI / バックエンドAPI | Accessibility, SEO |
+| ライブラリ / SDK | Accessibility, SEO |
+| Webフロントエンド | （全て有効） |
+| モバイルアプリ | SEO |
+| 計画/レビューのみ | Security, Performance, Quality（コード変更なし時） |
+
+**判定方法**:
+```
+1. 変更ファイルのパスを確認:
+   - src/components/, pages/, app/ → Webフロントエンド → Accessibility, SEO 有効
+   - src/api/, server/, cli/ → バックエンド/CLI → Accessibility, SEO 除外
+   - *.md のみ → ドキュメント変更 → Quality, Architect, Plan Reviewer, Scope Analyst を優先
+
+2. package.json / pyproject.toml を確認:
+   - react, vue, next → Webフロントエンド
+   - express, fastify, flask → バックエンド
+   - commander, yargs → CLI
+```
+
+#### 3.3 変更内容による除外
+
+| 変更内容 | 優先するエキスパート | 除外可能 |
+|---------|---------------------|---------|
+| Plans.md のみ変更 | Plan Reviewer, Scope Analyst | Security, Performance, Quality, Accessibility, SEO, Architect |
+| テストファイルのみ変更 | Security, Quality, Performance | Architect, Plan Reviewer, Scope Analyst |
+| README / ドキュメントのみ | Quality, Architect, Plan Reviewer, Scope Analyst | Security, Performance, Accessibility |
+
+#### 3.4 最終的な呼び出しリスト決定
+
+```
+設定で有効 AND プロジェクトに関連 AND 変更内容に関連
+→ 呼び出すエキスパートリスト
+
+例1: Webフロントエンドでコード変更あり
+→ Security, Accessibility, Performance, Quality, SEO, Architect
+→ 6エキスパート並列（Plan Reviewer, Scope Analyst は除外）
+
+例2: CLI プラグインでドキュメントのみ変更
+→ Quality, Architect, Plan Reviewer, Scope Analyst
+→ 4エキスパート並列（Security, Performance, Accessibility, SEO は除外）
+```
+
+### Step 4: エキスパートプロンプトの準備
+
+**Step 3 で決定したエキスパートのみ**、`experts/*.md` からプロンプトを読み込み:
 - `{files}`: 変更ファイルリスト
 - `{tech_stack}`: 検出された技術スタック
 - `{plan_content}`: Plans.md の内容（Plan Reviewer 用）
 - `{requirements}`: 要件内容（Scope Analyst 用）
 
-### Step 4: 並列 MCP 呼び出し
+### Step 5: 並列 MCP 呼び出し
 
-**重要**: 設定で `enabled: true` のエキスパートのみ呼び出し
+**重要**: Step 3 で決定した有効なエキスパートのみ呼び出し
 
 ```typescript
 // 並列呼び出しの概念コード
@@ -79,7 +188,7 @@ const results = await Promise.all(
 );
 ```
 
-### Step 5: 結果統合
+### Step 6: 結果統合
 
 各エキスパートからの結果を統合:
 
@@ -108,7 +217,7 @@ const results = await Promise.all(
 | 3 | Architect | High | src/services/ | Circular dependency |
 ```
 
-### Step 6: コミット判定
+### Step 7: コミット判定
 
 統合結果から最終判定を算出:
 

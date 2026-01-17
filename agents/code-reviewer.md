@@ -107,6 +107,23 @@ npx eslint src/ --format json 2>&1
 npm audit --json 2>&1
 ```
 
+### Step 2.5: LSP ベースの影響分析（推奨）
+
+Claude Code v2.0.74+ の LSP ツールを活用して、より精密な分析を行います。
+
+```
+LSP 操作:
+- goToDefinition: 型・関数の定義を確認
+- findReferences: 変更の影響範囲を特定
+- hover: 型情報・ドキュメントの確認
+```
+
+| シナリオ | LSP 操作 | 効果 |
+|---------|---------|------|
+| 関数シグネチャ変更 | findReferences | 呼び出し元への影響を完全把握 |
+| 型定義変更 | findReferences + hover | 型依存箇所の特定 |
+| API 変更 | incomingCalls | 上流への影響分析 |
+
 ### Step 3: パターンマッチング
 
 各ファイルに対してセキュリティパターンをチェック。
