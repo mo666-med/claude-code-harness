@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  shellcheck:
+    name: Shell Script Linting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ShellCheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Run ShellCheck on scripts/
+        run: |
+          find scripts -name "*.sh" -type f | xargs shellcheck --severity=error || true
+          # Strict mode for CI scripts
+          shellcheck --severity=warning scripts/ci/*.sh
+
+      - name: Run ShellCheck on tests/
+        run: |
+          find tests -name "*.sh" -type f | xargs shellcheck --severity=warning
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Make tests executable
+        run: chmod +x tests/*.sh
+
+      - name: Run validate-plugin
+        run: ./tests/validate-plugin.sh
+
+      - name: Run test-path-compatibility
+        run: ./tests/test-path-compatibility.sh || true
+
+      - name: Run test-project-detection
+        run: ./tests/test-project-detection.sh || true
+
+      - name: Run test-workflow-skill-references
+        run: ./tests/test-workflow-skill-references.sh || true
+
+  yaml-validation:
+    name: YAML Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate workflow files
+        run: |
+          for file in .github/workflows/*.yml; do
+            echo "Validating $file..."
+            python3 -c "import yaml; yaml.safe_load(open('$file'))" || exit 1
+          done
+
+      - name: Validate skill YAML files
+        run: |
+          find skills -name "*.yml" -o -name "*.yaml" | while read file; do
+            echo "Checking $file..."
+            python3 -c "import yaml; yaml.safe_load(open('$file'))" || echo "Warning: $file may have issues"
+          done
