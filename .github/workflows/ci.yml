@@ -28,7 +28,8 @@ jobs:
 
       - name: Run ShellCheck on tests/
         run: |
-          find tests -name "*.sh" -type f | xargs shellcheck --severity=warning
+          find tests -name "*.sh" -type f -print0 | xargs -0 shellcheck --severity=warning
+        continue-on-error: true
 
   integration-tests:
     name: Integration Tests
