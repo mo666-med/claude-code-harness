@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   shellcheck:
     name: Shell Script Linting
@@ -18,9 +21,10 @@ jobs:
 
       - name: Run ShellCheck on scripts/
         run: |
-          find scripts -name "*.sh" -type f | xargs shellcheck --severity=error || true
+          find scripts -name "*.sh" -type f -print0 | xargs -0 shellcheck --severity=error
           # Strict mode for CI scripts
           shellcheck --severity=warning scripts/ci/*.sh
+        continue-on-error: true
 
       - name: Run ShellCheck on tests/
         run: |
@@ -43,13 +47,16 @@ jobs:
         run: ./tests/validate-plugin.sh
 
       - name: Run test-path-compatibility
-        run: ./tests/test-path-compatibility.sh || true
+        run: ./tests/test-path-compatibility.sh
+        continue-on-error: true
 
       - name: Run test-project-detection
-        run: ./tests/test-project-detection.sh || true
+        run: ./tests/test-project-detection.sh
+        continue-on-error: true
 
       - name: Run test-workflow-skill-references
-        run: ./tests/test-workflow-skill-references.sh || true
+        run: ./tests/test-workflow-skill-references.sh
+        continue-on-error: true
 
   yaml-validation:
     name: YAML Validation
@@ -57,16 +64,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install PyYAML
+        run: pip install pyyaml
+
       - name: Validate workflow files
         run: |
           for file in .github/workflows/*.yml; do
             echo "Validating $file..."
-            python3 -c "import yaml; yaml.safe_load(open('$file'))" || exit 1
+            python3 -c "import yaml,sys; yaml.safe_load(open(sys.argv[1]))" "$file" || exit 1
           done
 
       - name: Validate skill YAML files
         run: |
-          find skills -name "*.yml" -o -name "*.yaml" | while read file; do
+          find skills -name "*.yml" -o -name "*.yaml" | while read -r file; do
             echo "Checking $file..."
-            python3 -c "import yaml; yaml.safe_load(open('$file'))" || echo "Warning: $file may have issues"
+            python3 -c "import yaml,sys; yaml.safe_load(open(sys.argv[1]))" "$file" || echo "Warning: $file may have issues"
           done
