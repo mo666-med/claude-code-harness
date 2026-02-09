@@ -1,6 +1,6 @@
 ---
-description: harness-ui ダッシュボードを開く・状態確認
-description-en: Open harness-ui dashboard and check status
+description: ""
+description-en: ""
 ---
 
 # /harness-ui - ダッシュボード表示

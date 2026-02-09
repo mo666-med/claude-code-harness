@@ -1,9 +1,6 @@
 ---
 name: stripe-subscription
-description: |
-  Stripe サブスクリプション課金の完全自動実装。MCP 経由で商品・価格・クーポン作成、Webhook 設定まで対応。
-  Use when: サブスク, subscription, 定期課金, 月額, 年額, recurring, Stripe課金, 商品作成, クーポン発行
-  Do NOT load for: 単発決済のみ, 認証のみ, UI作成
+description: ""
 allowed-tools:
   - Read
   - Write

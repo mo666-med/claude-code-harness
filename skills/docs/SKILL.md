@@ -1,6 +1,6 @@
 ---
 name: docs
-description: "Generates documentation files including NotebookLM YAML and slide content. Use when user mentions ドキュメント, document, YAML, NotebookLM, スライド, slide, プレゼン. Do NOT load for: 実装作業, コード修正, レビュー, デプロイ."
+description: "ドキュメント・図解・スライド"
 allowed-tools: ["Read", "Write", "Edit"]
 ---
 

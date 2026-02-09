@@ -1,6 +1,6 @@
 ---
 name: verify
-description: "Verifies builds, recovers from errors, and applies review fixes. Use when user mentions ビルド, build, 検証, verify, エラー復旧, error recovery, 指摘を適用, apply fixes, テスト実行, tests fail, lint errors occur, CI breaks, テスト失敗, lintエラー, 型エラー, ビルドエラー, CIが落ちた. Do NOT load for: 実装作業, レビュー, セットアップ, 新機能開発."
+description: ""
 allowed-tools: ["Read", "Write", "Edit", "Grep", "Glob", "Bash"]
 ---
 

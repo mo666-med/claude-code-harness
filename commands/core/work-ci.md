@@ -1,6 +1,6 @@
 ---
-description: CI用・非対話の実装実行（ベンチマーク専用）
-description-en: CI-only non-interactive implementation (benchmark use)
+description: ""
+description-en: ""
 user-invocable: false
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: codex-review
-description: "OpenAI Codex CLI を MCP サーバーとして統合し、セカンドオピニオンレビューを提供。トリガー: 'Codex でレビュー', 'セカンドオピニオン', 'Codex 設定', '別の AI にも見てもらって', 'Codex review'. Do NOT load for: 通常のレビュー（Codex 不要時）、実装作業、セットアップ以外。"
+description: ""
 allowed-tools: ["Bash", "Read", "Write", "Edit"]
 ---
 

@@ -1,6 +1,6 @@
 ---
-description: Codex モードのオン/オフを切り替え
-description-en: Toggle Codex mode on/off for reviews
+description: ""
+description-en: ""
 ---
 
 # /codex-mode - Codex モード切り替え

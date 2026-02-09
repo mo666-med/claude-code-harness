@@ -1,6 +1,6 @@
 ---
-description: 利用可能なスキル一覧を概要付きで表示
-description-en: Show available skills with descriptions
+description: ""
+description-en: ""
 ---
 
 # /skill-list - スキル一覧

@@ -1,9 +1,6 @@
 ---
 name: vote
-description: |
-  3者合議制による自動承認。「次に進めますか？」等の確認を省略し、Claude/Codex/Geminiで判断して自動進行。
-  Use when: dangerous operations, dangerouslyDisableSandbox, sudo, rm -rf, force push,
-  危険な操作, 権限が必要, sandbox無効化
+description: "3者合議制(PreToolUse hook連動)"
 allowed-tools:
   - Read
   - Bash

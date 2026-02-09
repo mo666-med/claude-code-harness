@@ -1,6 +1,6 @@
 ---
-description: 壁打ち内容をCursorで検証→Plans.md更新→Claude Codeへハンドオフする一連フロー
-description-en: Validate brainstormed ideas with Cursor, update Plans.md, then handoff back to Claude Code
+description: ""
+description-en: ""
 ---
 
 # /cc-cursor-cc - 計画検証ラウンドトリップ

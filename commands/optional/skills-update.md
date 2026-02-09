@@ -1,5 +1,5 @@
 ---
-description: "スキル設定を更新（add/remove/list/enable/disable）。Skills Gate の対象スキルを管理"
+description: ""
 ---
 
 # /skills-update

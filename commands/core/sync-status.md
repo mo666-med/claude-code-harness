@@ -1,6 +1,6 @@
 ---
-description: 進捗確認→Plans.md更新→次アクション提案（状況把握の起点）
-description-en: Check progress → update Plans.md → suggest next action
+description: ""
+description-en: ""
 ---
 
 # /sync-status - 状況把握・Plans.md同期・次アクション提案

@@ -1,6 +1,6 @@
 ---
-description: Codex MCP を使ったセカンドオピニオンレビュー
-description-en: Second-opinion code review using Codex MCP
+description: ""
+description-en: ""
 ---
 
 # /codex-review - Codex セカンドオピニオンレビュー

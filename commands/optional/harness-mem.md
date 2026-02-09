@@ -1,6 +1,6 @@
 ---
-description: Claude-mem 統合セットアップ（セッション跨ぎの記憶強化）
-description-en: Claude-mem integration setup for cross-session memory
+description: ""
+description-en: ""
 ---
 
 # /harness-mem - Claude-mem 統合セットアップ

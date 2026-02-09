@@ -1,6 +1,6 @@
 ---
 name: principles
-description: "Provides development principles, guidelines, and VibeCoder guidance. Use when user mentions 原則, principles, ガイドライン, guidelines, VibeCoder, 安全性, safety, 差分編集, diff-aware. Triggers: 原則, principles, ガイドライン, VibeCoder, 安全性, 差分編集. Do not use for actual implementation - use impl skill instead."
+description: ""
 allowed-tools: ["Read"]
 user-invocable: false
 ---

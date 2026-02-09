@@ -1,6 +1,6 @@
 ---
-description: CI用・非対話の計画作成（ベンチマーク専用）
-description-en: CI-only non-interactive planning (benchmark use)
+description: ""
+description-en: ""
 user-invocable: false
 ---
 

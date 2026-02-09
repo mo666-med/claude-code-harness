@@ -1,6 +1,6 @@
 ---
-description: プロジェクトセットアップ（環境診断→ファイル生成→SSOT同期→検証まで一括）
-description-en: Project setup (environment check → file generation → SSOT sync → validation)
+description: ""
+description-en: ""
 ---
 
 # /harness-init - プロジェクトセットアップ

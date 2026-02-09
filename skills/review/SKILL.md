@@ -1,6 +1,6 @@
 ---
 name: review
-description: "Reviews code for quality, security, performance, and accessibility issues. Use when user mentions レビュー, review, コードレビュー, セキュリティ, パフォーマンス, 品質チェック, セルフレビュー, PR, diff, 変更確認. Do NOT load for: 実装作業, 新機能開発, バグ修正, セットアップ."
+description: "コードレビュー・品質・検証"
 allowed-tools: ["Read", "Grep", "Glob", "Bash", "Task"]
 context: fork
 ---

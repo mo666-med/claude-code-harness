@@ -1,6 +1,6 @@
 ---
-description: "[オプション] メモリシステム（Claude-mem/Serena）からSSOT（decisions/patterns）へ重要な観測を昇格"
-description-en: "[Optional] Promote important observations from memory systems (Claude-mem/Serena) to SSOT"
+description: ""
+description-en: ""
 ---
 
 # /sync-ssot-from-memory - メモリ→SSOT昇格

@@ -1,6 +1,6 @@
 ---
-description: "[オプション] 作業後にPlans.md等が更新されているか不明な時、念のため実行"
-description-en: "[Optional] Sync project specs when unsure if updated"
+description: ""
+description-en: ""
 ---
 
 # /sync-project-specs - 作業後の念のため同期

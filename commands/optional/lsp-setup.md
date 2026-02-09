@@ -1,6 +1,6 @@
 ---
-description: "[オプション] LSP設定（言語サーバーの導入と設定）"
-description-en: "[Optional] LSP setup (Language Server installation and configuration)"
+description: ""
+description-en: ""
 ---
 
 # /lsp-setup - LSP 設定

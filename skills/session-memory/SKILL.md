@@ -1,6 +1,6 @@
 ---
 name: session-memory
-description: "Manages cross-session learning and memory persistence. Use when user mentions 前回何をした, 履歴, 過去の作業, セッション記録, continue from before, session history. Do NOT load for: 実装作業, レビュー, 一時的な情報."
+description: ""
 allowed-tools: ["Read", "Write", "Append"]
 user-invocable: false
 ---

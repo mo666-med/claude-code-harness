@@ -1,6 +1,6 @@
 ---
-description: ハーネス導入済みプロジェクトを最新版に安全アップデート（バージョン検出→バックアップ→非破壊更新）
-description-en: Safely update harness-enabled projects to latest version (version detection → backup → non-destructive update)
+description: ""
+description-en: ""
 ---
 
 # /harness-update - ハーネスアップデート

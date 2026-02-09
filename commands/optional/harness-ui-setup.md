@@ -1,6 +1,6 @@
 ---
-description: "[オプション] harness-ui ダッシュボードのセットアップ"
-description-en: "[Optional] Set up harness-ui dashboard"
+description: ""
+description-en: ""
 ---
 
 # /harness-ui-setup - harness-ui ダッシュボードセットアップ
